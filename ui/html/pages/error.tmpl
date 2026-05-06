@@ -1,0 +1,19 @@
+{{define "title"}}Error{{end}}
+
+{{define "header"}}Oops! Something went wrong{{end}}
+{{define "subheader"}}{{.PageData.Message}}{{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+        <div class="box box-danger">
+            <div class="box-body text-center tw-p-10">
+                <i class="fa fa-exclamation-triangle fa-5x text-danger tw-mb-4"></i>
+                <h3 class="tw-font-bold">{{.PageData.Message}}</h3>
+                <hr>
+                <a href="/" class="btn btn-primary btn-lg">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

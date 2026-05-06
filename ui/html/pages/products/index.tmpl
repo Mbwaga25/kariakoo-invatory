@@ -1,0 +1,54 @@
+{{define "title"}}Products List{{end}}
+
+{{define "header"}}Products{{end}}
+{{define "subheader"}}Manage your inventory items{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">All Products</h3>
+        <div class="box-tools">
+            <a href="/products/create" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Add New Product
+            </a>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped datatable" id="products_table">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Product Name</th>
+                        <th>Purchase Price</th>
+                        <th>Selling Price</th>
+                        <th>Current Stock</th>
+                        <th>Alert Qty</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.Products}}
+                    <tr>
+                        <td>{{.SKU}}</td>
+                        <td>{{.Name}}</td>
+                        <td>{{.PurchasePrice}}</td>
+                        <td>{{.SellingPrice}}</td>
+                        <td>
+                            <span class="label {{if gt .LocationQty 0.0}}label-success{{else}}label-danger{{end}}">
+                                {{.LocationQty}}
+                            </span>
+                        </td>
+                        <td><span class="label label-warning">{{.AlertQuantity}}</span></td>
+                        <td>
+                            <a href="/products/view?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-eye"></i> View</a>
+                            <a href="/products/edit?id={{.ID}}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i> Edit</a>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}

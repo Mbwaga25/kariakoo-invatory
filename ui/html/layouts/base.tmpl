@@ -1,0 +1,268 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>{{template "title" .}} - Inventory SaaS</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    
+    <!-- CSS Dependencies (CDN) -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/css/skins/skin-blue.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- Google Font -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+    
+    <style>
+        .tw-font-bold { font-weight: 700; }
+        .tw-bg-gray-100 { background-color: #f4f4f4; }
+        .tw-ml-2 { margin-left: 0.5rem; }
+        .tw-mt-1 { margin-top: 0.25rem; }
+        .tw-px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .tw-py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+    </style>
+</head>
+
+<body class="hold-transition skin-blue sidebar-mini">
+    <div class="wrapper">
+
+        <!-- Main Header -->
+        <header class="main-header">
+            <!-- Logo -->
+            <a href="/" class="logo">
+                <span class="logo-mini"><b>I</b>S</span>
+                <span class="logo-lg"><b>Inventory</b>SaaS</span>
+            </a>
+
+            <!-- Header Navbar -->
+            <nav class="navbar navbar-static-top" role="navigation">
+                <!-- Sidebar toggle button-->
+                <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                    <i class="fa fa-bars"></i>
+                    <span class="sr-only">Toggle navigation</span>
+                </a>
+
+                <!-- Navbar Right Menu -->
+                <div class="navbar-custom-menu">
+                    <ul class="nav navbar-nav">
+                        
+                        <!-- Location Switcher -->
+                        {{if gt (len .Locations) 0}}
+                        <li class="dropdown messages-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-map-marker-alt"></i>
+                                <span class="hidden-xs tw-font-bold" style="margin-left: 5px;">
+                                    {{$activeName := "Select Location"}}
+                                    {{range .Locations}}
+                                        {{if eq .ID $.ActiveLocationID}}{{$activeName = .Name}}{{end}}
+                                    {{end}}
+                                    {{$activeName}}
+                                </span>
+                                <i class="fa fa-caret-down"></i>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">Switch Business Location</li>
+                                <li>
+                                    <ul class="menu">
+                                        {{range .Locations}}
+                                        <li>
+                                            <a href="/business-location/switch?location_id={{.ID}}" class="{{if eq .ID $.ActiveLocationID}}tw-bg-gray-100{{end}}">
+                                                <div class="pull-left tw-mt-1">
+                                                    <i class="fa fa-building {{if eq .ID $.ActiveLocationID}}text-primary{{else}}text-muted{{end}}"></i>
+                                                </div>
+                                                <h4 class="tw-ml-2">
+                                                    {{.Name}}
+                                                    {{if eq .ID $.ActiveLocationID}}<small><i class="fa fa-check text-success"></i></small>{{end}}
+                                                </h4>
+                                                <p class="tw-ml-2 text-muted" style="margin:0">{{.City}}</p>
+                                            </a>
+                                        </li>
+                                        {{end}}
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="/business-location">Manage Locations</a></li>
+                            </ul>
+                        </li>
+                        {{end}}
+
+                        <!-- Notifications -->
+                        <li class="dropdown notifications-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <i class="fa fa-bell"></i>
+                                <span class="label label-warning">0</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="header">You have 0 notifications</li>
+                                <li>
+                                    <ul class="menu">
+                                        <!-- Notifications here -->
+                                    </ul>
+                                </li>
+                                <li class="footer"><a href="#">View all</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- User Account Menu -->
+                        <li class="dropdown user user-menu">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                <img src="https://ui-avatars.com/api/?name={{.UserName}}&background=random" class="user-image" alt="User Image">
+                                <span class="hidden-xs">{{.UserName}}</span>
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li class="user-header">
+                                    <img src="https://ui-avatars.com/api/?name={{.UserName}}&background=random" class="img-circle" alt="User Image">
+                                    <p>
+                                        {{.UserName}} - {{.Role}}
+                                        <small>Member since May 2026</small>
+                                    </p>
+                                </li>
+                                <li class="user-footer">
+                                    <div class="pull-left">
+                                        <a href="/profile" class="btn btn-default btn-flat">Profile</a>
+                                    </div>
+                                    <div class="pull-right">
+                                        <a href="/logout" class="btn btn-default btn-flat">Sign out</a>
+                                    </div>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Left side column -->
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <!-- Sidebar user panel -->
+                <div class="user-panel">
+                    <div class="pull-left image">
+                        <img src="https://ui-avatars.com/api/?name={{.UserName}}&background=random" class="img-circle" alt="User Image">
+                    </div>
+                    <div class="pull-left info">
+                        <p>{{.UserName}}</p>
+                        <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
+                    </div>
+                </div>
+
+                <!-- sidebar menu -->
+                <ul class="sidebar-menu" data-widget="tree">
+                    <li class="header">MAIN NAVIGATION</li>
+                    
+                    <li>
+                        <a href="/">
+                            <i class="fa fa-tachometer-alt"></i> <span>Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-cubes"></i> <span>Products</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="/products"><i class="fa fa-list"></i> List Products</a></li>
+                            <li><a href="/products/create"><i class="fa fa-plus-circle"></i> Add Product</a></li>
+                            <li><a href="/units"><i class="fa fa-balance-scale"></i> Units</a></li>
+                            <li><a href="/categories"><i class="fa fa-tags"></i> Categories</a></li>
+                            <li><a href="/brands"><i class="fa fa-copyright"></i> Brands</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-address-book"></i> <span>Contacts</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="/contacts?type=supplier"><i class="fa fa-star"></i> Suppliers</a></li>
+                            <li><a href="/contacts?type=customer"><i class="fa fa-star"></i> Customers</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-arrow-circle-up"></i> <span>Sell</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="/sales"><i class="fa fa-list"></i> All Sales</a></li>
+                            <li><a href="/pos/create"><i class="fa fa-plus-circle"></i> Add POS Sell</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-cog"></i> <span>Settings</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="/business-settings"><i class="fa fa-briefcase"></i> Business Settings</a></li>
+                            <li><a href="/business-location"><i class="fa fa-map-marker"></i> Business Locations</a></li>
+                            <li><a href="/users"><i class="fa fa-users"></i> Users</a></li>
+                        </ul>
+                    </li>
+
+                    {{if eq .Role "SuperAdmin"}}
+                    <li class="header">ADMINISTRATION</li>
+                    <li><a href="/tenants"><i class="fa fa-building"></i> <span>Tenants / Shops</span></a></li>
+                    {{end}}
+                </ul>
+            </section>
+        </aside>
+
+        <div class="content-wrapper">
+            <section class="content-header">
+                <h1>
+                    {{template "header" .}}
+                    <small>{{template "subheader" .}}</small>
+                </h1>
+            </section>
+
+            <section class="content container-fluid">
+                {{template "main" .}}
+            </section>
+        </div>
+
+        <footer class="main-footer">
+            <div class="pull-right hidden-xs">
+                <b>Version</b> 1.0.0
+            </div>
+            <strong>Copyright &copy; 2026 <a href="#">Kariakoo POS</a>.</strong> All rights reserved.
+        </footer>
+    </div>
+
+    <!-- JS Dependencies (CDN) -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/2.4.18/js/adminlte.min.js"></script>
+
+    {{block "scripts" .}}{{end}}
+
+    <script>
+        $(document).ready(function () {
+            var url = window.location.pathname;
+            $('.sidebar-menu a').filter(function () {
+                return this.getAttribute('href') === url;
+            }).parent().addClass('active').closest('.treeview').addClass('active menu-open');
+        });
+    </script>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,61 @@
+{{define "auth"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="csrf-token" content="go-csrf-token-placeholder">
+
+    <title>{{template "title" .}} - Inventory App</title>
+
+    <!-- CSS -->
+    <link href="/static/css/tailwind/app.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/vendor.css">
+    <link rel="stylesheet" href="/static/css/app.css">
+    
+    <style>
+        .login-page {
+            background-color: #f4f7f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+    </style>
+</head>
+<body class="hold-transition login-page">
+    <div class="container">
+        {{template "main" .}}
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/vendor.js"></script>
+    <script src="/static/js/lang/en.js"></script>
+    
+    <script type="text/javascript">
+        var base_path = "/";
+        var APP = {};
+        var datepicker_date_format = "mm/dd/yyyy";
+        var moment_date_format = "MM/DD/YYYY";
+        var moment_time_format = "HH:mm";
+        var app_locale = "en";
+        var non_utf8_languages = [];
+        var __default_datatable_page_entries = "25";
+        var __new_notification_count_interval = "60000";
+        if (typeof moment !== 'undefined') {
+            var financial_year = {
+                start: moment().startOf('year'),
+                end: moment().endOf('year'),
+            };
+        }
+    </script>
+
+    <script src="/static/js/functions.js"></script>
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/app.js"></script>
+    
+    {{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

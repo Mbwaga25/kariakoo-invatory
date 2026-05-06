@@ -1,0 +1,33 @@
+{{define "title"}}Open Cash Register{{end}}
+
+{{define "header"}}Cash Register{{end}}
+{{define "subheader"}}Open your financial session for today{{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3">
+        <div class="box box-success">
+            <form action="/pos/open-register" method="POST">
+                <input type="hidden" name="location_id" value="{{.PageData.LocationID}}">
+                <div class="box-header with-border text-center">
+                    <i class="fa fa-university fa-5x text-success"></i>
+                    <h3 class="box-title">Open New Register</h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <label>Opening Balance:*</label>
+                        <div class="input-group">
+                            <span class="input-group-addon">$</span>
+                            <input type="number" step="0.01" name="opening_amount" class="form-control input-lg" value="0.00" required>
+                        </div>
+                        <p class="help-block">Enter the amount of cash you have in the drawer starting today.</p>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-success btn-block btn-lg tw-font-bold">OPEN REGISTER</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

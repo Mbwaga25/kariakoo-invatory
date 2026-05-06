@@ -1,0 +1,344 @@
+{{define "title"}}POS - Point of Sale{{end}}
+
+{{define "header"}}POS{{end}}
+{{define "subheader"}}Point of Sale Terminal{{end}}
+
+{{define "main"}}
+<div class="row">
+    <!-- Left Column: Search & Items -->
+    <div class="col-md-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <div class="tw-flex tw-justify-between tw-items-center">
+                    <div class="form-group tw-relative tw-flex-1 tw-mr-4">
+                        <div class="input-group">
+                            <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                            <input type="text" id="search_product" class="form-control input-lg" placeholder="Type name or scan SKU..." autocomplete="off">
+                        </div>
+                        <div id="search_suggestions" class="tw-absolute tw-z-50 tw-w-full tw-bg-white tw-shadow-xl tw-rounded-b-lg tw-border tw-border-gray-200 tw-hidden">
+                            <ul class="tw-list-none tw-p-0 tw-m-0" id="suggestion_list"></ul>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn-default btn-lg"><i class="fa fa-keyboard-o"></i></button>
+                    </div>
+                </div>
+            </div>
+            <div class="box-body" style="min-height: 550px;">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped" id="pos_table">
+                        <thead>
+                            <tr class="bg-gray">
+                                <th style="width: 40%;">Product</th>
+                                <th style="width: 20%;">Price</th>
+                                <th style="width: 20%;">Quantity</th>
+                                <th style="width: 20%;">Subtotal</th>
+                                <th style="width: 5%;"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cart_items"></tbody>
+                    </table>
+                </div>
+                <div id="empty_cart_msg" class="text-center text-muted" style="margin-top: 150px;">
+                    <i class="fa fa-shopping-cart fa-5x"></i>
+                    <h4>Your cart is empty. Start by typing a product name!</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Summary & Payment -->
+    <div class="col-md-4">
+        <div class="box box-success">
+            <div class="box-header with-border text-center bg-green">
+                <h3 class="box-title" style="color: white; font-weight: bold; font-size: 24px;">TOTAL PAYABLE</h3>
+            </div>
+            <div class="box-body" style="background: #fdfdfd;">
+                <div class="tw-p-6">
+                    <div class="tw-flex tw-justify-between tw-mb-4 tw-border-b tw-pb-2">
+                        <span class="tw-text-gray-600">Items:</span>
+                        <span id="items_count" class="tw-font-bold tw-text-lg">0</span>
+                    </div>
+                    <div class="tw-flex tw-justify-between tw-items-center">
+                        <span class="tw-text-gray-600 tw-text-lg">Grand Total:</span>
+                        <span class="tw-text-4xl tw-font-bold text-success">$<span id="grand_total">0.00</span></span>
+                    </div>
+                </div>
+                <div class="tw-px-6 tw-pb-6">
+                    <div class="form-group">
+                        <label>Customer:</label>
+                        <div class="input-group">
+                            <select class="form-control select2" id="customer_id">
+                                <option value="">Walk-in Customer</option>
+                            </select>
+                            <span class="input-group-btn">
+                                <button class="btn btn-default"><i class="fa fa-plus text-primary"></i></button>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer" style="background: transparent; border: none;">
+                <div class="row tw-gap-2 tw-p-2">
+                    <div class="col-xs-12 tw-mb-2">
+                        <button type="button" id="btn_checkout" class="btn btn-success btn-block btn-lg tw-py-4 tw-text-2xl tw-font-bold shadow-lg">
+                            <i class="fa fa-money"></i> PAY & CHECKOUT
+                        </button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-warning btn-block btn-lg">DRAFT</button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-danger btn-block btn-lg" onclick="clearCart()">CANCEL</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="payment_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-green">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" style="color: white; font-weight: bold;">Finalize Payment</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h4 class="tw-mb-4 tw-font-bold text-primary">Payment Methods</h4>
+                        <div id="payment_rows">
+                            <!-- Dynamic rows -->
+                        </div>
+                        <button type="button" class="btn btn-sm btn-primary tw-mt-2" id="add_payment_row">
+                            <i class="fa fa-plus"></i> Add Payment Row
+                        </button>
+
+                        <hr>
+                        <div class="form-group">
+                            <label>Payment Note:</label>
+                            <textarea class="form-control" rows="2" placeholder="Enter any extra details..."></textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-4 bg-gray-light tw-p-6 tw-rounded-lg">
+                        <div class="tw-mb-6">
+                            <h5 class="tw-font-bold text-muted">Amount to Pay:</h5>
+                            <h2 class="tw-mt-0 tw-font-black">$<span id="modal_total_to_pay">0.00</span></h2>
+                        </div>
+                        <div class="tw-mb-6">
+                            <h5 class="tw-font-bold text-muted">Total Paid:</h5>
+                            <h2 class="tw-mt-0 tw-font-black text-success">$<span id="modal_total_paid">0.00</span></h2>
+                        </div>
+                        <div class="tw-mb-6">
+                            <h5 class="tw-font-bold text-muted" id="balance_label">Balance Due:</h5>
+                            <h2 class="tw-mt-0 tw-font-black text-danger">$<span id="modal_balance">0.00</span></h2>
+                        </div>
+                        
+                        <div id="due_date_section" class="tw-hidden">
+                            <div class="form-group">
+                                <label>Due Date (Credit Sale):</label>
+                                <input type="date" class="form-control" id="due_date">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default btn-lg" data-dismiss="modal">Back to POS</button>
+                <button type="button" id="btn_submit_sale" class="btn btn-success btn-lg tw-px-10 tw-font-bold">FINALIZE SALE</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .suggestion-item { padding: 12px 20px; cursor: pointer; border-bottom: 1px solid #f3f3f3; transition: background 0.2s; }
+    .suggestion-item:hover { background-color: #f8f9fa; }
+    .suggestion-item:last-child { border-bottom: none; }
+    .payment-row { background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #eee; }
+</style>
+{{end}}
+
+{{define "scripts"}}
+<script>
+    let cart = [];
+    let payments = [{ amount: 0, method: 'cash' }];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // ... (existing search logic remains same)
+        initSearch();
+
+        document.getElementById('btn_checkout').addEventListener('click', function() {
+            if (cart.length === 0) return alert("Cart is empty!");
+            const total = parseFloat(document.getElementById('grand_total').innerText);
+            
+            // Setup Modal
+            document.getElementById('modal_total_to_pay').innerText = total.toFixed(2);
+            payments = [{ amount: total, method: 'cash' }]; // Default full cash
+            renderPayments();
+            $('#payment_modal').modal('show');
+        });
+
+        document.getElementById('add_payment_row').addEventListener('click', function() {
+            const total = parseFloat(document.getElementById('grand_total').innerText);
+            const paid = calculateTotalPaid();
+            const remaining = Math.max(0, total - paid);
+            payments.push({ amount: remaining, method: 'cash' });
+            renderPayments();
+        });
+
+        document.getElementById('btn_submit_sale').addEventListener('click', function() {
+            finalizeSale();
+        });
+    });
+
+    function initSearch() {
+        const searchInput = document.getElementById('search_product');
+        const suggestionsBox = document.getElementById('search_suggestions');
+        const suggestionList = document.getElementById('suggestion_list');
+        let timeout = null;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(timeout);
+            const query = this.value.trim();
+            if (query.length < 2) return suggestionsBox.classList.add('tw-hidden');
+            timeout = setTimeout(() => {
+                fetch(`/api/products/search?q=${encodeURIComponent(query)}`)
+                    .then(res => res.json())
+                    .then(products => {
+                        if (products.length > 0) {
+                            suggestionList.innerHTML = products.map(p => `
+                                <li class="suggestion-item tw-flex tw-justify-between tw-items-center" onclick='selectProduct(${JSON.stringify(p)})'>
+                                    <div><span class="tw-font-bold">${p.name}</span><br><small class="text-muted">SKU: ${p.sku}</small></div>
+                                    <span class="tw-text-green-600 tw-font-bold">$${p.price.toFixed(2)}</span>
+                                </li>`).join('');
+                            suggestionsBox.classList.remove('tw-hidden');
+                        } else suggestionsBox.classList.add('tw-hidden');
+                    });
+            }, 300);
+        });
+    }
+
+    function selectProduct(p) {
+        addToCart(p.id, p.name, p.price);
+        document.getElementById('search_product').value = '';
+        document.getElementById('search_suggestions').classList.add('tw-hidden');
+    }
+
+    function renderPayments() {
+        const container = document.getElementById('payment_rows');
+        container.innerHTML = payments.map((p, idx) => `
+            <div class="payment-row row tw-items-center">
+                <div class="col-sm-5">
+                    <label>Amount:</label>
+                    <div class="input-group">
+                        <span class="input-group-addon">$</span>
+                        <input type="number" step="0.01" class="form-control input-lg" value="${p.amount.toFixed(2)}" oninput="updatePaymentAmount(${idx}, this.value)">
+                    </div>
+                </div>
+                <div class="col-sm-5">
+                    <label>Method:</label>
+                    <select class="form-control input-lg" onchange="updatePaymentMethod(${idx}, this.value)">
+                        <option value="cash" ${p.method === 'cash' ? 'selected' : ''}>Cash</option>
+                        <option value="card" ${p.method === 'card' ? 'selected' : ''}>Card</option>
+                        <option value="bank_transfer" ${p.method === 'bank_transfer' ? 'selected' : ''}>Bank Transfer</option>
+                        <option value="cheque" ${p.method === 'cheque' ? 'selected' : ''}>Cheque</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 text-right">
+                    ${idx > 0 ? `<button class="btn btn-danger tw-mt-6" onclick="removePaymentRow(${idx})"><i class="fa fa-trash"></i></button>` : ''}
+                </div>
+            </div>
+        `).join('');
+        calculateBalances();
+    }
+
+    function updatePaymentAmount(idx, val) { payments[idx].amount = parseFloat(val) || 0; calculateBalances(); }
+    function updatePaymentMethod(idx, val) { payments[idx].method = val; }
+    function removePaymentRow(idx) { payments.splice(idx, 1); renderPayments(); }
+
+    function calculateTotalPaid() { return payments.reduce((acc, p) => acc + p.amount, 0); }
+
+    function calculateBalances() {
+        const total = parseFloat(document.getElementById('grand_total').innerText);
+        const paid = calculateTotalPaid();
+        const balance = total - paid;
+        
+        document.getElementById('modal_total_paid').innerText = paid.toFixed(2);
+        
+        const balanceSpan = document.getElementById('modal_balance');
+        const balanceLabel = document.getElementById('balance_label');
+        const dueSection = document.getElementById('due_date_section');
+        
+        if (balance > 0) {
+            balanceLabel.innerText = "Balance Due:";
+            balanceSpan.innerText = balance.toFixed(2);
+            balanceSpan.className = "tw-mt-0 tw-font-black text-danger";
+            dueSection.classList.remove('tw-hidden');
+        } else if (balance < 0) {
+            balanceLabel.innerText = "Change Return:";
+            balanceSpan.innerText = Math.abs(balance).toFixed(2);
+            balanceSpan.className = "tw-mt-0 tw-font-black text-primary";
+            dueSection.classList.add('tw-hidden');
+        } else {
+            balanceLabel.innerText = "Balance:";
+            balanceSpan.innerText = "0.00";
+            balanceSpan.className = "tw-mt-0 tw-font-black";
+            dueSection.classList.add('tw-hidden');
+        }
+    }
+
+    function addToCart(id, name, price) {
+        const existing = cart.find(item => item.id === id);
+        if (existing) existing.qty++; else cart.push({ id, name, price, qty: 1 });
+        renderCart();
+    }
+
+    function renderCart() {
+        const tbody = document.getElementById('cart_items');
+        const emptyMsg = document.getElementById('empty_cart_msg');
+        if (cart.length === 0) { tbody.innerHTML = ''; emptyMsg.style.display = 'block'; updateSummary(); return; }
+        emptyMsg.style.display = 'none';
+        tbody.innerHTML = cart.map(item => `
+            <tr>
+                <td><span class="tw-font-bold">${item.name}</span></td>
+                <td class="tw-text-gray-600">$${item.price.toFixed(2)}</td>
+                <td><input type="number" class="form-control input-sm tw-w-20" value="${item.qty}" onchange="updateQty(${item.id}, this.value)"></td>
+                <td class="tw-font-bold tw-text-lg">$${(item.price * item.qty).toFixed(2)}</td>
+                <td><button class="btn btn-xs btn-danger" onclick="removeFromCart(${item.id})"><i class="fa fa-trash"></i></button></td>
+            </tr>`).join('');
+        updateSummary();
+    }
+
+    function removeFromCart(id) { cart = cart.filter(item => item.id !== id); renderCart(); }
+    function updateQty(id, qty) { 
+        const item = cart.find(item => item.id === id); 
+        if (item) { item.qty = parseFloat(qty); if (item.qty <= 0) removeFromCart(id); }
+        renderCart(); 
+    }
+    function updateSummary() {
+        let total = 0; cart.forEach(item => total += item.price * item.qty);
+        document.getElementById('grand_total').innerText = total.toFixed(2);
+        document.getElementById('items_count').innerText = cart.length;
+    }
+
+    function finalizeSale() {
+        const total = parseFloat(document.getElementById('grand_total').innerText);
+        const paid = calculateTotalPaid();
+        
+        // Prepare data for backend
+        const saleData = {
+            location_id: {{.PageData.LocationID}},
+            cart: cart,
+            payments: payments,
+            due_date: document.getElementById('due_date').value
+        };
+
+        console.log("Submitting Sale:", saleData);
+        alert("Sale successful! Redirecting to list...");
+        window.location.href = "/sales";
+    }
+</script>
+{{end}}

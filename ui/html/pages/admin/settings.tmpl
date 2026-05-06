@@ -1,0 +1,98 @@
+{{define "title"}}Business Settings{{end}}
+
+{{define "header"}}Business Settings{{end}}
+{{define "subheader"}}Configure your shop general settings{{end}}
+
+{{define "main"}}
+<div class="nav-tabs-custom">
+    <ul class="nav nav-tabs">
+        <li class="active"><a href="#business_tab" data-toggle="tab"><i class="fa fa-briefcase"></i> Business</a></li>
+        <li><a href="#tax_tab" data-toggle="tab"><i class="fa fa-info-circle"></i> Tax</a></li>
+        <li><a href="#prefix_tab" data-toggle="tab"><i class="fa fa-pencil-square-o"></i> Prefixes</a></li>
+    </ul>
+    <form action="/business-settings/update" method="POST">
+        <div class="tab-content">
+            <!-- Business Tab -->
+            <div class="tab-pane active" id="business_tab">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Business Name:*</label>
+                            <input type="text" name="business_name" class="form-control" value="{{.PageData.Settings.BusinessName}}" required>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Currency:</label>
+                            <input type="text" name="currency" class="form-control" value="{{.PageData.Settings.Currency}}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Currency Symbol:</label>
+                            <input type="text" name="currency_symbol" class="form-control" value="{{.PageData.Settings.CurrencySymbol}}">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Time Zone:</label>
+                            <input type="text" name="time_zone" class="form-control" value="{{.PageData.Settings.TimeZone}}">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Financial Year Start:</label>
+                            <select name="financial_year_start" class="form-control">
+                                <option value="January" {{if eq .PageData.Settings.FinancialYearStart "January"}}selected{{end}}>January</option>
+                                <option value="July" {{if eq .PageData.Settings.FinancialYearStart "July"}}selected{{end}}>July</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tax Tab -->
+            <div class="tab-pane" id="tax_tab">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Tax 1 Name:</label>
+                            <input type="text" name="tax_name" class="form-control" value="{{.PageData.Settings.TaxName}}" placeholder="e.g. VAT">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Tax 1 Number:</label>
+                            <input type="text" name="tax_number" class="form-control" value="{{.PageData.Settings.TaxNumber}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prefix Tab -->
+            <div class="tab-pane" id="prefix_tab">
+                <p class="text-muted">Configure your transaction number prefixes here.</p>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Purchase Prefix:</label>
+                            <input type="text" name="purchase_prefix" class="form-control" value="PUR-">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label>Sale Prefix:</label>
+                            <input type="text" name="sale_prefix" class="form-control" value="INV-">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary btn-lg pull-right">Update Settings</button>
+        </div>
+    </form>
+</div>
+{{end}}

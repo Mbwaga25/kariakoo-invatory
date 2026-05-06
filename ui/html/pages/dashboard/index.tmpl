@@ -1,0 +1,35 @@
+{{define "title"}}Dashboard{{end}}
+{{define "header"}}Dashboard{{end}}
+{{define "subheader"}}Control panel{{end}}
+
+{{define "main"}}
+<div class="row">
+    <!-- Metric widgets can go here, porting the UI from pos/resources/views/home/index.blade.php -->
+    <div class="col-lg-3 col-xs-6">
+        <div class="small-box bg-aqua">
+            <div class="inner">
+                <h3>150</h3>
+                <p>New Orders</p>
+            </div>
+            <div class="icon">
+                <i class="ion ion-bag"></i>
+            </div>
+            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title">Welcome to Inventory Module</h3>
+            </div>
+            <div class="box-body">
+                <p>This UI replicates the design language of your POS system, but relies on a standard Go backend architecture.</p>
+                <p>Port your specific UI blade templates over to standard Go templates (.tmpl) under the <code>ui/html/pages</code> directory.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

@@ -1,0 +1,102 @@
+{{define "title"}}Categories{{end}}
+
+{{define "header"}}Categories{{end}}
+{{define "subheader"}}Manage product categories{{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">All Categories</h3>
+                <div class="box-tools">
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#add_category_modal">
+                        <i class="fa fa-plus"></i> Add New Category
+                    </button>
+                </div>
+            </div>
+            
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped datatable" id="categories_table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Parent Category</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.Categories}}
+                            <tr>
+                                <td>{{.Name}}</td>
+                                <td>
+                                    {{if .ParentID}}
+                                    <span class="label label-info">Sub-category</span>
+                                    {{else}}
+                                    <span class="label label-default">Main</span>
+                                    {{end}}
+                                </td>
+                                <td>{{.Description}}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs btn-primary edit_category" data-id="{{.ID}}" data-name="{{.Name}}" data-description="{{.Description}}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
+                                        <button class="btn btn-xs btn-danger delete_category" data-id="{{.ID}}"><i class="glyphicon glyphicon-trash"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div class="modal fade" id="add_category_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="category_add_form" action="/categories/store" method="POST">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Category</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="parent_id">Parent Category:</label>
+                        <select name="parent_id" class="form-control">
+                            <option value="">None (Main Category)</option>
+                            {{range .PageData.Categories}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Category Name:*</label>
+                        <input type="text" name="name" class="form-control" placeholder="Enter category name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Categories page ready.");
+    });
+</script>
+{{end}}

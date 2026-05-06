@@ -1,0 +1,202 @@
+{{define "title"}}Business Locations{{end}}
+
+{{define "header"}}Business Locations{{end}}
+{{define "subheader"}}Manage your shop outlets and branch offices{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">All Locations</h3>
+        <div class="box-tools">
+            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addLocationModal">
+                <i class="fa fa-plus"></i> Add New Location
+            </button>
+        </div>
+    </div>
+    <div class="box-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped datatable" id="locations_table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Location ID</th>
+                        <th>City</th>
+                        <th>State</th>
+                        <th>Country</th>
+                        <th>Zip Code</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.Locations}}
+                    <tr>
+                        <td>{{.Name}}</td>
+                        <td>{{.LocationID}}</td>
+                        <td>{{.City}}</td>
+                        <td>{{.State}}</td>
+                        <td>{{.Country}}</td>
+                        <td>{{.ZipCode}}</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-xs btn-primary edit-location" 
+                                        data-id="{{.ID}}"
+                                        data-name="{{.Name}}"
+                                        data-location_id="{{.LocationID}}"
+                                        data-city="{{.City}}"
+                                        data-state="{{.State}}"
+                                        data-country="{{.Country}}"
+                                        data-zip_code="{{.ZipCode}}">
+                                    <i class="fa fa-edit"></i> Edit
+                                </button>
+                                <a href="/business-location/delete?id={{.ID}}" class="btn btn-xs btn-danger" onclick="return confirm('Are you sure you want to delete this location?')">
+                                    <i class="fa fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Location Modal -->
+<div class="modal fade" id="addLocationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="/business-location/store" method="POST">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Business Location</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name:*</label>
+                        <input type="text" name="name" class="form-control" required placeholder="e.g. Kariakoo Branch">
+                    </div>
+                    <div class="form-group">
+                        <label>Location ID:</label>
+                        <input type="text" name="location_id" class="form-control" placeholder="e.g. BL001">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>City:*</label>
+                                <input type="text" name="city" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>State:</label>
+                                <input type="text" name="state" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Country:*</label>
+                                <input type="text" name="country" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Zip Code:</label>
+                                <input type="text" name="zip_code" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Location Modal -->
+<div class="modal fade" id="editLocationModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="/business-location/update" method="POST">
+                <input type="hidden" name="id" id="edit_id">
+                <div class="modal-header bg-primary">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Edit Business Location</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>Name:*</label>
+                        <input type="text" name="name" id="edit_name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Location ID:</label>
+                        <input type="text" name="location_id" id="edit_location_id" class="form-control">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>City:*</label>
+                                <input type="text" name="city" id="edit_city" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>State:</label>
+                                <input type="text" name="state" id="edit_state" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Country:*</label>
+                                <input type="text" name="country" id="edit_country" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Zip Code:</label>
+                                <input type="text" name="zip_code" id="edit_zip_code" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Location</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize DataTable with specific responsive options if not already done globally
+    if (!$.fn.DataTable.isDataTable('#locations_table')) {
+        $('#locations_table').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+        });
+    }
+
+    $('.edit-location').click(function() {
+        const data = $(this).data();
+        $('#edit_id').val(data.id);
+        $('#edit_name').val(data.name);
+        $('#edit_location_id').val(data.location_id);
+        $('#edit_city').val(data.city);
+        $('#edit_state').val(data.state);
+        $('#edit_country').val(data.country);
+        $('#edit_zip_code').val(data.zip_code);
+        
+        $('#editLocationModal').modal('show');
+    });
+});
+</script>
+{{end}}

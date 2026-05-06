@@ -1,0 +1,1 @@
+CREATE TABLE IF NOT EXISTS stock_transfer_items (id INT AUTO_INCREMENT PRIMARY KEY, transfer_id INT NOT NULL, product_id INT NOT NULL, quantity DECIMAL(15,4) NOT NULL, FOREIGN KEY (transfer_id) REFERENCES stock_transfers(id) ON DELETE CASCADE, FOREIGN KEY (product_id) REFERENCES products(id)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1,0 +1,106 @@
+{{define "title"}}Units{{end}}
+
+{{define "header"}}Units{{end}}
+{{define "subheader"}}Manage product units{{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h3 class="box-title">All Units</h3>
+                <div class="box-tools">
+                    <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#add_unit_modal">
+                        <i class="fa fa-plus"></i> Add New Unit
+                    </button>
+                </div>
+            </div>
+            
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped datatable" id="units_table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Short Name</th>
+                                <th>Allow Decimal</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.Units}}
+                            <tr>
+                                <td>{{.ActualName}}</td>
+                                <td>{{.ShortName}}</td>
+                                <td>
+                                    {{if .AllowDecimal}}
+                                    <span class="label label-success">Yes</span>
+                                    {{else}}
+                                    <span class="label label-danger">No</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-xs btn-primary edit_unit" data-id="{{.ID}}" data-name="{{.ActualName}}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
+                                        <button class="btn btn-xs btn-danger delete_unit" data-id="{{.ID}}"><i class="glyphicon glyphicon-trash"></i> Delete</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Unit Modal -->
+<div class="modal fade" id="add_unit_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="unit_add_form" action="/units/store" method="POST">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Add Unit</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="actual_name">Unit Name:*</label>
+                        <input type="text" name="actual_name" class="form-control" placeholder="Enter unit name (e.g. Kilograms)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="short_name">Short Name:*</label>
+                        <input type="text" name="short_name" class="form-control" placeholder="Enter short name (e.g. kg)" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Base Unit (for conversion):</label>
+                        <select name="base_unit_id" class="form-control">
+                            <option value="">None (Primary Unit)</option>
+                            {{range .PageData.Units}}
+                            <option value="{{.ID}}">{{.ActualName}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Conversion Factor (e.g. 1 Box = 12 Pieces):</label>
+                        <input type="number" step="0.0001" name="operation_value" class="form-control" placeholder="1.0000">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Unit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Units page ready.");
+    });
+</script>
+{{end}}
