@@ -1,0 +1,44 @@
+{{define "title"}}Register Report{{end}}
+
+{{define "header"}}Register Report{{end}}
+{{define "subheader"}}Summary of cash register sessions{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Register Sessions</h3>
+    </div>
+    <div class="box-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped datatable" id="register_report_table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Opened At</th>
+                        <th>Closed At</th>
+                        <th>Closing Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.RegisterReports}}
+                    <tr>
+                        <td>{{.UserName}}</td>
+                        <td>{{.LocationName}}</td>
+                        <td>
+                            <span class="label {{if eq .Status "open"}}label-success{{else}}label-danger{{end}}">
+                                {{.Status}}
+                            </span>
+                        </td>
+                        <td>{{.OpenedAt.Format "Jan 02, 2006 15:04"}}</td>
+                        <td>{{if .ClosedAt}}{{.ClosedAt.Format "Jan 02, 2006 15:04"}}{{else}}-{{end}}</td>
+                        <td>${{.ClosingAmount}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}

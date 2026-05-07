@@ -53,6 +53,7 @@ type CashRegister struct {
 	TenantID           int
 	BusinessLocationID int
 	UserID             int
+	OpeningAmount      float64
 	Status             string
 	ClosedAt           *time.Time
 	ClosingAmount      float64
@@ -135,10 +136,10 @@ func (m *Models) InsertSale(s *Sale) (int64, error) {
 }
 
 func (m *Models) GetOpenRegister(userID int, locationID int) (*CashRegister, error) {
-	query := "SELECT id, tenant_id, business_location_id, user_id, status, created_at FROM cash_registers WHERE user_id = ? AND business_location_id = ? AND status = 'open' LIMIT 1"
+	query := "SELECT id, tenant_id, business_location_id, user_id, opening_amount, status, created_at FROM cash_registers WHERE user_id = ? AND business_location_id = ? AND status = 'open' LIMIT 1"
 	
 	var r CashRegister
-	err := m.DB.QueryRow(query, userID, locationID).Scan(&r.ID, &r.TenantID, &r.BusinessLocationID, &r.UserID, &r.Status, &r.CreatedAt)
+	err := m.DB.QueryRow(query, userID, locationID).Scan(&r.ID, &r.TenantID, &r.BusinessLocationID, &r.UserID, &r.OpeningAmount, &r.Status, &r.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,8 @@ func (m *Models) GetOpenRegister(userID int, locationID int) (*CashRegister, err
 }
 
 func (m *Models) OpenRegister(r *CashRegister) error {
-	query := "INSERT INTO cash_registers (tenant_id, business_location_id, user_id, status, created_at) VALUES (?, ?, ?, 'open', ?)"
-	_, err := m.DB.Exec(query, r.TenantID, r.BusinessLocationID, r.UserID, time.Now())
+	query := "INSERT INTO cash_registers (tenant_id, business_location_id, user_id, opening_amount, status, created_at) VALUES (?, ?, ?, ?, 'open', ?)"
+	_, err := m.DB.Exec(query, r.TenantID, r.BusinessLocationID, r.UserID, r.OpeningAmount, time.Now())
 	return err
 }
+

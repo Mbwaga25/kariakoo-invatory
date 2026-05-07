@@ -1,43 +1,43 @@
-{{define "title"}}Purchases{{end}}
+{{define "title"}}Stock Transfers{{end}}
 
-{{define "header"}}Purchases{{end}}
-{{define "subheader"}}Manage your purchase transactions{{end}}
+{{define "header"}}Stock Transfers{{end}}
+{{define "subheader"}}Manage stock transfers between locations{{end}}
 
 {{define "main"}}
 <div class="box box-primary">
     <div class="box-header with-border">
-        <h3 class="box-title">All Purchases</h3>
+        <h3 class="box-title">All Transfers</h3>
         <div class="box-tools">
-            <a href="/purchases/create" class="btn btn-primary btn-sm">
-                <i class="fa fa-plus"></i> Add New Purchase
+            <a href="/stock-transfers/create" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Add New Transfer
             </a>
         </div>
     </div>
     <div class="box-body">
         <div class="table-responsive">
-            <table class="table table-bordered table-striped datatable" id="purchases_table">
+            <table class="table table-bordered table-striped datatable" id="transfers_table">
                 <thead>
                     <tr>
                         <th>Date</th>
                         <th>Reference No</th>
-                        <th>Location</th>
+                        <th>From Location</th>
+                        <th>To Location</th>
                         <th>Status</th>
-                        <th>Payment Status</th>
                         <th>Grand Total</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{range .PageData.Purchases}}
+                    {{range .PageData.Transfers}}
                     <tr>
-                        <td>{{.PurchaseDate.Format "Jan 02, 2006"}}</td>
+                        <td>{{.TransactionDate.Format "Jan 02, 2006"}}</td>
                         <td>{{.RefNo}}</td>
-                        <td>Location ID: {{.BusinessLocationID}}</td>
+                        <td>{{.FromLocationName}}</td>
+                        <td>{{.ToLocationName}}</td>
                         <td><span class="label label-info">{{.Status}}</span></td>
-                        <td><span class="label label-warning">{{.PaymentStatus}}</span></td>
                         <td>${{.FinalTotal}}</td>
                         <td>
-                            <a href="/purchases/view?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-eye"></i> View</a>
+                            <a href="/stock-transfers/view?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-eye"></i> View</a>
                         </td>
                     </tr>
                     {{end}}

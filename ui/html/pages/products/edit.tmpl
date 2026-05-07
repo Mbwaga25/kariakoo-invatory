@@ -1,7 +1,7 @@
 {{define "title"}}Edit Product{{end}}
 
 {{define "header"}}Edit Product{{end}}
-{{define "subheader"}}Update details for {{.Product.Name}}{{end}}
+{{define "subheader"}}Update details for {{.PageData.Product.Name}}{{end}}
 
 {{define "main"}}
 <div class="box box-primary">
@@ -10,19 +10,19 @@
     </div>
     
     <form action="/products/update" method="POST">
-        <input type="hidden" name="id" value="{{.Product.ID}}">
+        <input type="hidden" name="id" value="{{.PageData.Product.ID}}">
         <div class="box-body">
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Product Name:*</label>
-                        <input type="text" name="name" class="form-control" id="name" value="{{.Product.Name}}" required>
+                        <input type="text" name="name" class="form-control" id="name" value="{{.PageData.Product.Name}}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="sku">SKU:*</label>
-                        <input type="text" name="sku" class="form-control" id="sku" value="{{.Product.SKU}}" required>
+                        <input type="text" name="sku" class="form-control" id="sku" value="{{.PageData.Product.SKU}}" required>
                     </div>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                         <label for="purchase_price">Purchase Price:*</label>
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="purchase_price" class="form-control" id="purchase_price" value="{{.Product.PurchasePrice}}" required>
+                            <input type="number" step="0.01" name="purchase_price" class="form-control" id="purchase_price" value="{{.PageData.Product.PurchasePrice}}" required>
                         </div>
                     </div>
                 </div>
@@ -48,7 +48,7 @@
                         <label for="selling_price">Selling Price:*</label>
                         <div class="input-group">
                             <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="selling_price" class="form-control" id="selling_price" value="{{.Product.SellingPrice}}" required>
+                            <input type="number" step="0.01" name="selling_price" class="form-control" id="selling_price" value="{{.PageData.Product.SellingPrice}}" required>
                         </div>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="description">Product Description:</label>
-                        <textarea name="description" class="form-control" rows="3">{{.Product.Description}}</textarea>
+                        <textarea name="description" class="form-control" rows="3">{{.PageData.Product.Description}}</textarea>
                     </div>
                 </div>
             </div>
@@ -67,7 +67,7 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="alert_quantity">Alert Quantity:</label>
-                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="{{.Product.AlertQuantity}}">
+                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="{{.PageData.Product.AlertQuantity}}">
                     </div>
                 </div>
             </div>

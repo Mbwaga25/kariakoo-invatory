@@ -58,15 +58,28 @@ type ProductLocation struct {
 	IsActive     bool
 }
 
-func (m *Models) GetProductsByTenant(tenantID int, locationID int) ([]*Product, error) {
+func (m *Models) GetProductsByTenant(tenantID int, locationID int, categoryID int, brandID int) ([]*Product, error) {
 	query := `SELECT p.id, p.tenant_id, p.name, p.sku, p.purchase_price, p.selling_price, p.alert_quantity, p.unit_id, p.category_id, p.brand_id, p.description, p.created_at,
 			  COALESCE(pl.qty_available, 0) as location_qty,
 			  pl.selling_price as location_price
 			  FROM products p
 			  LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
-			  WHERE p.tenant_id = ? ORDER BY p.id DESC`
+			  WHERE p.tenant_id = ?`
 	
-	rows, err := m.DB.Query(query, locationID, tenantID)
+	args := []interface{}{locationID, tenantID}
+
+	if categoryID > 0 {
+		query += " AND p.category_id = ?"
+		args = append(args, categoryID)
+	}
+	if brandID > 0 {
+		query += " AND p.brand_id = ?"
+		args = append(args, brandID)
+	}
+
+	query += " ORDER BY p.id DESC"
+	
+	rows, err := m.DB.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

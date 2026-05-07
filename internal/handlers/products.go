@@ -32,18 +32,42 @@ func (app *Application) ProductCreate(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) ProductList(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
-	locationID := middleware.GetLocationID(r.Context())
 	
-	products, err := app.Models.GetProductsByTenant(tenantID, locationID)
+	// Default location to the session location, unless overridden by filter
+	locationID := middleware.GetLocationID(r.Context())
+	if filterLocID, _ := strconv.Atoi(r.URL.Query().Get("location_id")); filterLocID > 0 {
+		locationID = filterLocID
+	}
+
+	categoryID, _ := strconv.Atoi(r.URL.Query().Get("category_id"))
+	brandID, _ := strconv.Atoi(r.URL.Query().Get("brand_id"))
+	
+	products, err := app.Models.GetProductsByTenant(tenantID, locationID, categoryID, brandID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
+	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
+	brands, _ := app.Models.GetBrandsByTenant(tenantID)
+	locations, _ := app.Models.GetLocationsByTenant(tenantID)
+
 	app.RenderPage(w, r, "products/index", struct {
-		Products []*models.Product
+		Products   []*models.Product
+		Categories []*models.Category
+		Brands     []*models.Brand
+		Locations  []*models.BusinessLocation
+		Filters    map[string]int
 	}{
-		Products: products,
+		Products:   products,
+		Categories: categories,
+		Brands:     brands,
+		Locations:  locations,
+		Filters: map[string]int{
+			"CategoryID": categoryID,
+			"BrandID":    brandID,
+			"LocationID": locationID,
+		},
 	})
 }
 
@@ -115,13 +139,24 @@ func (app *Application) ProductStore(w http.ResponseWriter, r *http.Request) {
 
 	// Location Stocks
 	r.ParseForm()
-	locationIDStrs := r.Form["location_ids"]
+	locationType := r.FormValue("location_type")
 	locationStocks := make(map[int]float64)
-	for _, s := range locationIDStrs {
-		id, _ := strconv.Atoi(s)
-		stockStr := r.FormValue("opening_stock_" + s)
-		stock, _ := strconv.ParseFloat(stockStr, 64)
-		locationStocks[id] = stock
+
+	if locationType == "all" || locationType == "" { // Fallback if missing
+		locations, err := app.Models.GetLocationsByTenant(tenantID)
+		if err == nil {
+			for _, loc := range locations {
+				locationStocks[loc.ID] = 0.0
+			}
+		}
+	} else {
+		locationIDStrs := r.Form["location_ids"]
+		for _, s := range locationIDStrs {
+			id, _ := strconv.Atoi(s)
+			stockStr := r.FormValue("opening_stock_" + s)
+			stock, _ := strconv.ParseFloat(stockStr, 64)
+			locationStocks[id] = stock
+		}
 	}
 
 	p := &models.Product{

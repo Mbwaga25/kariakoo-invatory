@@ -1,0 +1,36 @@
+{{define "title"}}Stock Report{{end}}
+
+{{define "header"}}Stock Report{{end}}
+{{define "subheader"}}Current inventory levels and valuation{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title">Inventory Valuation</h3>
+    </div>
+    <div class="box-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped datatable" id="stock_report_table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>SKU</th>
+                        <th>Current Stock</th>
+                        <th>Inventory Value (at cost)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.StockReports}}
+                    <tr>
+                        <td>{{.ProductName}}</td>
+                        <td>{{.SKU}}</td>
+                        <td>{{.CurrentStock}}</td>
+                        <td>${{.StockValue}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{{end}}

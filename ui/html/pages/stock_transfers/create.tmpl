@@ -1,0 +1,97 @@
+{{define "title"}}Add New Transfer{{end}}
+
+{{define "header"}}Add Stock Transfer{{end}}
+{{define "subheader"}}Transfer stock between business locations{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <form action="/stock-transfers/store" method="POST" id="stock_transfer_form">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="from_location_id">From Location:*</label>
+                        <select name="from_location_id" id="from_location_id" class="form-control" required>
+                            {{range .PageData.Locations}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="to_location_id">To Location:*</label>
+                        <select name="to_location_id" id="to_location_id" class="form-control" required>
+                            {{range .PageData.Locations}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ref_no">Reference No:</label>
+                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Reference No">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered" id="product_table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th><button type="button" class="btn btn-success btn-xs" id="add_row"><i class="fa fa-plus"></i></button></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <select name="product_id[]" class="form-control" required>
+                                        <option value="">Select Product</option>
+                                        {{range .PageData.Products}}
+                                        <option value="{{.ID}}">{{.Name}} ({{.SKU}})</option>
+                                        {{end}}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" name="quantity[]" class="form-control" required>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Save Transfer</button>
+            <a href="/stock-transfers" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    $('#add_row').click(function() {
+        var row = '<tr>' +
+            '<td><select name="product_id[]" class="form-control" required>' +
+            $('#product_table tbody tr:first select').html() +
+            '</select></td>' +
+            '<td><input type="number" step="0.01" name="quantity[]" class="form-control" required></td>' +
+            '<td><button type="button" class="btn btn-danger btn-xs remove_row"><i class="fa fa-minus"></i></button></td>' +
+            '</tr>';
+        $('#product_table tbody').append(row);
+    });
+
+    $(document).on('click', '.remove_row', function() {
+        $(this).closest('tr').remove();
+    });
+});
+</script>
+{{end}}

@@ -33,7 +33,7 @@
                         <div class="input-group">
                             <select name="unit_id" id="unit_id" class="form-control" required>
                                 <option value="">Please Select</option>
-                                {{range .Units}}
+                                {{range .PageData.Units}}
                                 <option value="{{.ID}}">{{.ActualName}}</option>
                                 {{end}}
                             </select>
@@ -49,7 +49,7 @@
                         <div class="input-group">
                             <select name="category_id" id="category_id" class="form-control">
                                 <option value="">Please Select</option>
-                                {{range .Categories}}
+                                {{range .PageData.Categories}}
                                 <option value="{{.ID}}">{{.Name}}</option>
                                 {{end}}
                             </select>
@@ -65,7 +65,7 @@
                         <div class="input-group">
                             <select name="brand_id" id="brand_id" class="form-control">
                                 <option value="">Please Select</option>
-                                {{range .Brands}}
+                                {{range .PageData.Brands}}
                                 <option value="{{.ID}}">{{.Name}}</option>
                                 {{end}}
                             </select>
@@ -130,35 +130,53 @@
                             <h3 class="box-title">Inventory & Locations</h3>
                         </div>
                         <div class="box-body">
-                            <table class="table table-bordered table-striped">
-                                <thead>
-                                    <tr class="bg-gray">
-                                        <th style="width: 50px;">Select</th>
-                                        <th>Business Location</th>
-                                        <th style="width: 200px;">Opening Stock</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {{range .Locations}}
-                                    <tr>
-                                        <td class="text-center">
-                                            <input type="checkbox" name="location_ids" value="{{.ID}}" checked class="location-check">
-                                        </td>
-                                        <td>
-                                            <span class="tw-font-bold">{{.Name}}</span><br>
-                                            <small class="text-muted">{{.City}}, {{.Country}}</small>
-                                        </td>
-                                        <td>
-                                            <div class="input-group">
-                                                <input type="number" step="0.01" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0.00">
-                                                <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {{end}}
-                                </tbody>
-                            </table>
-                            <p class="help-block"><i class="fa fa-info-circle"></i> Enable the checkbox and set initial stock levels for each shop branch.</p>
+                            <div class="form-group">
+                                <label>Location Assignment:*</label>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="location_type" id="location_type_all" value="all" checked>
+                                        Add to All Locations
+                                    </label>
+                                </div>
+                                <div class="radio">
+                                    <label>
+                                        <input type="radio" name="location_type" id="location_type_specific" value="specific">
+                                        Add to Specific Location(s)
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="specific_locations_container" style="display: none;">
+                                <table class="table table-bordered table-striped">
+                                    <thead>
+                                        <tr class="bg-gray">
+                                            <th style="width: 50px;">Select</th>
+                                            <th>Business Location</th>
+                                            <th style="width: 200px;">Opening Stock</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{range .PageData.Locations}}
+                                        <tr>
+                                            <td class="text-center">
+                                                <input type="checkbox" name="location_ids" value="{{.ID}}" class="location-check">
+                                            </td>
+                                            <td>
+                                                <span class="tw-font-bold">{{.Name}}</span><br>
+                                                <small class="text-muted">{{.City}}, {{.Country}}</small>
+                                            </td>
+                                            <td>
+                                                <div class="input-group">
+                                                    <input type="number" step="0.01" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0.00">
+                                                    <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {{end}}
+                                    </tbody>
+                                </table>
+                                <p class="help-block"><i class="fa fa-info-circle"></i> Enable the checkbox and set initial stock levels for specific shop branches.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -316,6 +334,20 @@
         purchaseInput.addEventListener('input', calculateSellingPrice);
         marginInput.addEventListener('input', calculateSellingPrice);
         sellingInput.addEventListener('input', calculateMargin);
+
+        // Location toggle logic
+        const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
+        const specificLocationsContainer = document.getElementById('specific_locations_container');
+        
+        locationTypeRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'specific') {
+                    specificLocationsContainer.style.display = 'block';
+                } else {
+                    specificLocationsContainer.style.display = 'none';
+                }
+            });
+        });
     });
 </script>
 {{end}}

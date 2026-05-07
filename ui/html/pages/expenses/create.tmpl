@@ -1,0 +1,56 @@
+{{define "title"}}Add New Expense{{end}}
+
+{{define "header"}}Add Expense{{end}}
+{{define "subheader"}}Record a business expense{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <form action="/expenses/store" method="POST">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="location_id">Business Location:*</label>
+                        <select name="location_id" id="location_id" class="form-control" required>
+                            {{range .PageData.Locations}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="expense_category_id">Expense Category:</label>
+                        <select name="expense_category_id" id="expense_category_id" class="form-control">
+                            <option value="">Select Category</option>
+                            {{range .PageData.Categories}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ref_no">Reference No:</label>
+                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Reference No">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="final_total">Total Amount:*</label>
+                        <input type="number" step="0.01" name="final_total" class="form-control" id="final_total" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Save Expense</button>
+            <a href="/expenses" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+{{end}}

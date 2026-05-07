@@ -91,17 +91,42 @@ func main() {
 	mux.Handle("/pos/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SalesCreate))))
 	mux.Handle("/pos/open-register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterOpen))))
 
+	// Purchase Routes
+	mux.Handle("/purchases", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseList))))
+	mux.Handle("/purchases/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseCreate))))
+	mux.Handle("/purchases/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseStore))))
+
+	// Stock Transfer Routes
+	mux.Handle("/stock-transfers", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockTransferList))))
+	mux.Handle("/stock-transfers/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockTransferCreate))))
+	mux.Handle("/stock-transfers/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockTransferStore))))
+
+	// Stock Adjustment Routes
+	mux.Handle("/stock-adjustments", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockAdjustmentList))))
+	mux.Handle("/stock-adjustments/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockAdjustmentCreate))))
+	mux.Handle("/stock-adjustments/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockAdjustmentStore))))
+
+	// Expense Routes
+	mux.Handle("/expenses", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseList))))
+	mux.Handle("/expenses/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseCreate))))
+	mux.Handle("/expenses/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseStore))))
+
+	// Contact Routes
+	mux.Handle("/contacts", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactList))))
+	mux.Handle("/contacts/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactCreate))))
+	mux.Handle("/contacts/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactStore))))
+
+	// Report Routes
+	mux.Handle("/reports/profit-loss", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ProfitLossReport))))
+	mux.Handle("/reports/stock", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockReport))))
+	mux.Handle("/reports/register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterReport))))
+
 	// Sidebar Routes (Placeholder pages only)
 	routes := map[string]string{
 		"/variations":           "products/variations",
 		"/import-products":      "products/import",
 		"/import-opening-stock": "products/opening_stock",
 		"/warranties":           "products/warranties",
-		"/contacts":             "contacts/index",
-		"/customer-group":       "contacts/groups",
-		"/import-contacts":      "contacts/import",
-		"/purchases":            "purchases/index",
-		"/purchases/create":     "purchases/create",
 		"/purchase-return":      "purchases/return",
 		"/sell-return":          "sales/return",
 		"/shipments":            "sales/shipments",

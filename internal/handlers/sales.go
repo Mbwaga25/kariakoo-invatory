@@ -76,7 +76,7 @@ func (app *Application) SalesCreate(w http.ResponseWriter, r *http.Request) {
 		})
 		return
 	}
-	products, _ := app.Models.GetProductsByTenant(tenantID, selectedLocationID)
+	products, _ := app.Models.GetProductsByTenant(tenantID, selectedLocationID, 0, 0)
 
 	app.RenderPage(w, r, "sales/create", struct {
 		Products   []*models.Product
@@ -96,6 +96,7 @@ func (app *Application) RegisterOpen(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	tenantID := middleware.GetTenantID(r.Context())
 	locationID, _ := strconv.Atoi(r.FormValue("location_id"))
+	openingAmount, _ := strconv.ParseFloat(r.FormValue("opening_amount"), 64)
 
 	if locationID <= 0 {
 		http.Error(w, "Invalid Location ID. Please select a valid shop location.", http.StatusBadRequest)
@@ -106,6 +107,7 @@ func (app *Application) RegisterOpen(w http.ResponseWriter, r *http.Request) {
 		TenantID:           tenantID,
 		BusinessLocationID: locationID,
 		UserID:             user.ID,
+		OpeningAmount:      openingAmount,
 	}
 
 	err := app.Models.OpenRegister(reg)
@@ -117,3 +119,4 @@ func (app *Application) RegisterOpen(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/pos/create?location_id="+strconv.Itoa(locationID), http.StatusSeeOther)
 }
+

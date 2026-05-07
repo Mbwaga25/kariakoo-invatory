@@ -1,20 +1,48 @@
-{{define "title"}}CONTACTS{{end}}
-{{define "header"}}CONTACTS{{end}}
-{{define "subheader"}}Management for contacts{{end}}
+{{define "title"}}{{.PageData.ContactType | printf "%s List"}}{{end}}
+
+{{define "header"}}{{.PageData.ContactType | printf "%s List"}}{{end}}
+{{define "subheader"}}Manage your {{.PageData.ContactType}}s{{end}}
 
 {{define "main"}}
-<div class="box box-info">
+<div class="box box-primary">
     <div class="box-header with-border">
-        <h3 class="box-title">CONTACTS List</h3>
-        <div class="box-tools pull-right">
-            <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+        <h3 class="box-title">All {{.PageData.ContactType}}s</h3>
+        <div class="box-tools">
+            <a href="/contacts/create?type={{.PageData.ContactType}}" class="btn btn-primary btn-sm">
+                <i class="fa fa-plus"></i> Add {{.PageData.ContactType}}
+            </a>
         </div>
     </div>
     <div class="box-body">
-        <div class="well text-center">
-            <h3><i class="fa fa-info-circle"></i> CONTACTS Module</h3>
-            <p>This module is currently being migrated from the Laravel POS system.</p>
-            <a href="/" class="btn btn-primary"><i class="fa fa-home"></i> Back to Dashboard</a>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped datatable" id="contacts_table">
+                <thead>
+                    <tr>
+                        <th>Contact ID</th>
+                        <th>Name</th>
+                        <th>Mobile</th>
+                        <th>Email</th>
+                        <th>Tax Number</th>
+                        <th>Opening Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.Contacts}}
+                    <tr>
+                        <td>{{.ID}}</td>
+                        <td>{{.Name}} {{if .BusinessName}}({{.BusinessName}}){{end}}</td>
+                        <td>{{.Mobile}}</td>
+                        <td>{{.Email}}</td>
+                        <td>{{.TaxNumber}}</td>
+                        <td>${{.OpeningBalance}}</td>
+                        <td>
+                            <a href="/contacts/edit?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-edit"></i> Edit</a>
+                        </td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

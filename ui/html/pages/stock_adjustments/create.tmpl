@@ -1,0 +1,96 @@
+{{define "title"}}Add New Adjustment{{end}}
+
+{{define "header"}}Add Stock Adjustment{{end}}
+{{define "subheader"}}Correct inventory levels for loss, damage, etc.{{end}}
+
+{{define "main"}}
+<div class="box box-primary">
+    <form action="/stock-adjustments/store" method="POST" id="stock_adjustment_form">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="location_id">Business Location:*</label>
+                        <select name="location_id" id="location_id" class="form-control" required>
+                            {{range .PageData.Locations}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="ref_no">Reference No:</label>
+                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Reference No">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="adjustment_type">Adjustment Type:*</label>
+                        <select name="adjustment_type" id="adjustment_type" class="form-control" required>
+                            <option value="normal">Normal (e.g. Broken)</option>
+                            <option value="abnormal">Abnormal (e.g. Theft)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <table class="table table-bordered" id="product_table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th><button type="button" class="btn btn-success btn-xs" id="add_row"><i class="fa fa-plus"></i></button></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <select name="product_id[]" class="form-control" required>
+                                        <option value="">Select Product</option>
+                                        {{range .PageData.Products}}
+                                        <option value="{{.ID}}">{{.Name}} ({{.SKU}})</option>
+                                        {{end}}
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" name="quantity[]" class="form-control" required>
+                                </td>
+                                <td></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="box-footer">
+            <button type="submit" class="btn btn-primary">Save Adjustment</button>
+            <a href="/stock-adjustments" class="btn btn-default">Cancel</a>
+        </div>
+    </form>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    $('#add_row').click(function() {
+        var row = '<tr>' +
+            '<td><select name="product_id[]" class="form-control" required>' +
+            $('#product_table tbody tr:first select').html() +
+            '</select></td>' +
+            '<td><input type="number" step="0.01" name="quantity[]" class="form-control" required></td>' +
+            '<td><button type="button" class="btn btn-danger btn-xs remove_row"><i class="fa fa-minus"></i></button></td>' +
+            '</tr>';
+        $('#product_table tbody').append(row);
+    });
+
+    $(document).on('click', '.remove_row', function() {
+        $(this).closest('tr').remove();
+    });
+});
+</script>
+{{end}}
