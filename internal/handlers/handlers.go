@@ -98,6 +98,7 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 	var locations []*models.BusinessLocation
 	activeLocationID := middleware.GetLocationID(r.Context())
 	currencySymbol := "TSh"
+	installedModules := make(map[string]bool)
 	
 	if user != nil {
 		tenantID := middleware.GetTenantID(r.Context())
@@ -105,6 +106,12 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		
 		if settings, err := app.Models.GetBusinessSettings(tenantID); err == nil {
 			currencySymbol = settings.CurrencySymbol
+		}
+
+		if modules, err := app.Models.GetTenantModules(tenantID); err == nil {
+			for _, m := range modules {
+				installedModules[m.Key] = m.IsInstalled
+			}
 		}
 	}
 
@@ -116,6 +123,7 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		Locations        []*models.BusinessLocation
 		ActiveLocationID int
 		CurrencySymbol   string
+		Modules          map[string]bool
 	}{
 		Role:             role,
 		UserName:         userName,
@@ -123,6 +131,7 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		Locations:        locations,
 		ActiveLocationID: activeLocationID,
 		CurrencySymbol:   currencySymbol,
+		Modules:          installedModules,
 	}
 
 	err = ts.ExecuteTemplate(w, "base", fullData)

@@ -150,6 +150,7 @@ func main() {
 	mux.Handle("/business-location/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationUpdate))))
 	mux.Handle("/business-location/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationDelete))))
 	mux.Handle("/business-location/switch", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationSwitch))))
+	mux.Handle("/settings/modules", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SettingsModules))))
 
 	for route, tmpl := range routes {
 		tName := tmpl // capture for closure
