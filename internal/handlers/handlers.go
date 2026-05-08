@@ -46,7 +46,16 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		filepath.Join("ui", "html", "pages", templateName+".tmpl"),
 	}
 
-	ts, err := template.ParseFiles(files...)
+	ts := template.New(filepath.Base(files[0])).Funcs(template.FuncMap{
+		"subtract": func(a, b float64) float64 {
+			return a - b
+		},
+		"add": func(a, b float64) float64 {
+			return a + b
+		},
+	})
+	
+	ts, err := ts.ParseFiles(files...)
 	if err != nil {
 		log.Printf("Error parsing templates for %s: %v", templateName, err)
 		http.Error(w, "PARSE ERROR: "+err.Error(), http.StatusInternalServerError)

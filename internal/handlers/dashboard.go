@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"kariakoo/inventory/internal/middleware"
 )
 
 func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
@@ -10,5 +11,14 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.RenderPage(w, r, "dashboard/index", nil)
+	tenantID := middleware.GetTenantID(r.Context())
+	
+	// Get dashboard data
+	dashboardData, err := app.Models.GetDashboardData(tenantID, nil)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	app.RenderPage(w, r, "dashboard/index", dashboardData)
 }

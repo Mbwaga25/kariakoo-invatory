@@ -120,6 +120,8 @@ func main() {
 	mux.Handle("/reports/profit-loss", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ProfitLossReport))))
 	mux.Handle("/reports/stock", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockReport))))
 	mux.Handle("/reports/register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterReport))))
+	mux.Handle("/reports/purchase-sell", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseSellReport))))
+	mux.Handle("/reports/expense", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseReport))))
 
 	// Sidebar Routes (Placeholder pages only)
 	routes := map[string]string{

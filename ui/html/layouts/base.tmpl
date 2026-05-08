@@ -26,6 +26,33 @@
         .tw-mt-1 { margin-top: 0.25rem; }
         .tw-px-4 { padding-left: 1rem; padding-right: 1rem; }
         .tw-py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+        
+        /* Modern Dashboard Styles */
+        .info-box {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: transform 0.2s ease-in-out;
+        }
+        .info-box:hover {
+            transform: translateY(-5px);
+        }
+        .info-box-icon {
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+        }
+        .small-box {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        .box {
+            border-radius: 10px;
+            border-top: 3px solid #3c8dbc;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
+        .main-sidebar {
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
 
@@ -251,6 +278,8 @@
                         </a>
                         <ul class="treeview-menu">
                             <li><a href="/reports/profit-loss"><i class="fa fa-money-bill-alt"></i> Profit & Loss</a></li>
+                            <li><a href="/reports/purchase-sell"><i class="fa fa-shopping-cart"></i> Purchase & Sell</a></li>
+                            <li><a href="/reports/expense"><i class="fa fa-minus-circle"></i> Expense Report</a></li>
                             <li><a href="/reports/stock"><i class="fa fa-boxes"></i> Stock Report</a></li>
                             <li><a href="/reports/register"><i class="fa fa-cash-register"></i> Register Report</a></li>
                         </ul>

@@ -4,6 +4,22 @@
 {{define "subheader"}}Current inventory levels and valuation{{end}}
 
 {{define "main"}}
+<div class="row">
+    <div class="col-md-4">
+        <div class="info-box">
+            <span class="info-box-icon bg-blue"><i class="fa fa-boxes"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Stock Value</span>
+                <span class="info-box-number">
+                    {{$total := 0.0}}
+                    {{range .PageData.StockReports}}{{$total = (add $total .StockValue)}}{{end}}
+                    ${{printf "%.2f" $total}}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="box box-primary">
     <div class="box-header with-border">
         <h3 class="box-title">Inventory Valuation</h3>

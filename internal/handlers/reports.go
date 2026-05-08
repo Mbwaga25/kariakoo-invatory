@@ -64,3 +64,47 @@ func (app *Application) RegisterReport(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (app *Application) PurchaseSellReport(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	end := time.Now()
+	start := end.AddDate(0, 0, -30)
+
+	report, err := app.Models.GetPurchaseSellReport(tenantID, start, end)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	app.RenderPage(w, r, "reports/purchase_sell", struct {
+		Report *models.PurchaseSellReport
+		Start  time.Time
+		End    time.Time
+	}{
+		Report: report,
+		Start:  start,
+		End:    end,
+	})
+}
+
+func (app *Application) ExpenseReport(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	end := time.Now()
+	start := end.AddDate(0, 0, -30)
+
+	reports, err := app.Models.GetExpenseReport(tenantID, start, end)
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	app.RenderPage(w, r, "reports/expense", struct {
+		Expenses []*models.ExpenseReport
+		Start    time.Time
+		End      time.Time
+	}{
+		Expenses: reports,
+		Start:    start,
+		End:      end,
+	})
+}
+

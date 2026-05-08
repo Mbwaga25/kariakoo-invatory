@@ -3,33 +3,162 @@
 {{define "subheader"}}Control panel{{end}}
 
 {{define "main"}}
+<!-- Info boxes -->
 <div class="row">
-    <!-- Metric widgets can go here, porting the UI from pos/resources/views/home/index.blade.php -->
-    <div class="col-lg-3 col-xs-6">
-        <div class="small-box bg-aqua">
-            <div class="inner">
-                <h3>150</h3>
-                <p>New Orders</p>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-cart"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Sales</span>
+                <span class="info-box-number" id="total_sales">{{printf "%.2f" .PageData.TotalSales}}</span>
             </div>
-            <div class="icon">
-                <i class="ion ion-bag"></i>
+        </div>
+    </div>
+    
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="fa fa-money-bill-wave"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Net Profit</span>
+                <span class="info-box-number" id="net_profit">{{printf "%.2f" .PageData.Net}}</span>
             </div>
-            <a href="#" class="small-box-footer">More info <i class="fa fa-arrow-circle-right"></i></a>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-yellow"><i class="fa fa-file-invoice-dollar"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Invoice Due</span>
+                <span class="info-box-number" id="invoice_due">{{printf "%.2f" .PageData.InvoiceDue}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="fa fa-undo"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Sell Return</span>
+                <span class="info-box-number" id="sell_return">{{printf "%.2f" .PageData.TotalSellReturn}}</span>
+            </div>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="box">
-            <div class="box-header with-border">
-                <h3 class="box-title">Welcome to Inventory Module</h3>
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-blue"><i class="fa fa-truck-loading"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Purchase</span>
+                <span class="info-box-number" id="total_purchase">{{printf "%.2f" .PageData.TotalPurchases}}</span>
             </div>
-            <div class="box-body">
-                <p>This UI replicates the design language of your POS system, but relies on a standard Go backend architecture.</p>
-                <p>Port your specific UI blade templates over to standard Go templates (.tmpl) under the <code>ui/html/pages</code> directory.</p>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-orange"><i class="fa fa-exclamation-triangle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Purchase Due</span>
+                <span class="info-box-number" id="purchase_due">{{printf "%.2f" .PageData.PurchaseDue}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box">
+            <span class="info-box-icon bg-purple"><i class="fa fa-minus-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Expense</span>
+                <span class="info-box-number" id="total_expense">{{printf "%.2f" .PageData.TotalExpenses}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 col-sm-6 col-xs-12">
+        <div class="info-box bg-red">
+            <span class="info-box-icon"><i class="fa fa-boxes"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Stock Alerts</span>
+                <span class="info-box-number">{{.PageData.StockAlertsCount}}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 70%"></div>
+                </div>
+                <span class="progress-description">Items below alert level</span>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Sales Chart -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-chart-line"></i> Sells Last 30 Days</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="chart">
+                    <canvas id="salesChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{end}}
+
+{{define "scripts"}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        
+        const labels = [
+            {{range .PageData.MonthlySales}}
+            "{{.Date}}",
+            {{end}}
+        ];
+        
+        const data = [
+            {{range .PageData.MonthlySales}}
+            {{.Total}},
+            {{end}}
+        ];
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Daily Sales',
+                    data: data,
+                    borderColor: 'rgba(60,141,188,0.8)',
+                    backgroundColor: 'rgba(60,141,188,0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '$' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {{end}}

@@ -1,0 +1,50 @@
+{{define "title"}}Expense Report{{end}}
+
+{{define "header"}}Expense Report{{end}}
+{{define "subheader"}}Summary of expenses by category ({{.Start.Format "Jan 02, 2006"}} - {{.End.Format "Jan 02, 2006"}}){{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-minus-circle"></i> Expense Details</h3>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr class="bg-red">
+                                <th>Category</th>
+                                <th class="text-right">Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.Expenses}}
+                            <tr>
+                                <td>{{.CategoryName}}</td>
+                                <td class="text-right text-bold">${{printf "%.2f" .TotalAmount}}</td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="2" class="text-center">No expenses found for this period.</td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray">
+                                <th>Total:</th>
+                                <td class="text-right text-bold">
+                                    {{$total := 0.0}}
+                                    {{range .PageData.Expenses}}{{$total = (add $total .TotalAmount)}}{{end}}
+                                    ${{printf "%.2f" $total}}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

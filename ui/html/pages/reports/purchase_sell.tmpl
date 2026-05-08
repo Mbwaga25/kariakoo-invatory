@@ -1,0 +1,74 @@
+{{define "title"}}Purchase & Sell Report{{end}}
+
+{{define "header"}}Purchase & Sell Report{{end}}
+{{define "subheader"}}Summary of purchases and sales ({{.Start.Format "Jan 02, 2006"}} - {{.End.Format "Jan 02, 2006"}}){{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-6 col-sm-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-shopping-basket"></i> Purchases</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Total Purchase:</th>
+                        <td class="text-right text-bold">${{printf "%.2f" .PageData.Report.TotalPurchase}}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Purchase Return:</th>
+                        <td class="text-right">${{printf "%.2f" .PageData.Report.TotalPurchaseReturn}}</td>
+                    </tr>
+                    <tr class="bg-gray">
+                        <th>Purchase Due:</th>
+                        <td class="text-right text-red text-bold">${{printf "%.2f" .PageData.Report.PurchaseDue}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 col-sm-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-shopping-cart"></i> Sales</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th>Total Sale:</th>
+                        <td class="text-right text-bold text-green">${{printf "%.2f" .PageData.Report.TotalSale}}</td>
+                    </tr>
+                    <tr>
+                        <th>Total Sale Return:</th>
+                        <td class="text-right">${{printf "%.2f" .PageData.Report.TotalSaleReturn}}</td>
+                    </tr>
+                    <tr class="bg-gray">
+                        <th>Invoice Due:</th>
+                        <td class="text-right text-red text-bold">${{printf "%.2f" .PageData.Report.InvoiceDue}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-balance-scale"></i> Difference</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tr class="bg-blue">
+                        <th>Net (Sales - Purchases):</th>
+                        <td class="text-right text-bold">${{printf "%.2f" (subtract .PageData.Report.TotalSale .PageData.Report.TotalPurchase)}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
