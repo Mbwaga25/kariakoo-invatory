@@ -4,6 +4,28 @@
 {{define "subheader"}}Inventory corrections and adjustments{{end}}
 
 {{define "main"}}
+<!-- Date Filter -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-body">
+                <form action="/stock-adjustments" method="GET" class="form-inline">
+                    <div class="form-group">
+                        <label>From: </label>
+                        <input type="date" name="start_date" class="form-control" value="{{.PageData.Start.Format "2006-01-02"}}">
+                    </div>
+                    <div class="form-group tw-ml-2">
+                        <label>To: </label>
+                        <input type="date" name="end_date" class="form-control" value="{{.PageData.End.Format "2006-01-02"}}">
+                    </div>
+                    <button type="submit" class="btn btn-primary tw-ml-2"><i class="fa fa-filter"></i> Filter</button>
+                    <a href="/stock-adjustments" class="btn btn-default tw-ml-2">Today</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="box box-primary">
     <div class="box-header with-border">
         <h3 class="box-title">All Adjustments</h3>

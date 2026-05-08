@@ -12,8 +12,9 @@ import (
 func (app *Application) StockAdjustmentList(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	locationID := middleware.GetLocationID(r.Context())
+	start, end := app.ParseDateRange(r)
 	
-	adjustments, err := app.Models.GetStockAdjustmentsByTenant(tenantID, locationID)
+	adjustments, err := app.Models.GetStockAdjustmentsByTenant(tenantID, locationID, start, end)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -21,8 +22,12 @@ func (app *Application) StockAdjustmentList(w http.ResponseWriter, r *http.Reque
 
 	app.RenderPage(w, r, "stock_adjustments/index", struct {
 		Adjustments []*models.StockAdjustment
+		Start       time.Time
+		End         time.Time
 	}{
 		Adjustments: adjustments,
+		Start:       start,
+		End:         end,
 	})
 }
 

@@ -65,8 +65,8 @@
                     <tr>
                         <td>{{.SKU}}</td>
                         <td>{{.Name}}</td>
-                        <td>{{.PurchasePrice}}</td>
-                        <td>{{.SellingPrice}}</td>
+                        <td>{{$.CurrencySymbol}}{{.PurchasePrice}}</td>
+                        <td>{{$.CurrencySymbol}}{{.SellingPrice}}</td>
                         <td>
                             <span class="label {{if gt .LocationQty 0.0}}label-success{{else}}label-danger{{end}}">
                                 {{.LocationQty}}

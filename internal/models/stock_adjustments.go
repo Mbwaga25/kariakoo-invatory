@@ -30,13 +30,13 @@ type StockAdjustmentItem struct {
 	SKU               string
 }
 
-func (m *Models) GetStockAdjustmentsByTenant(tenantID int, locationID int) ([]*StockAdjustment, error) {
+func (m *Models) GetStockAdjustmentsByTenant(tenantID int, locationID int, start, end time.Time) ([]*StockAdjustment, error) {
 	query := `SELECT sa.id, sa.tenant_id, sa.business_location_id, sa.ref_no, sa.transaction_date, sa.adjustment_type, sa.final_total, l.name as location_name
 			  FROM stock_adjustments sa
 			  JOIN business_locations l ON sa.business_location_id = l.id
-			  WHERE sa.tenant_id = ?`
+			  WHERE sa.tenant_id = ? AND sa.transaction_date BETWEEN ? AND ?`
 	
-	args := []interface{}{tenantID}
+	args := []interface{}{tenantID, start, end}
 	if locationID != 0 {
 		query += " AND sa.business_location_id = ?"
 		args = append(args, locationID)

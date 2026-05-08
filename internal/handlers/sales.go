@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"kariakoo/inventory/internal/middleware"
 	"kariakoo/inventory/internal/models"
@@ -12,8 +13,9 @@ import (
 func (app *Application) SalesList(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	locationID := middleware.GetLocationID(r.Context())
+	start, end := app.ParseDateRange(r)
 	
-	sales, err := app.Models.GetSalesByTenant(tenantID, locationID)
+	sales, err := app.Models.GetSalesByTenant(tenantID, locationID, start, end)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -22,8 +24,12 @@ func (app *Application) SalesList(w http.ResponseWriter, r *http.Request) {
 
 	app.RenderPage(w, r, "sales/index", struct {
 		Sales []*models.Sale
+		Start time.Time
+		End   time.Time
 	}{
 		Sales: sales,
+		Start: start,
+		End:   end,
 	})
 }
 

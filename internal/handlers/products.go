@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -44,6 +45,7 @@ func (app *Application) ProductList(w http.ResponseWriter, r *http.Request) {
 	
 	products, err := app.Models.GetProductsByTenant(tenantID, locationID, categoryID, brandID)
 	if err != nil {
+		log.Printf("ERROR GetProductsByTenant: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -165,11 +167,11 @@ func (app *Application) ProductStore(w http.ResponseWriter, r *http.Request) {
 		SKU:           sku,
 		PurchasePrice: purchasePrice,
 		SellingPrice:  sellingPrice,
-		AlertQuantity: alertQty,
+		AlertQuantity: app.Float64Ptr(alertQty),
 		UnitID:        unitID,
 		CategoryID:    categoryID,
 		BrandID:       brandID,
-		Description:   r.FormValue("description"),
+		Description:   app.StringPtr(r.FormValue("description")),
 	}
 
 	_, err := app.Models.InsertProduct(p, locationStocks)
@@ -196,7 +198,7 @@ func (app *Application) CategoryStore(w http.ResponseWriter, r *http.Request) {
 		TenantID:    tenantID,
 		ParentID:    parentID,
 		Name:        r.FormValue("name"),
-		Description: r.FormValue("description"),
+		Description: app.StringPtr(r.FormValue("description")),
 	}
 
 	id, err := app.Models.InsertCategory(c)
@@ -219,7 +221,7 @@ func (app *Application) BrandStore(w http.ResponseWriter, r *http.Request) {
 	b := &models.Brand{
 		TenantID:    tenantID,
 		Name:        r.FormValue("name"),
-		Description: r.FormValue("description"),
+		Description: app.StringPtr(r.FormValue("description")),
 	}
 
 	_, err := app.Models.InsertBrand(b)
@@ -364,11 +366,11 @@ func (app *Application) ProductUpdate(w http.ResponseWriter, r *http.Request) {
 		SKU:           r.FormValue("sku"),
 		PurchasePrice: purchasePrice,
 		SellingPrice:  sellingPrice,
-		AlertQuantity: alertQty,
+		AlertQuantity: app.Float64Ptr(alertQty),
 		UnitID:        unitID,
 		CategoryID:    categoryID,
 		BrandID:       brandID,
-		Description:   r.FormValue("description"),
+		Description:   app.StringPtr(r.FormValue("description")),
 	}
 
 	err := app.Models.UpdateProduct(p)
@@ -391,7 +393,7 @@ func (app *Application) ApiCategoryStore(w http.ResponseWriter, r *http.Request)
 		TenantID:    tenantID,
 		ParentID:    parentID,
 		Name:        r.FormValue("name"),
-		Description: r.FormValue("description"),
+		Description: app.StringPtr(r.FormValue("description")),
 	}
 
 	id, err := app.Models.InsertCategory(c)
@@ -408,7 +410,7 @@ func (app *Application) ApiBrandStore(w http.ResponseWriter, r *http.Request) {
 	b := &models.Brand{
 		TenantID:    tenantID,
 		Name:        r.FormValue("name"),
-		Description: r.FormValue("description"),
+		Description: app.StringPtr(r.FormValue("description")),
 	}
 
 	id, err := app.Models.InsertBrand(b)

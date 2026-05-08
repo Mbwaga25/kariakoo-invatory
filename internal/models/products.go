@@ -12,11 +12,11 @@ type Product struct {
 	SKU           string
 	PurchasePrice float64
 	SellingPrice  float64
-	AlertQuantity float64
+	AlertQuantity *float64
 	UnitID        *int
 	CategoryID    *int
 	BrandID       *int
-	Description   string
+	Description   *string
 	CreatedAt     time.Time
 	
 	// Location-specific details
@@ -29,7 +29,7 @@ type Category struct {
 	TenantID    int
 	ParentID    *int
 	Name        string
-	Description string
+	Description *string
 	CreatedAt   time.Time
 }
 
@@ -37,7 +37,7 @@ type Brand struct {
 	ID          int
 	TenantID    int
 	Name        string
-	Description string
+	Description *string
 	CreatedAt   time.Time
 }
 

@@ -11,8 +11,9 @@ import (
 
 func (app *Application) StockTransferList(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
+	start, end := app.ParseDateRange(r)
 	
-	transfers, err := app.Models.GetStockTransfersByTenant(tenantID)
+	transfers, err := app.Models.GetStockTransfersByTenant(tenantID, start, end)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
@@ -20,8 +21,12 @@ func (app *Application) StockTransferList(w http.ResponseWriter, r *http.Request
 
 	app.RenderPage(w, r, "stock_transfers/index", struct {
 		Transfers []*models.StockTransfer
+		Start     time.Time
+		End       time.Time
 	}{
 		Transfers: transfers,
+		Start:     start,
+		End:       end,
 	})
 }
 

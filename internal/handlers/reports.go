@@ -10,10 +10,7 @@ import (
 
 func (app *Application) ProfitLossReport(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
-	
-	// Default to last 30 days
-	end := time.Now()
-	start := end.AddDate(0, 0, -30)
+	start, end := app.ParseDateRange(r)
 
 	report, err := app.Models.GetProfitLossReport(tenantID, start, end)
 	if err != nil {
@@ -66,8 +63,7 @@ func (app *Application) RegisterReport(w http.ResponseWriter, r *http.Request) {
 
 func (app *Application) PurchaseSellReport(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
-	end := time.Now()
-	start := end.AddDate(0, 0, -30)
+	start, end := app.ParseDateRange(r)
 
 	report, err := app.Models.GetPurchaseSellReport(tenantID, start, end)
 	if err != nil {
@@ -88,8 +84,7 @@ func (app *Application) PurchaseSellReport(w http.ResponseWriter, r *http.Reques
 
 func (app *Application) ExpenseReport(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
-	end := time.Now()
-	start := end.AddDate(0, 0, -30)
+	start, end := app.ParseDateRange(r)
 
 	reports, err := app.Models.GetExpenseReport(tenantID, start, end)
 	if err != nil {
@@ -97,14 +92,20 @@ func (app *Application) ExpenseReport(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	var total float64
+	for _, exp := range reports {
+		total += exp.TotalAmount
+	}
+
 	app.RenderPage(w, r, "reports/expense", struct {
 		Expenses []*models.ExpenseReport
+		Total    float64
 		Start    time.Time
 		End      time.Time
 	}{
 		Expenses: reports,
+		Total:    total,
 		Start:    start,
 		End:      end,
 	})
 }
-

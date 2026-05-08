@@ -32,15 +32,15 @@ type StockTransferItem struct {
 	SKU             string
 }
 
-func (m *Models) GetStockTransfersByTenant(tenantID int) ([]*StockTransfer, error) {
+func (m *Models) GetStockTransfersByTenant(tenantID int, start, end time.Time) ([]*StockTransfer, error) {
 	query := `SELECT st.id, st.tenant_id, st.from_location_id, st.to_location_id, st.ref_no, st.transaction_date, st.status, st.final_total, fl.name as from_location_name, tl.name as to_location_name
 			  FROM stock_transfers st
 			  JOIN business_locations fl ON st.from_location_id = fl.id
 			  JOIN business_locations tl ON st.to_location_id = tl.id
-			  WHERE st.tenant_id = ?
+			  WHERE st.tenant_id = ? AND st.transaction_date BETWEEN ? AND ?
 			  ORDER BY st.transaction_date DESC`
 	
-	rows, err := m.DB.Query(query, tenantID)
+	rows, err := m.DB.Query(query, tenantID, start, end)
 	if err != nil {
 		return nil, err
 	}

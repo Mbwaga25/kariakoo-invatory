@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"kariakoo/inventory/internal/middleware"
 	"kariakoo/inventory/internal/models"
@@ -22,6 +23,37 @@ func (app *Application) jsonResponse(w http.ResponseWriter, status int, data int
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)
+}
+
+func (app *Application) ParseDateRange(r *http.Request) (time.Time, time.Time) {
+	startStr := r.URL.Query().Get("start_date")
+	endStr := r.URL.Query().Get("end_date")
+	
+	now := time.Now()
+	// Default to today if not provided
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+
+	if startStr != "" && endStr != "" {
+		if s, err := time.Parse("2006-01-02", startStr); err == nil {
+			start = s
+		}
+		if e, err := time.Parse("2006-01-02", endStr); err == nil {
+			end = time.Date(e.Year(), e.Month(), e.Day(), 23, 59, 59, 0, e.Location())
+		}
+	}
+	return start, end
+}
+
+func (app *Application) StringPtr(s string) *string {
+	if s == "" {
+		return nil
+	}
+	return &s
+}
+
+func (app *Application) Float64Ptr(f float64) *float64 {
+	return &f
 }
 
 // RenderPage is a generic helper to render a page with the base layout
@@ -62,12 +94,18 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		return
 	}
 
-	// Fetch locations for switcher if user is admin
+	// Fetch locations and settings if user is logged in
 	var locations []*models.BusinessLocation
 	activeLocationID := middleware.GetLocationID(r.Context())
+	currencySymbol := "TSh"
+	
 	if user != nil {
 		tenantID := middleware.GetTenantID(r.Context())
 		locations, _ = app.Models.GetLocationsByTenant(tenantID)
+		
+		if settings, err := app.Models.GetBusinessSettings(tenantID); err == nil {
+			currencySymbol = settings.CurrencySymbol
+		}
 	}
 
 	// Merge global data with page-specific data
@@ -77,12 +115,14 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		PageData         interface{}
 		Locations        []*models.BusinessLocation
 		ActiveLocationID int
+		CurrencySymbol   string
 	}{
 		Role:             role,
 		UserName:         userName,
 		PageData:         data,
 		Locations:        locations,
 		ActiveLocationID: activeLocationID,
+		CurrencySymbol:   currencySymbol,
 	}
 
 	err = ts.ExecuteTemplate(w, "base", fullData)

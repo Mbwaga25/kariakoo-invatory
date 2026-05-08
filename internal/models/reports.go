@@ -24,6 +24,11 @@ type DashboardData struct {
 	Net                 float64
 	StockAlertsCount    int
 	MonthlySales        []MonthlySale
+	StockAlerts         []*Product
+	RecentSales         []*Sale
+	RecentTransfers     []*StockTransfer
+	PendingOrders       []*Sale
+	PendingInvoices     []*Sale
 }
 
 type MonthlySale struct {
@@ -142,21 +147,22 @@ func (m *Models) GetRegisterReport(tenantID int) ([]*RegisterReport, error) {
 	return reports, nil
 }
 
-func (m *Models) GetDashboardData(tenantID int, locationID *int) (*DashboardData, error) {
+func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time.Time) (*DashboardData, error) {
 	data := &DashboardData{}
 
-	// Basic filters
-	salesWhere := "WHERE s.tenant_id = ?"
-	args := []interface{}{tenantID}
+	// Basic filters for Sales
+	salesWhere := "WHERE s.tenant_id = ? AND s.transaction_date BETWEEN ? AND ?"
+	args := []interface{}{tenantID, start, end}
 	if locationID != nil {
 		salesWhere += " AND s.business_location_id = ?"
 		args = append(args, *locationID)
 	}
 
-	purchasesWhere := "WHERE p.tenant_id = ?"
-	pArgs := []interface{}{tenantID}
+	// Basic filters for Purchases
+	purchasesWhere := "WHERE p.tenant_id = ? AND p.purchase_date BETWEEN ? AND ?"
+	pArgs := []interface{}{tenantID, start, end}
 	if locationID != nil {
-		purchasesWhere += " AND p.business_location_id = ?" // Note: check column name for location in purchases
+		purchasesWhere += " AND p.business_location_id = ?"
 		pArgs = append(pArgs, *locationID)
 	}
 
@@ -169,11 +175,7 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int) (*DashboardData
 	// 2. Total Purchases
 	err = m.DB.QueryRow("SELECT COALESCE(SUM(final_total), 0) FROM purchases p "+purchasesWhere, pArgs...).Scan(&data.TotalPurchases)
 	if err != nil {
-		// Fallback: check if column is location_id or business_location_id
-		err = m.DB.QueryRow("SELECT COALESCE(SUM(final_total), 0) FROM purchases p WHERE p.tenant_id = ?", tenantID).Scan(&data.TotalPurchases)
-		if err != nil {
-			return nil, fmt.Errorf("TotalPurchases: %v", err)
-		}
+		return nil, fmt.Errorf("TotalPurchases: %v", err)
 	}
 
 	// 3. Total Expenses
@@ -205,7 +207,7 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int) (*DashboardData
 	// 6. Net (Sales - Expenses)
 	data.Net = data.TotalSales - data.TotalExpenses
 
-	// 7. Stock Alerts (qty < 10 for simplicity, or we could use alert_quantity if we had it)
+	// 7. Stock Alerts (All time, usually not filtered by date)
 	err = m.DB.QueryRow(`
 		SELECT COUNT(*) FROM product_locations pl
 		JOIN products p ON pl.product_id = p.id
@@ -215,8 +217,25 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int) (*DashboardData
 		return nil, err
 	}
 
-	// 8. Monthly Sales (Last 30 days)
+	// 7b. Stock Alerts Details
 	rows, err := m.DB.Query(`
+		SELECT p.id, p.name, p.sku, pl.qty_available 
+		FROM product_locations pl
+		JOIN products p ON pl.product_id = p.id
+		WHERE p.tenant_id = ? AND pl.qty_available < 10
+		LIMIT 5
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var p Product
+			rows.Scan(&p.ID, &p.Name, &p.SKU, &p.LocationQty)
+			data.StockAlerts = append(data.StockAlerts, &p)
+		}
+	}
+
+	// 8. Monthly Sales (Last 30 days for the chart, independent of filter)
+	rows, err = m.DB.Query(`
 		SELECT DATE(transaction_date) as d, SUM(final_total) 
 		FROM sales 
 		WHERE tenant_id = ? AND transaction_date >= DATE_SUB(NOW(), INTERVAL 30 DAY)
@@ -228,6 +247,62 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int) (*DashboardData
 			var ms MonthlySale
 			rows.Scan(&ms.Date, &ms.Total)
 			data.MonthlySales = append(data.MonthlySales, ms)
+		}
+	}
+
+	// 9. Recent Sales
+	rows, err = m.DB.Query(`
+		SELECT id, invoice_no, final_total, transaction_date, status
+		FROM sales WHERE tenant_id = ? ORDER BY transaction_date DESC LIMIT 5
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var s Sale
+			rows.Scan(&s.ID, &s.InvoiceNo, &s.FinalTotal, &s.TransactionDate, &s.Status)
+			data.RecentSales = append(data.RecentSales, &s)
+		}
+	}
+
+	// 10. Recent Transfers
+	rows, err = m.DB.Query(`
+		SELECT id, ref_no, final_total, transaction_date, status
+		FROM stock_transfers WHERE tenant_id = ? ORDER BY transaction_date DESC LIMIT 5
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var t StockTransfer
+			rows.Scan(&t.ID, &t.RefNo, &t.FinalTotal, &t.TransactionDate, &t.Status)
+			data.RecentTransfers = append(data.RecentTransfers, &t)
+		}
+	}
+
+	// 11. Pending Orders (status not final)
+	rows, err = m.DB.Query(`
+		SELECT id, invoice_no, final_total, transaction_date, status
+		FROM sales WHERE tenant_id = ? AND status != 'final' ORDER BY transaction_date DESC LIMIT 5
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var s Sale
+			rows.Scan(&s.ID, &s.InvoiceNo, &s.FinalTotal, &s.TransactionDate, &s.Status)
+			data.PendingOrders = append(data.PendingOrders, &s)
+		}
+	}
+
+	// 12. Pending Invoices (payment_status not paid)
+	rows, err = m.DB.Query(`
+		SELECT id, invoice_no, final_total, transaction_date, payment_status
+		FROM sales WHERE tenant_id = ? AND payment_status != 'paid' ORDER BY transaction_date DESC LIMIT 5
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var s Sale
+			rows.Scan(&s.ID, &s.InvoiceNo, &s.FinalTotal, &s.TransactionDate, &s.PaymentStatus)
+			data.PendingInvoices = append(data.PendingInvoices, &s)
 		}
 	}
 
@@ -277,9 +352,9 @@ func (m *Models) GetPurchaseSellReport(tenantID int, start, end time.Time) (*Pur
 func (m *Models) GetExpenseReport(tenantID int, start, end time.Time) ([]*ExpenseReport, error) {
 	query := `SELECT COALESCE(ec.name, 'Uncategorized'), SUM(e.final_total)
 			  FROM expenses e
-			  LEFT JOIN categories ec ON e.category_id = ec.id
+			  LEFT JOIN expense_categories ec ON e.expense_category_id = ec.id
 			  WHERE e.tenant_id = ? AND e.transaction_date BETWEEN ? AND ?
-			  GROUP BY e.category_id`
+			  GROUP BY e.expense_category_id`
 	
 	rows, err := m.DB.Query(query, tenantID, start, end)
 	if err != nil {

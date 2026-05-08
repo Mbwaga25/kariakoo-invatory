@@ -8,7 +8,6 @@ import (
 	"sort"
 
 	_ "github.com/go-sql-driver/mysql"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -69,24 +68,23 @@ func main() {
 		}
 	}
 
-	// Seeding
-	password := "123456"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-
-	// Seed Tenant 1
-	_, _ = db.Exec("INSERT IGNORE INTO tenants (id, name) VALUES (1, 'Main Business')")
-	
-	// Seed Location 1 for Tenant 1
-	_, _ = db.Exec("INSERT IGNORE INTO business_locations (id, tenant_id, name) VALUES (1, 1, 'Headquarters')")
-	_, _ = db.Exec("INSERT IGNORE INTO business_locations (id, tenant_id, name) VALUES (2, 1, 'Branch Office')")
-
-	// Seed Users
-	_, err = db.Exec("INSERT INTO users (id, tenant_id, location_id, name, email, password_hash, role) VALUES (1, NULL, NULL, 'Super Admin', 'superadmin@test.com', ?, 'SuperAdmin')", string(hash))
-	if err != nil { log.Printf("Error seeding superadmin: %v", err) }
-	_, err = db.Exec("INSERT INTO users (id, tenant_id, location_id, name, email, password_hash, role) VALUES (2, 1, 1, 'Shop Admin', 'shopadmin@test.com', ?, 'ShopAdmin')", string(hash))
-	if err != nil { log.Printf("Error seeding shopadmin: %v", err) }
-	_, err = db.Exec("INSERT INTO users (id, tenant_id, location_id, name, email, password_hash, role) VALUES (3, 1, 2, 'Shop Keeper', 'shopkeeper@test.com', ?, 'ShopKeeper')", string(hash))
-	if err != nil { log.Printf("Error seeding shopkeeper: %v", err) }
+	// Run seeders from cmd/migrate/seed/
+	seedDir := filepath.Join("cmd", "migrate", "seed")
+	if _, err := os.Stat(seedDir); err == nil {
+		seedFiles, _ := os.ReadDir(seedDir)
+		for _, f := range seedFiles {
+			if filepath.Ext(f.Name()) == ".sql" {
+				log.Printf("Executing seeder: %s", f.Name())
+				content, err := os.ReadFile(filepath.Join(seedDir, f.Name()))
+				if err == nil {
+					_, err = db.Exec(string(content))
+					if err != nil {
+						log.Printf("Error executing seeder %s: %v", f.Name(), err)
+					}
+				}
+			}
+		}
+	}
 
 	log.Println("All migrations and seeding completed successfully!")
 }

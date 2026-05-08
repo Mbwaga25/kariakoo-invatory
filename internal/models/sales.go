@@ -63,11 +63,11 @@ type CashRegister struct {
 	CreatedAt          time.Time
 }
 
-func (m *Models) GetSalesByTenant(tenantID int, locationID int) ([]*Sale, error) {
+func (m *Models) GetSalesByTenant(tenantID int, locationID int, start, end time.Time) ([]*Sale, error) {
 	query := `SELECT id, tenant_id, business_location_id, customer_id, invoice_no, transaction_date, due_date, status, payment_status, total_before_tax, tax_amount, discount_amount, final_total, created_by, created_at 
-			  FROM sales WHERE tenant_id = ?`
+			  FROM sales WHERE tenant_id = ? AND transaction_date BETWEEN ? AND ?`
 	
-	args := []interface{}{tenantID}
+	args := []interface{}{tenantID, start, end}
 	if locationID != 0 {
 		query += " AND business_location_id = ?"
 		args = append(args, locationID)
