@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS cash_registers (
     tenant_id INT NOT NULL,
     business_location_id INT NOT NULL,
     user_id INT NOT NULL,
+    opening_amount DECIMAL(15,2) DEFAULT 0.00,
     status ENUM('open', 'close') DEFAULT 'open',
     closed_at DATETIME NULL,
     closing_amount DECIMAL(15,2) DEFAULT 0.00,

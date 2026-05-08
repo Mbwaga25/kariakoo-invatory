@@ -1,8 +1,23 @@
+-- Fix for cash_registers missing opening_amount
 SET @dbname = DATABASE();
-SET @tablename = 'stock_transfers';
+SET @tablename = 'cash_registers';
+SET @columnname = 'opening_amount';
+SET @preparedStatement = (SELECT IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+   WHERE TABLE_SCHEMA = @dbname
+     AND TABLE_NAME = @tablename
+     AND COLUMN_NAME = @columnname) > 0,
+  'SELECT 1',
+  CONCAT('ALTER TABLE ', @tablename, ' ADD COLUMN ', @columnname, ' DECIMAL(15,2) DEFAULT 0.00 AFTER user_id;')
+));
+PREPARE stmt FROM @preparedStatement;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
--- from_store_id to from_location_id
+-- Fix for stock_transfers renames if they failed (compatibility for MySQL < 8.0)
+-- Check for from_store_id and rename to from_location_id if exists
 SET @columnname = 'from_store_id';
+SET @tablename = 'stock_transfers';
 SET @preparedStatement = (SELECT IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
    WHERE TABLE_SCHEMA = @dbname
@@ -15,7 +30,6 @@ PREPARE stmt FROM @preparedStatement;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- to_store_id to to_location_id
 SET @columnname = 'to_store_id';
 SET @preparedStatement = (SELECT IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
@@ -29,7 +43,6 @@ PREPARE stmt FROM @preparedStatement;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- transfer_date to transaction_date
 SET @columnname = 'transfer_date';
 SET @preparedStatement = (SELECT IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
@@ -43,7 +56,7 @@ PREPARE stmt FROM @preparedStatement;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- ref_no
+-- Ensure ref_no and final_total exist in stock_transfers
 SET @columnname = 'ref_no';
 SET @preparedStatement = (SELECT IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
@@ -57,7 +70,6 @@ PREPARE stmt FROM @preparedStatement;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
--- final_total
 SET @columnname = 'final_total';
 SET @preparedStatement = (SELECT IF(
   (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS

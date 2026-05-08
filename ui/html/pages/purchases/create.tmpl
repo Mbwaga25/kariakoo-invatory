@@ -10,8 +10,8 @@
             <div class="row">
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="supplier_id">Supplier:*</label>
-                        <select name="supplier_id" id="supplier_id" class="form-control" required>
+                        <label for="supplier_id"><i class="fa fa-user"></i> Supplier:*</label>
+                        <select name="supplier_id" id="supplier_id" class="form-control select2" required>
                             <option value="">Select Supplier</option>
                             {{range .PageData.Suppliers}}
                             <option value="{{.ID}}">{{.Name}}</option>
@@ -21,8 +21,8 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="location_id">Business Location:*</label>
-                        <select name="location_id" id="location_id" class="form-control" required>
+                        <label for="location_id"><i class="fa fa-map-marker"></i> Business Location:*</label>
+                        <select name="location_id" id="location_id" class="form-control select2" required>
                             {{range .PageData.Locations}}
                             <option value="{{.ID}}">{{.Name}}</option>
                             {{end}}
@@ -31,38 +31,122 @@
                 </div>
                 <div class="col-md-3">
                     <div class="form-group">
-                        <label for="ref_no">Reference No:</label>
+                        <label for="ref_no"><i class="fa fa-hashtag"></i> Reference No:</label>
                         <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Reference No">
+                        <p class="help-block">Leave blank to auto generate</p>
                     </div>
                 </div>
             </div>
 
+            <hr>
+            
             <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="product_id">Product:*</label>
-                        <select name="product_id" id="product_id" class="form-control" required>
-                            <option value="">Select Product</option>
-                            {{range .PageData.Products}}
-                            <option value="{{.ID}}">{{.Name}} ({{.SKU}})</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="quantity">Quantity:*</label>
-                        <input type="number" step="0.01" name="quantity" class="form-control" id="quantity" required>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="purchase_price">Unit Purchase Price:*</label>
-                        <input type="number" step="0.01" name="purchase_price" class="form-control" id="purchase_price" required>
+                <div class="col-md-12">
+                    <h4 class="box-title" style="margin-bottom: 15px;"><i class="fa fa-shopping-cart"></i> Purchase Items</h4>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover" id="purchase_items_table">
+                            <thead>
+                                <tr class="bg-blue" style="color: white;">
+                                    <th style="width: 45%">Product Name</th>
+                                    <th style="width: 20%">Quantity</th>
+                                    <th style="width: 25%">Unit Price</th>
+                                    <th style="width: 10%" class="text-center">
+                                        <button type="button" class="btn btn-success btn-sm" id="add_row" title="Add Product">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="product-row">
+                                    <td>
+                                        <select name="product_id[]" class="form-control select2" required style="width: 100%;">
+                                            <option value="">Search/Select Product</option>
+                                            {{range .PageData.Products}}
+                                            <option value="{{.ID}}">{{.Name}} ({{.SKU}})</option>
+                                            {{end}}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="number" step="0.01" name="quantity[]" class="form-control" required placeholder="0.00">
+                                            <span class="input-group-addon">Qty</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <span class="input-group-addon">$</span>
+                                            <input type="number" step="0.01" name="purchase_price[]" class="form-control" required placeholder="0.00">
+                                        </div>
+                                    </td>
+                                    <td class="text-center">
+                                        <button type="button" class="btn btn-danger btn-sm remove-row-btn" style="display: none;">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="bg-gray">
+                                    <th colspan="2" class="text-right">Total Items: <span id="total_items">1</span></th>
+                                    <th colspan="2">Total Amount: <span id="grand_total">0.00</span></th>
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const tableBody = document.querySelector('#purchase_items_table tbody');
+                const addRowBtn = document.getElementById('add_row');
+                
+                function updateTotals() {
+                    const rows = tableBody.querySelectorAll('tr');
+                    document.getElementById('total_items').textContent = rows.length;
+                    
+                    let total = 0;
+                    rows.forEach(row => {
+                        const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
+                        const price = parseFloat(row.querySelector('input[name="purchase_price[]"]').value) || 0;
+                        total += qty * price;
+                    });
+                    document.getElementById('grand_total').textContent = total.toFixed(2);
+                }
+
+                addRowBtn.addEventListener('click', function() {
+                    const firstRow = tableBody.querySelector('tr');
+                    const newRow = firstRow.cloneNode(true);
+                    
+                    // Clear values
+                    newRow.querySelectorAll('input').forEach(input => {
+                        input.value = '';
+                        input.addEventListener('input', updateTotals);
+                    });
+                    
+                    const select = newRow.querySelector('select');
+                    select.selectedIndex = 0;
+                    
+                    // Show remove button
+                    const removeBtn = newRow.querySelector('.remove-row-btn');
+                    removeBtn.style.display = 'inline-block';
+                    removeBtn.addEventListener('click', function() {
+                        newRow.remove();
+                        updateTotals();
+                    });
+                    
+                    tableBody.appendChild(newRow);
+                    updateTotals();
+                });
+
+                // Initial events
+                tableBody.querySelectorAll('input').forEach(input => {
+                    input.addEventListener('input', updateTotals);
+                });
+            });
+        </script>
 
         <div class="box-footer">
             <button type="submit" class="btn btn-primary">Save Purchase</button>

@@ -74,23 +74,32 @@ func (app *Application) PurchaseStore(w http.ResponseWriter, r *http.Request) {
 		p.SupplierID = &supplierID
 	}
 
-	// Simplified: In a real app, we would loop through items from the form
-	// For now, let's assume one item or a simplified structure
-	// This is a placeholder for the actual form processing logic
+	p.FinalTotal = 0
 	
-	productID, _ := strconv.Atoi(r.FormValue("product_id"))
-	qty, _ := strconv.ParseFloat(r.FormValue("quantity"), 64)
-	price, _ := strconv.ParseFloat(r.FormValue("purchase_price"), 64)
+	productIDs := r.Form["product_id[]"]
+	quantities := r.Form["quantity[]"]
+	prices := r.Form["purchase_price[]"]
 
-	if productID > 0 && qty > 0 {
-		item := &models.PurchaseItem{
-			ProductID:     productID,
-			Quantity:      qty,
-			PurchasePrice: price,
-			LineTotal:     qty * price,
+	for i, pidStr := range productIDs {
+		productID, _ := strconv.Atoi(pidStr)
+		qty, _ := strconv.ParseFloat(quantities[i], 64)
+		price, _ := strconv.ParseFloat(prices[i], 64)
+
+		if productID > 0 && qty > 0 {
+			item := &models.PurchaseItem{
+				ProductID:     productID,
+				Quantity:      qty,
+				PurchasePrice: price,
+				LineTotal:     qty * price,
+			}
+			p.Items = append(p.Items, item)
+			p.FinalTotal += item.LineTotal
 		}
-		p.Items = append(p.Items, item)
-		p.FinalTotal = item.LineTotal
+	}
+
+	if len(p.Items) == 0 {
+		http.Error(w, "At least one product is required", http.StatusBadRequest)
+		return
 	}
 
 	_, err := app.Models.InsertPurchase(p)
