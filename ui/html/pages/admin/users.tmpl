@@ -1,14 +1,14 @@
 {{define "title"}}User Management{{end}}
 
 {{define "header"}}Users{{end}}
-{{define "subheader"}}Manage your employees and permissions{{end}}
+{{define "subheader"}}Manage Store Keepers, Shop Keepers & Admins{{end}}
 
 {{define "main"}}
 <div class="row">
     <div class="col-md-4">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">Add New User</h3>
+                <h3 class="box-title"><i class="fa fa-user-plus"></i> Add New User</h3>
             </div>
             <form action="/users/store" method="POST">
                 <div class="box-body">
@@ -27,15 +27,23 @@
                     <div class="form-group">
                         <label>Role:*</label>
                         <select name="role" class="form-control" required>
-                            <option value="ShopKeeper">Shop Keeper</option>
-                            <option value="ShopAdmin">Shop Admin (Creates New Tenant)</option>
-                            <option value="Cashier">Cashier</option>
+                            <option value="StoreKeeper">Store Keeper (Manage Stock & Orders)</option>
+                            <option value="ShopKeeper">Shop Keeper (Place Orders)</option>
+                            {{if or (eq .PageData.UserRole "SuperAdmin")}}
+                            <option value="ShopAdmin">Shop Admin (New Tenant)</option>
+                            {{end}}
                         </select>
-                        <p class="help-block">Note: Shop Admin creates a new tenant isolate.</p>
+                        <div style="margin-top:10px;padding:10px;background:#F0F4F8;border-radius:8px;font-size:12px;">
+                            <p style="margin:3px 0;"><span class="role-storekeeper">Store Keeper</span> — Manages stock, receives & processes orders</p>
+                            <p style="margin:3px 0;"><span class="role-shopkeeper">Shop Keeper</span> — Places store & bulk orders</p>
+                            <p style="margin:3px 0;"><span class="role-shopadmin">Shop Admin</span> — Creates a new tenant</p>
+                        </div>
                     </div>
                 </div>
                 <div class="box-footer">
-                    <button type="submit" class="btn btn-primary btn-block">Create User & Onboard</button>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fa fa-check"></i> Create User & Onboard
+                    </button>
                 </div>
             </form>
         </div>
@@ -43,13 +51,50 @@
     <div class="col-md-8">
         <div class="box box-info">
             <div class="box-header with-border">
-                <h3 class="box-title">Recent Users</h3>
+                <h3 class="box-title"><i class="fa fa-users"></i> All Users</h3>
             </div>
             <div class="box-body">
-                <p class="text-muted">User list for this tenant will appear here.</p>
-                <!-- Add actual user list here if needed -->
+                <table class="table table-striped table-hover" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .PageData.Users}}
+                        <tr>
+                            <td>{{.ID}}</td>
+                            <td><strong>{{.Name}}</strong></td>
+                            <td>{{.Email}}</td>
+                            <td>
+                                {{if eq .Role "SuperAdmin"}}<span class="role-superadmin">Super Admin</span>
+                                {{else if eq .Role "StoreKeeper"}}<span class="role-storekeeper">Store Keeper</span>
+                                {{else if eq .Role "ShopKeeper"}}<span class="role-shopkeeper">Shop Keeper</span>
+                                {{else if eq .Role "ShopAdmin"}}<span class="role-shopadmin">Shop Admin</span>
+                                {{else}}<span class="label label-default">{{.Role}}</span>
+                                {{end}}
+                            </td>
+                            <td>{{.CreatedAt.Format "Jan 02, 2006"}}</td>
+                        </tr>
+                        {{else}}
+                        <tr><td colspan="5" class="text-center">No users found</td></tr>
+                        {{end}}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    $('#usersTable').DataTable({"pageLength": 25});
+});
+</script>
 {{end}}

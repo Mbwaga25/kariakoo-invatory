@@ -63,7 +63,7 @@
                                         <select name="product_id[]" class="form-control select2" required style="width: 100%;">
                                             <option value="">Search/Select Product</option>
                                             {{range .PageData.Products}}
-                                            <option value="{{.ID}}">{{.Name}} ({{.SKU}})</option>
+                                            <option value="{{.ID}}" {{if eq .ID $.PageData.PreselectedProductID}}selected{{end}}>{{.Name}} ({{.SKU}})</option>
                                             {{end}}
                                         </select>
                                     </td>

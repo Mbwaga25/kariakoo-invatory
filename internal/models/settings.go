@@ -67,6 +67,7 @@ func (m *Models) GetTenantModules(tenantID int) ([]Module, error) {
 		"stock_transfers":   "Stock Transfers",
 		"expenses":          "Expense Tracking",
 		"reports":           "Advanced Reporting",
+		"store_management":  "Store Management (Orders)",
 	}
 
 	installed := make(map[string]bool)

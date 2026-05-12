@@ -1,0 +1,239 @@
+{{define "title"}}Order {{.PageData.Order.RefNo}}{{end}}
+{{define "header"}}Order Details{{end}}
+{{define "subheader"}}{{.PageData.Order.RefNo}}{{end}}
+
+{{define "main"}}
+<div class="row">
+    <!-- Order Details -->
+    <div class="col-md-8">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-clipboard-list"></i> Order #{{.PageData.Order.RefNo}}</h3>
+                <div class="box-tools pull-right">
+                    <span class="badge-{{.PageData.Order.Status}}" style="font-size:14px;">{{.PageData.Order.Status}}</span>
+                </div>
+            </div>
+            <div class="box-body">
+                <!-- Order Info Grid -->
+                <div class="row" style="margin-bottom:20px;">
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">ORDER TYPE</p>
+                        <p style="font-weight:700;font-size:15px;">
+                            {{if eq .PageData.Order.OrderType "StoreOrder"}}Store Order{{else}}Bulk Order{{end}}
+                        </p>
+                    </div>
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">PLACED BY</p>
+                        <p style="font-weight:700;font-size:15px;">{{.PageData.Order.PlacedByName}}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">LOCATION</p>
+                        <p style="font-weight:700;font-size:15px;">{{.PageData.Order.ToLocationName}}</p>
+                    </div>
+                </div>
+                {{if .PageData.Order.OrderFrom}}
+                <div class="row" style="margin-bottom:20px;">
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">ORDER FROM</p>
+                        <p style="font-weight:700;">{{.PageData.Order.OrderFrom}}</p>
+                    </div>
+                </div>
+                {{end}}
+
+                <!-- Order Items Table -->
+                <h4 style="color:#1B2A4A;border-bottom:2px solid #1B2A4A;padding-bottom:8px;"><i class="fa fa-list"></i> Items</h4>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Qty</th>
+                            <th>Unit Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .PageData.Order.Items}}
+                        <tr>
+                            <td><strong>{{.ProductName}}</strong></td>
+                            <td>{{.ProductSKU}}</td>
+                            <td>{{printf "%.0f" .Quantity}}</td>
+                            <td>{{$.CurrencySymbol}} {{printf "%.2f" .UnitPrice}}</td>
+                            <td><strong>{{$.CurrencySymbol}} {{printf "%.2f" .Subtotal}}</strong></td>
+                        </tr>
+                        {{else}}
+                        <tr><td colspan="5" class="text-center">No items</td></tr>
+                        {{end}}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background:#1B2A4A;color:#fff;">
+                            <td colspan="4" style="text-align:right;font-weight:700;font-size:16px;">TOTAL:</td>
+                            <td style="font-weight:700;font-size:16px;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.TotalAmount}}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                {{if .PageData.Order.Notes}}
+                <div style="background:#FFF9C4;padding:12px;border-radius:8px;margin-top:15px;white-space:pre-wrap;">
+                    <strong><i class="fa fa-sticky-note"></i> Notes:</strong> {{.PageData.Order.Notes}}
+                </div>
+                {{end}}
+            </div>
+
+            <!-- Accept/Reject Actions (Store Keeper & Admins) -->
+            {{if and (eq .PageData.Order.Status "pending") (or (eq .Role "StoreKeeper") (eq .Role "Role_Admin") (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
+            <div class="box-footer" style="background:#F0F4F8;padding:20px;">
+                <h4 style="margin-top:0;color:#1B2A4A;"><i class="fa fa-gavel"></i> Process Order <small>[v4-FINAL]</small></h4>
+                
+                <div class="row">
+                    <div class="col-md-8">
+                        <form action="/orders/accept" method="POST" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd;">
+                            <input type="hidden" name="order_id" value="{{.PageData.Order.ID}}">
+                            
+                            <label style="color:#2E7D32;"><i class="fa fa-check-circle"></i> Accept Order</label>
+                            <div class="form-group" style="margin-top:10px;">
+                                <label style="font-size:12px;color:#888;">Amount Paid at Acceptance (Optional):</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon">{{.CurrencySymbol}}</span>
+                                    <input type="number" name="amount_paid" id="acceptAmountPaid" class="form-control" step="0.01" min="0" max="{{printf "%.2f" .PageData.Order.TotalAmount}}" placeholder="0.00">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" onclick="document.getElementById('acceptAmountPaid').value='{{printf "%.2f" .PageData.Order.TotalAmount}}'">Full Amount</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block" style="font-weight:bold;">
+                                CONFIRM ACCEPTANCE
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <form action="/orders/reject" method="POST" style="background:#fff; padding:15px; border-radius:8px; border:1px solid #ddd; height: 100%;">
+                            <input type="hidden" name="order_id" value="{{.PageData.Order.ID}}">
+                            
+                            <label style="color:#C62828;"><i class="fa fa-times-circle"></i> Reject Order</label>
+                            <div class="form-group" style="margin-top:10px;">
+                                <label style="font-size:12px;color:#888;">Reason for rejection:</label>
+                                <textarea name="reason" class="form-control" rows="2" placeholder="e.g. Out of stock" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-danger btn-block" style="font-weight:bold;">
+                                CONFIRM REJECTION
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {{end}}
+
+            {{if eq .PageData.Order.Status "accepted"}}
+            <div class="box-footer" style="background:#E8F5E9;padding:15px;">
+                <p style="color:#2E7D32;margin:0;"><i class="fa fa-check"></i> <strong>Order Accepted</strong> 
+                    {{if .PageData.Order.ProcessedByName}}by {{.PageData.Order.ProcessedByName}}{{end}}
+                    — Stock has been updated. Order recorded.</p>
+            </div>
+            {{end}}
+        </div>
+    </div>
+
+    <!-- Payment Status Panel -->
+    <div class="col-md-4">
+        <div class="box box-warning">
+            <div class="box-header with-border" style="background:{{if eq .PageData.Order.PaymentStatus "paid"}}#E8F5E9{{else if eq .PageData.Order.PaymentStatus "incomplete"}}#FFF3E0{{else}}#FFEBEE{{end}};border-radius:12px 12px 0 0;">
+                <h3 class="box-title"><i class="fa fa-credit-card"></i> Payment Status</h3>
+            </div>
+            <div class="box-body text-center" style="padding:25px;">
+                <div style="margin-bottom:20px;">
+                    {{if eq .PageData.Order.PaymentStatus "paid"}}
+                    <i class="fa fa-check-circle" style="font-size:50px;color:#2E7D32;"></i>
+                    <h3 style="color:#2E7D32;margin:10px 0 0;">Paid</h3>
+                    {{else if eq .PageData.Order.PaymentStatus "incomplete"}}
+                    <i class="fa fa-exclamation-circle" style="font-size:50px;color:#E65100;"></i>
+                    <h3 style="color:#E65100;margin:10px 0 0;">Incomplete</h3>
+                    {{else}}
+                    <i class="fa fa-times-circle" style="font-size:50px;color:#C62828;"></i>
+                    <h3 style="color:#C62828;margin:10px 0 0;">Unpaid</h3>
+                    {{end}}
+                </div>
+
+                <table class="table" style="margin-bottom:0;">
+                    <tr><td style="text-align:left;color:#888;">Total Amount</td><td style="text-align:right;font-weight:700;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.TotalAmount}}</td></tr>
+                    <tr><td style="text-align:left;color:#888;">Amount Paid</td><td style="text-align:right;font-weight:700;color:#2E7D32;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.AmountPaid}}</td></tr>
+                    <tr style="border-top:2px solid #1B2A4A;"><td style="text-align:left;font-weight:700;">Remaining</td><td style="text-align:right;font-weight:700;color:#C62828;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.RemainingAmount}}</td></tr>
+                </table>
+            </div>
+
+            {{if and (ne .PageData.Order.PaymentStatus "paid") (ne .PageData.Order.Status "rejected")}}
+            <div class="box-footer">
+                <h4 style="margin-top:0;color:#1B2A4A;"><i class="fa fa-money-bill"></i> Update Payment</h4>
+                <form action="/orders/payment" method="POST">
+                    <input type="hidden" name="order_id" value="{{.PageData.Order.ID}}">
+                    <div class="form-group">
+                        <label>Amount Paid:</label>
+                        <input type="number" name="amount" class="form-control" step="0.01" min="0.01" max="{{printf "%.2f" .PageData.Order.RemainingAmount}}" required placeholder="Enter amount">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block" style="background:#E65100;border-color:#E65100;">
+                        <i class="fa fa-check"></i> Update Status
+                    </button>
+                </form>
+            </div>
+            {{end}}
+        </div>
+
+        <!-- Payment History -->
+        {{if .PageData.Payments}}
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-history"></i> Payment History</h3>
+            </div>
+            <div class="box-body no-padding">
+                <table class="table table-condensed">
+                    <tr><th>Amount</th><th>By</th><th>Date</th></tr>
+                    {{range .PageData.Payments}}
+                    <tr>
+                        <td><strong>{{$.CurrencySymbol}} {{printf "%.2f" .Amount}}</strong></td>
+                        <td>{{.PaidByName}}</td>
+                        <td>{{.CreatedAt.Format "Jan 02"}}</td>
+                    </tr>
+                    {{end}}
+                </table>
+            </div>
+        </div>
+        {{end}}
+
+        <!-- Flow Result -->
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-check-double"></i> Flow Result</h3>
+            </div>
+            <div class="box-body" style="font-size:13px;">
+                <ul style="list-style:none;padding:0;">
+                    <li style="padding:5px 0;">
+                        <i class="fa fa-{{if or (eq .PageData.Order.Status "accepted") (eq .PageData.Order.Status "completed")}}check-circle{{else}}circle{{end}}" 
+                           style="color:{{if or (eq .PageData.Order.Status "accepted") (eq .PageData.Order.Status "completed")}}#2E7D32{{else}}#ccc{{end}};margin-right:8px;"></i> 
+                        Stock Updated
+                    </li>
+                    <li style="padding:5px 0;">
+                        <i class="fa fa-check-circle" style="color:#2E7D32;margin-right:8px;"></i> 
+                        Order Recorded
+                    </li>
+                    <li style="padding:5px 0;">
+                        <i class="fa fa-{{if ne .PageData.Order.PaymentStatus "unpaid"}}check-circle{{else}}circle{{end}}" 
+                           style="color:{{if ne .PageData.Order.PaymentStatus "unpaid"}}#2E7D32{{else}}#ccc{{end}};margin-right:8px;"></i> 
+                        Payment Status Updated
+                    </li>
+                    <li style="padding:5px 0;">
+                        <i class="fa fa-{{if or (eq .PageData.Order.Status "accepted") (eq .PageData.Order.Status "completed")}}check-circle{{else}}circle{{end}}" 
+                           style="color:{{if or (eq .PageData.Order.Status "accepted") (eq .PageData.Order.Status "completed")}}#2E7D32{{else}}#ccc{{end}};margin-right:8px;"></i> 
+                        Reports Updated
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <a href="/orders" class="btn btn-default btn-block"><i class="fa fa-arrow-left"></i> Back to Orders</a>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+{{end}}

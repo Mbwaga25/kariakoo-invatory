@@ -11,11 +11,31 @@ import (
 
 func (app *Application) UserList(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
-	_ = tenantID // Placeholder for future filtering
+	user := middleware.GetUser(r.Context())
 	
-	// Implementation to list users for this tenant
-	// For now, just render the placeholder
-	app.RenderPage(w, r, "admin/users", nil)
+	var users []*models.User
+	var err error
+
+	if user.Role == "SuperAdmin" {
+		users, err = app.Models.GetAllUsers()
+	} else {
+		users, err = app.Models.GetUsersByTenant(tenantID)
+	}
+	if err != nil {
+		log.Printf("ERROR UserList: %v", err)
+	}
+
+	locations, _ := app.Models.GetLocationsByTenant(tenantID)
+
+	app.RenderPage(w, r, "admin/users", struct {
+		Users     []*models.User
+		UserRole  string
+		Locations []*models.BusinessLocation
+	}{
+		Users:     users,
+		UserRole:  user.Role,
+		Locations: locations,
+	})
 }
 
 func (app *Application) UserStore(w http.ResponseWriter, r *http.Request) {

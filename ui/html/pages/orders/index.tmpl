@@ -1,0 +1,166 @@
+{{define "title"}}Store Orders{{end}}
+{{define "header"}}Store Orders{{end}}
+{{define "subheader"}}Manage store and bulk orders{{end}}
+
+{{define "main"}}
+<!-- Order Summary Cards -->
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #1B2A4A;">{{.PageData.Summary.TotalOrders}}</div>
+            <div class="stat-label">Total Orders</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #F9A825;">{{.PageData.Summary.PendingOrders}}</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #2E7D32;">{{.PageData.Summary.CompletedOrders}}</div>
+            <div class="stat-label">Completed</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #2E7D32;">{{.PageData.Summary.PaidCount}}</div>
+            <div class="stat-label"><i class="fa fa-circle" style="color:#2E7D32;font-size:8px"></i> Paid</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #C62828;">{{.PageData.Summary.UnpaidCount}}</div>
+            <div class="stat-label"><i class="fa fa-circle" style="color:#C62828;font-size:8px"></i> Unpaid</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-xs-6">
+        <div class="stat-card">
+            <div class="stat-number" style="color: #E65100;">{{.PageData.Summary.IncompleteCount}}</div>
+            <div class="stat-label"><i class="fa fa-circle" style="color:#E65100;font-size:8px"></i> Incomplete</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter & Actions Bar -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form action="/orders" method="GET" class="form-inline">
+                            <div class="form-group" style="margin-right:10px;">
+                                <select name="status" class="form-control">
+                                    <option value="">All Statuses</option>
+                                    <option value="pending" {{if eq .PageData.StatusFilter "pending"}}selected{{end}}>Pending</option>
+                                    <option value="accepted" {{if eq .PageData.StatusFilter "accepted"}}selected{{end}}>Accepted</option>
+                                    <option value="completed" {{if eq .PageData.StatusFilter "completed"}}selected{{end}}>Completed</option>
+                                    <option value="rejected" {{if eq .PageData.StatusFilter "rejected"}}selected{{end}}>Rejected</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin-right:10px;">
+                                <select name="type" class="form-control">
+                                    <option value="">All Types</option>
+                                    <option value="StoreOrder" {{if eq .PageData.TypeFilter "StoreOrder"}}selected{{end}}>Store Order</option>
+                                    <option value="BulkOrder" {{if eq .PageData.TypeFilter "BulkOrder"}}selected{{end}}>Bulk Order</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fa fa-filter"></i> Filter</button>
+                            <a href="/orders" class="btn btn-default" style="margin-left:5px;">Reset</a>
+                        </form>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        {{if or (eq .PageData.UserRole "ShopKeeper") (eq .PageData.UserRole "ShopAdmin") (eq .PageData.UserRole "SuperAdmin")}}
+                        <a href="/orders/create?type=StoreOrder" class="btn btn-primary" style="margin-right:5px;">
+                            <i class="fa fa-cart-plus"></i> Store Order
+                        </a>
+                        <a href="/orders/create?type=BulkOrder" class="btn btn-info">
+                            <i class="fa fa-boxes"></i> Bulk Order
+                        </a>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-clipboard-list"></i> Orders List</h3>
+            </div>
+            <div class="box-body">
+                <table class="table table-striped table-hover" id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Ref No</th>
+                            <th>Type</th>
+                            <th>Placed By</th>
+                            <th>Location</th>
+                            <th>Total ({{.CurrencySymbol}})</th>
+                            <th>Status</th>
+                            <th>Payment</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .PageData.Orders}}
+                        <tr>
+                            <td><strong>{{.RefNo}}</strong></td>
+                            <td>
+                                {{if eq .OrderType "StoreOrder"}}
+                                <span style="color:#1B2A4A;font-weight:600"><i class="fa fa-store"></i> Store</span>
+                                {{else}}
+                                <span style="color:#0277BD;font-weight:600"><i class="fa fa-boxes"></i> Bulk</span>
+                                {{end}}
+                            </td>
+                            <td>{{.PlacedByName}}</td>
+                            <td>{{.ToLocationName}}</td>
+                            <td>{{$.CurrencySymbol}} {{printf "%.2f" .TotalAmount}}</td>
+                            <td>
+                                <span class="badge-{{.Status}}">{{.Status}}</span>
+                            </td>
+                            <td>
+                                <span class="badge-{{.PaymentStatus}}">
+                                    {{if eq .PaymentStatus "incomplete"}}Partially Paid
+                                    {{else if eq .PaymentStatus "paid"}}Fully Paid
+                                    {{else}}Not Paid Yet{{end}}
+                                </span>
+                            </td>
+                            <td>{{.CreatedAt.Format "Jan 02, 2006"}}</td>
+                            <td>
+                                <a href="/orders/view?id={{.ID}}" class="btn btn-xs btn-default" title="View">
+                                    <i class="fa fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {{else}}
+                        <tr><td colspan="9" class="text-center" style="padding:30px;color:#888;">
+                            <i class="fa fa-inbox" style="font-size:40px;margin-bottom:10px;display:block;"></i>
+                            No orders found
+                        </td></tr>
+                        {{end}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    $('#ordersTable').DataTable({
+        "order": [[7, "desc"]],
+        "pageLength": 25
+    });
+});
+</script>
+{{end}}

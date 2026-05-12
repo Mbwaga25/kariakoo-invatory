@@ -62,7 +62,16 @@ func (app *Application) LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	app.jsonResponse(w, http.StatusOK, map[string]string{"success": "true", "msg": "Login successful! Redirecting...", "redirect": "/"})
+	redirect := "/dashboard"
+	if user.Role == "ShopKeeper" || user.Role == "StoreKeeper" {
+		redirect = "/orders"
+	}
+
+	app.jsonResponse(w, http.StatusOK, map[string]string{
+		"success":  "true",
+		"msg":      "Login successful! Redirecting...",
+		"redirect": redirect,
+	})
 }
 
 func (app *Application) Logout(w http.ResponseWriter, r *http.Request) {

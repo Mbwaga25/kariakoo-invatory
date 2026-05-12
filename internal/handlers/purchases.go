@@ -29,18 +29,23 @@ func (app *Application) PurchaseList(w http.ResponseWriter, r *http.Request) {
 func (app *Application) PurchaseCreate(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	
+	// Get optional pre-selected product
+	preselectedID, _ := strconv.Atoi(r.URL.Query().Get("product_id"))
+	
 	products, _ := app.Models.GetProductsByTenant(tenantID, 0, 0, 0)
 	locations, _ := app.Models.GetLocationsByTenant(tenantID)
 	suppliers, _ := app.Models.GetContactsByTenant(tenantID, "supplier")
 
 	app.RenderPage(w, r, "purchases/create", struct {
-		Products  []*models.Product
-		Locations []*models.BusinessLocation
-		Suppliers []*models.Contact
+		Products             []*models.Product
+		Locations            []*models.BusinessLocation
+		Suppliers            []*models.Contact
+		PreselectedProductID int
 	}{
-		Products:  products,
-		Locations: locations,
-		Suppliers: suppliers,
+		Products:             products,
+		Locations:            locations,
+		Suppliers:            suppliers,
+		PreselectedProductID: preselectedID,
 	})
 }
 

@@ -51,6 +51,16 @@ func (m *Models) GetContactsByTenant(tenantID int, contactType string) ([]*Conta
 	return contacts, nil
 }
 
+func (m *Models) GetContactByName(tenantID int, name string) (*Contact, error) {
+	query := "SELECT id, name FROM contacts WHERE tenant_id = ? AND name = ? LIMIT 1"
+	var c Contact
+	err := m.DB.QueryRow(query, tenantID, name).Scan(&c.ID, &c.Name)
+	if err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
 func (m *Models) InsertContact(c *Contact) (int64, error) {
 	query := `INSERT INTO contacts (tenant_id, type, name, business_name, email, mobile, tax_number, opening_balance, address, city, state, country, zip_code, created_by)
 			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`

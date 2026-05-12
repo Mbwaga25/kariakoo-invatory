@@ -31,17 +31,18 @@ func main() {
 		{"Super Admin", "superadmin@test.com", "SuperAdmin", nil},
 		{"Tenant Admin", "shopadmin@test.com", "ShopAdmin", 1},
 		{"Shop Keeper", "shopkeeper@test.com", "ShopKeeper", 1},
-		{"Store Keeper", "storekeeper@test.com", "StoreManager", 1},
+		{"Store Keeper", "storekeeper@test.com", "StoreKeeper", 1},
 	}
 
 	// Ensure tenant 1 exists
 	_, _ = db.Exec("INSERT IGNORE INTO tenants (id, name) VALUES (1, 'Main Shop')")
 	// Ensure a default location exists for tenant 1
 	_, _ = db.Exec("INSERT IGNORE INTO business_locations (id, tenant_id, name, location_id, city, country) VALUES (1, 1, 'Kariakoo Main', 'BL001', 'Dar es Salaam', 'Tanzania')")
-	// Update users to be assigned to this location
+	
 	for _, u := range users {
-		// Use REPLACE INTO to overwrite any old data
-		query := "REPLACE INTO users (name, email, password_hash, role, tenant_id) VALUES (?, ?, ?, ?, ?)"
+		// Use INSERT ON DUPLICATE KEY UPDATE to avoid FK issues
+		query := `INSERT INTO users (name, email, password_hash, role, tenant_id) VALUES (?, ?, ?, ?, ?)
+				  ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), role = VALUES(role), name = VALUES(name)`
 		_, err = db.Exec(query, u.name, u.email, actualHash, u.role, u.tenantID)
 		if err != nil {
 			log.Printf("Error seeding user %s: %v", u.email, err)
@@ -52,3 +53,4 @@ func main() {
 
 	log.Println("Seeding complete!")
 }
+

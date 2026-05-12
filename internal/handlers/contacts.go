@@ -71,3 +71,41 @@ func (app *Application) ContactStore(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/contacts?type="+c.Type, http.StatusSeeOther)
 }
+
+func (app *Application) ContactStoreQuick(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		app.jsonResponse(w, http.StatusMethodNotAllowed, map[string]string{"success": "false", "msg": "Method not allowed"})
+		return
+	}
+
+	tenantID := middleware.GetTenantID(r.Context())
+	user := middleware.GetUser(r.Context())
+
+	r.ParseForm()
+	
+	c := &models.Contact{
+		TenantID:  tenantID,
+		Type:      r.FormValue("type"),
+		Name:      r.FormValue("name"),
+		Mobile:    r.FormValue("mobile"),
+		CreatedBy: &user.ID,
+	}
+
+	if c.Name == "" {
+		app.jsonResponse(w, http.StatusOK, map[string]string{"success": "false", "msg": "Name is required"})
+		return
+	}
+
+	id, err := app.Models.InsertContact(c)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]string{"success": "false", "msg": err.Error()})
+		return
+	}
+
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{
+		"success": "true",
+		"id":      id,
+		"name":    c.Name,
+		"msg":     "Customer added successfully",
+	})
+}

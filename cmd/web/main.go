@@ -85,6 +85,7 @@ func main() {
 	mux.Handle("/api/brands/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiBrandStore))))
 	mux.Handle("/api/units/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiUnitStore))))
 	mux.Handle("/api/products/search", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiProductSearch))))
+	mux.Handle("/api/contacts/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactStoreQuick))))
 
 	// Sales Routes
 	mux.Handle("/sales", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SalesList))))
@@ -122,6 +123,16 @@ func main() {
 	mux.Handle("/reports/register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterReport))))
 	mux.Handle("/reports/purchase-sell", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseSellReport))))
 	mux.Handle("/reports/expense", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseReport))))
+
+	// Store Order Management Routes
+	mux.Handle("/orders", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderList))))
+	mux.Handle("/orders/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderCreate))))
+	mux.Handle("/orders/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderStore))))
+	mux.Handle("/orders/view", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderView))))
+	mux.Handle("/orders/accept", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderAccept))))
+	mux.Handle("/orders/reject", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderReject))))
+	mux.Handle("/orders/payment", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderPaymentUpdate))))
+	mux.Handle("/orders/pending", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PendingOrdersList))))
 
 	// Sidebar Routes (Placeholder pages only)
 	routes := map[string]string{

@@ -27,32 +27,60 @@
         .tw-px-4 { padding-left: 1rem; padding-right: 1rem; }
         .tw-py-4 { padding-top: 1rem; padding-bottom: 1rem; }
         
+        /* Classic Store Navy/Green Theme */
+        .skin-blue .main-header .navbar { background-color: #1B2A4A; }
+        .skin-blue .main-header .logo { background-color: #152240; }
+        .skin-blue .main-header .logo:hover { background-color: #1B2A4A; }
+        .skin-blue .main-sidebar { background-color: #1E3250; }
+        .skin-blue .sidebar-menu > li.header { background-color: #152240; color: #8899AA; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .skin-blue .sidebar-menu > li > a { color: #C5D0DC; transition: all 0.2s; }
+        .skin-blue .sidebar-menu > li:hover > a, .skin-blue .sidebar-menu > li.active > a { color: #fff; background-color: #2E7D32; border-left: 3px solid #4CAF50; }
+        .skin-blue .sidebar-menu > li > .treeview-menu { background-color: #16283D; }
+        .skin-blue .sidebar-menu > li > .treeview-menu > li > a { color: #A0B0C0; }
+        .skin-blue .sidebar-menu > li > .treeview-menu > li > a:hover { color: #fff; background-color: #2E7D32; }
+        .skin-blue .sidebar-menu > li > .treeview-menu > li.active > a { color: #4CAF50; }
+
         /* Modern Dashboard Styles */
-        .info-box {
-            border-radius: 8px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            transition: transform 0.2s ease-in-out;
-        }
-        .info-box:hover {
-            transform: translateY(-5px);
-        }
-        .info-box-icon {
-            border-top-left-radius: 8px;
-            border-bottom-left-radius: 8px;
-        }
-        .small-box {
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-        .box {
-            border-radius: 10px;
-            border-top: 3px solid #3c8dbc;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-        .main-sidebar {
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        }
+        .info-box { border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.2s ease, box-shadow 0.2s ease; border: none; }
+        .info-box:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.12); }
+        .info-box-icon { border-radius: 12px 0 0 12px; }
+        .small-box { border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .box { border-radius: 12px; border-top: 3px solid #1B2A4A; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+        .box-primary { border-top-color: #1B2A4A; }
+        .box-success { border-top-color: #2E7D32; }
+        .box-warning { border-top-color: #E65100; }
+        .box-danger { border-top-color: #C62828; }
+        .box-info { border-top-color: #0277BD; }
+        .main-sidebar { box-shadow: 3px 0 15px rgba(0,0,0,0.15); }
+        .btn-primary { background-color: #2E7D32; border-color: #2E7D32; }
+        .btn-primary:hover { background-color: #1B5E20; border-color: #1B5E20; }
+        .content-wrapper { background-color: #F0F4F8; }
+        .main-footer { background-color: #fff; border-top: 2px solid #1B2A4A; }
+
+        /* Status badges */
+        .badge-paid { background-color: #2E7D32; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-unpaid { background-color: #C62828; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-incomplete { background-color: #E65100; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-pending { background-color: #F9A825; color: #333; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-accepted { background-color: #0277BD; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-rejected { background-color: #6D4C41; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+        .badge-completed { background-color: #2E7D32; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; }
+
+        /* Role badges */
+        .role-superadmin { background: linear-gradient(135deg, #1B2A4A, #2E4A6E); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .role-storekeeper { background: linear-gradient(135deg, #0277BD, #039BE5); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .role-shopkeeper { background: linear-gradient(135deg, #2E7D32, #43A047); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+        .role-shopadmin { background: linear-gradient(135deg, #6A1B9A, #8E24AA); color: #fff; padding: 3px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+
+        /* Table improvements */
+        .table > thead > tr > th { background-color: #1B2A4A; color: #fff; border: none; font-weight: 600; }
+        .table-striped > tbody > tr:nth-of-type(odd) { background-color: #F8FAFC; }
+        
+        /* Card summary stats */
+        .stat-card { background: #fff; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.06); transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card .stat-number { font-size: 28px; font-weight: 700; }
+        .stat-card .stat-label { font-size: 13px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; }
     </style>
 </head>
 
@@ -182,12 +210,15 @@
                 <ul class="sidebar-menu" data-widget="tree">
                     <li class="header">MAIN NAVIGATION</li>
                     
+                    {{if and (ne .Role "ShopKeeper") (ne .Role "StoreKeeper")}}
                     <li>
                         <a href="/">
                             <i class="fa fa-tachometer-alt"></i> <span>Dashboard</span>
                         </a>
                     </li>
+                    {{end}}
 
+                    {{if or (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopAdmin")}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-cubes"></i> <span>Products</span>
@@ -203,8 +234,22 @@
                             <li><a href="/brands"><i class="fa fa-copyright"></i> Brands</a></li>
                         </ul>
                     </li>
+                    {{end}}
 
-                    {{if index .Modules "purchases"}}
+                    {{if and (index .Modules "purchases") (eq .Role "StoreKeeper")}}
+                    <li>
+                        <a href="/purchases/create">
+                            <i class="fa fa-download"></i> <span>Receive New Stock</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/purchases">
+                            <i class="fa fa-history"></i> <span>Stock History</span>
+                        </a>
+                    </li>
+                    {{end}}
+
+                    {{if and (index .Modules "purchases") (or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-shopping-cart"></i> <span>Purchases</span>
@@ -219,7 +264,7 @@
                     </li>
                     {{end}}
 
-                    {{if or (index .Modules "stock_transfers") (index .Modules "stock_adjustments")}}
+                    {{if and (or (index .Modules "stock_transfers") (index .Modules "stock_adjustments")) (or (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopAdmin"))}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-exchange-alt"></i> <span>Stock Management</span>
@@ -234,6 +279,7 @@
                     </li>
                     {{end}}
 
+                    {{if or (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopAdmin")}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-address-book"></i> <span>Contacts</span>
@@ -246,8 +292,9 @@
                             <li><a href="/contacts?type=customer"><i class="fa fa-star"></i> Customers</a></li>
                         </ul>
                     </li>
+                    {{end}}
 
-                    {{if index .Modules "sales"}}
+                    {{if and (index .Modules "sales") (or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-arrow-circle-up"></i> <span>Sell</span>
@@ -262,7 +309,7 @@
                     </li>
                     {{end}}
 
-                    {{if index .Modules "expenses"}}
+                    {{if and (index .Modules "expenses") (or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-minus-circle"></i> <span>Expenses</span>
@@ -277,7 +324,29 @@
                     </li>
                     {{end}}
 
-                    {{if index .Modules "reports"}}
+                    {{if or (index .Modules "store_management") (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopKeeper")}}
+                    <li class="header">STORE MANAGEMENT</li>
+                    <li class="treeview">
+                        <a href="#">
+                            <i class="fa fa-store"></i> <span>Orders</span>
+                            <span class="pull-right-container">
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </span>
+                        </a>
+                        <ul class="treeview-menu">
+                            <li><a href="/orders"><i class="fa fa-list"></i> All Orders</a></li>
+                            {{if or (eq .Role "ShopKeeper") (eq .Role "ShopAdmin") (eq .Role "SuperAdmin")}}
+                            <li><a href="/orders/create?type=StoreOrder"><i class="fa fa-cart-plus"></i> Store Order</a></li>
+                            <li><a href="/orders/create?type=BulkOrder"><i class="fa fa-boxes"></i> Bulk Order</a></li>
+                            {{end}}
+                            {{if or (eq .Role "StoreKeeper") (eq .Role "SuperAdmin")}}
+                            <li><a href="/orders/pending"><i class="fa fa-bell"></i> Pending Orders</a></li>
+                            {{end}}
+                        </ul>
+                    </li>
+                    {{end}}
+
+                    {{if and (index .Modules "reports") (or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-chart-bar"></i> <span>Reports</span>
@@ -295,6 +364,7 @@
                     </li>
                     {{end}}
 
+                    {{if or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin")}}
                     <li class="treeview">
                         <a href="#">
                             <i class="fa fa-cog"></i> <span>Settings</span>
@@ -309,6 +379,7 @@
                             <li><a href="/users"><i class="fa fa-users"></i> Users</a></li>
                         </ul>
                     </li>
+                    {{end}}
 
                     {{if eq .Role "SuperAdmin"}}
                     <li class="header">ADMINISTRATION</li>

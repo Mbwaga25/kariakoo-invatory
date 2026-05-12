@@ -74,8 +74,11 @@
                         </td>
                         <td><span class="label label-warning">{{.AlertQuantity}}</span></td>
                         <td>
-                            <a href="/products/view?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-eye"></i> View</a>
-                            <a href="/products/edit?id={{.ID}}" class="btn btn-xs btn-primary"><i class="fa fa-edit"></i> Edit</a>
+                            <a href="/products/view?id={{.ID}}" class="btn btn-xs btn-info" title="View Details"><i class="fa fa-eye"></i> View</a>
+                            {{if or (eq $.Role "StoreKeeper") (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                            <a href="/purchases/create?product_id={{.ID}}" class="btn btn-xs btn-success" title="Quick Stock-In"><i class="fa fa-download"></i> Add Stock</a>
+                            {{end}}
+                            <a href="/products/edit?id={{.ID}}" class="btn btn-xs btn-primary" title="Edit Product"><i class="fa fa-edit"></i> Edit</a>
                         </td>
                     </tr>
                     {{end}}

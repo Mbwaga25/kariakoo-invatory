@@ -5,60 +5,40 @@
 {{define "main"}}
 <div class="row">
     <div class="col-md-4 col-md-offset-4">
-        <div class="tw-p-5 md:tw-p-6 tw-mb-4 tw-rounded-2xl tw-transition-all tw-duration-200 tw-bg-white tw-shadow-sm tw-ring-1 tw-ring-gray-200">
-            <div class="tw-flex tw-flex-col tw-gap-4 tw-dw-rounded-box tw-dw-p-6 tw-dw-max-w-md">
-                <div class="tw-flex tw-items-center tw-flex-col">
-                    <h1 class="tw-text-lg md:tw-text-xl tw-font-semibold tw-text-[#1e1e1e]">
-                        Welcome Back
-                    </h1>
-                    <h2 class="tw-text-sm tw-font-medium tw-text-gray-500">
-                        Login to your Inventory App
-                    </h2>
+        <div style="text-align:center;margin-bottom:20px;">
+            <h2 style="color:#1B2A4A;font-weight:700;margin:0;">CLASSIC STORE</h2>
+            <p style="color:#2E7D32;font-weight:600;font-size:14px;margin:5px 0 0;">Stock Management System</p>
+        </div>
+        <div style="background:#fff;border-radius:16px;padding:30px;box-shadow:0 8px 30px rgba(0,0,0,0.1);border-top:4px solid #2E7D32;">
+            <div style="text-align:center;margin-bottom:20px;">
+                <h1 style="font-size:20px;font-weight:600;color:#1B2A4A;margin:0;">Welcome Back</h1>
+                <p style="font-size:14px;color:#888;margin:5px 0 0;">Login to your Inventory App</p>
+            </div>
+
+            <form method="POST" action="/login" id="login-form">
+                <div class="form-group">
+                    <label style="font-size:13px;font-weight:600;color:#333;">Email</label>
+                    <input class="form-control" style="height:46px;border-radius:8px;border:1px solid #D1D5DA;"
+                        name="email" required autofocus placeholder="Email" type="email" id="email" />
                 </div>
-
-                <form method="POST" action="/login" id="login-form">
-                    <div class="form-group has-feedback">
-                        <label class="tw-dw-form-control">
-                            <div class="tw-dw-label">
-                                <span class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black">Email</span>
-                            </div>
-                            <input class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500"
-                                name="email" required autofocus placeholder="Email" type="email" id="email" />
-                        </label>
-                    </div>
-
-                    <div class="form-group has-feedback">
-                        <label class="tw-dw-form-control">
-                            <div class="tw-dw-label">
-                                <span class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black">Password</span>
-                            </div>
-                            <input class="tw-border tw-border-[#D1D5DA] tw-outline-none tw-h-12 tw-bg-transparent tw-rounded-lg tw-px-3 tw-font-medium tw-text-black placeholder:tw-text-gray-500"
-                                id="password" type="password" name="password" required placeholder="Password" />
-                        </label>
-                    </div>
-
-                    <div class="tw-dw-form-control">
-                        <label class="tw-dw-cursor-pointer tw-dw-label tw-self-start tw-gap-2">
-                            <input type="checkbox" name="remember" class="tw-dw-checkbox">
-                            <span class="tw-text-xs md:tw-text-sm tw-font-medium tw-text-black tw-mt-[0.2rem]">Remember Me</span>
-                        </label>
-                    </div>
-
-                    <button type="submit"
-                        class="tw-bg-gradient-to-r tw-from-indigo-500 tw-to-blue-500 tw-h-12 tw-rounded-xl tw-text-sm md:tw-text-base tw-text-white tw-font-semibold tw-w-full tw-max-w-full mt-2 hover:tw-from-indigo-600 hover:tw-to-blue-600">
-                        Login
-                    </button>
-                </form>
-                
-                <div class="tw-text-center tw-mt-4">
-                    <p class="tw-text-xs tw-text-gray-500">
-                        Try logging in with any of these roles:
-                        <br/><b>superadmin@test.com / 123456</b>
-                        <br/><b>shopadmin@test.com / 123456</b>
-                        <br/><b>shopkeeper@test.com / 123456</b>
-                        <br/><b>storekeeper@test.com / 123456</b>
-                    </p>
+                <div class="form-group">
+                    <label style="font-size:13px;font-weight:600;color:#333;">Password</label>
+                    <input class="form-control" style="height:46px;border-radius:8px;border:1px solid #D1D5DA;"
+                        id="password" type="password" name="password" required placeholder="Password" />
                 </div>
+                <button type="submit" style="width:100%;height:46px;border:none;border-radius:10px;background:linear-gradient(135deg,#2E7D32,#43A047);color:#fff;font-weight:600;font-size:15px;cursor:pointer;margin-top:10px;">
+                    Login
+                </button>
+            </form>
+            
+            <div style="text-align:center;margin-top:20px;padding:15px;background:#F0F4F8;border-radius:10px;">
+                <p style="font-size:11px;color:#666;margin:0 0 8px;">
+                    <strong>System Roles:</strong>
+                </p>
+                <p style="font-size:11px;margin:3px 0;"><span class="role-superadmin" style="padding:2px 6px;">Super Admin</span> superadmin@test.com</p>
+                <p style="font-size:11px;margin:3px 0;"><span class="role-storekeeper" style="padding:2px 6px;">Store Keeper</span> storekeeper@test.com</p>
+                <p style="font-size:11px;margin:3px 0;"><span class="role-shopkeeper" style="padding:2px 6px;">Shop Keeper</span> shopkeeper@test.com</p>
+                <p style="font-size:11px;margin:3px 0;color:#888;">Password: <strong>123456</strong></p>
             </div>
         </div>
     </div>
