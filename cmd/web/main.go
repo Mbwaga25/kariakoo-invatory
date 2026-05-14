@@ -2,10 +2,13 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
 
+	"github.com/joho/godotenv"
 	_ "github.com/go-sql-driver/mysql"
 	"kariakoo/inventory/internal/handlers"
 	"kariakoo/inventory/internal/middleware"
@@ -13,8 +16,22 @@ import (
 )
 
 func main() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	// Build DSN from environment variables
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true",
+		os.Getenv("DB_USER"),
+		os.Getenv("DB_PASS"),
+		os.Getenv("DB_HOST"),
+		os.Getenv("DB_PORT"),
+		os.Getenv("DB_NAME"),
+	)
+
 	// Connect to MySQL
-	dsn := "root:@tcp(127.0.0.1:3306)/invatory?parseTime=true"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
@@ -24,7 +41,7 @@ func main() {
 	if err = db.Ping(); err != nil {
 		log.Fatal("Could not connect to database: ", err)
 	}
-	log.Println("Successfully connected to MySQL database 'invatory'")
+	log.Println("Successfully connected to MySQL database:", os.Getenv("DB_NAME"))
 
 	app := &handlers.Application{
 		DB:     db,
@@ -49,9 +66,9 @@ func main() {
 	mux.HandleFunc("/logout", app.Logout)
 
 	// Protected Routes (SaaS isolation)
-	// We wrap the Home handler with both RequireAuthentication and TenantContext
 	dashboardChain := middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.Home)))
 	mux.Handle("/", dashboardChain)
+	mux.Handle("/dashboard", dashboardChain)
 
 	productCreateChain := middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ProductCreate)))
 	mux.Handle("/products/create", productCreateChain)
@@ -171,8 +188,13 @@ func main() {
 		mux.Handle(route, chain)
 	}
 
-	log.Println("Starting Inventory server on :8081...")
-	err = http.ListenAndServe(":8081", mux)
+	port := os.Getenv("APP_PORT")
+	if port == "" {
+		port = "8081"
+	}
+
+	log.Println("Starting Inventory server on :" + port)
+	err = http.ListenAndServe(":"+port, mux)
 	if err != nil {
 		log.Fatal(err)
 	}

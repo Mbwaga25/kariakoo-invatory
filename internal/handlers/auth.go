@@ -62,7 +62,7 @@ func (app *Application) LoginPost(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, &cookie)
 
-	redirect := "/dashboard"
+	redirect := "/"
 	if user.Role == "ShopKeeper" || user.Role == "StoreKeeper" {
 		redirect = "/orders"
 	}
