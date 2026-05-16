@@ -308,7 +308,7 @@ $(document).ready(function() {
                         var purchase_line_id = ui.item.purchase_line_id && searched_term == ui.item.lot_number ? ui.item.purchase_line_id : null;
                         pos_product_row(ui.item.variation_id, purchase_line_id);
                     } else {
-                        alert(LANG.out_of_stock);
+                        toastr.warning(LANG.out_of_stock);
                     }
                 },
             })
@@ -872,7 +872,7 @@ $(document).ready(function() {
             });
 
             if (total_advance_payments > 1) {
-                alert(LANG.advance_payment_cannot_be_more_than_once);
+                toastr.error(LANG.advance_payment_cannot_be_more_than_once);
                 return false;
             }
 

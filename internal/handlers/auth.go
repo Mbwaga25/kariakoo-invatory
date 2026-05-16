@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,8 +38,8 @@ func (app *Application) LoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := r.PostForm.Get("email")
-	password := r.PostForm.Get("password")
+	email := strings.TrimSpace(r.PostForm.Get("email"))
+	password := strings.TrimSpace(r.PostForm.Get("password"))
 
 	user, err := app.Models.GetUserByEmail(email)
 	if err != nil {
