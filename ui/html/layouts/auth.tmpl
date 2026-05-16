@@ -13,6 +13,7 @@
     <link href="/static/css/tailwind/app.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/vendor.css">
     <link rel="stylesheet" href="/static/css/app.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css">
     
     <style>
         .login-page {
@@ -57,6 +58,15 @@
     <script src="/static/js/functions.js"></script>
     <script src="/static/js/common.js"></script>
     <script src="/static/js/app.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js"></script>
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+    </script>
     
     {{block "scripts" .}}{{end}}
 </body>

@@ -72,7 +72,7 @@
                         </form>
                     </div>
                     <div class="col-md-4 text-right">
-                        {{if or (eq .PageData.UserRole "ShopKeeper") (eq .PageData.UserRole "ShopAdmin") (eq .PageData.UserRole "SuperAdmin")}}
+                        {{if or (eq .PageData.UserRole "ShopKeeper") (eq .PageData.UserRole "ShopAdmin") (eq .PageData.UserRole "SuperAdmin") (eq .PageData.UserRole "StoreKeeper")}}
                         <a href="/orders/create?type=StoreOrder" class="btn btn-primary" style="margin-right:5px;">
                             <i class="fa fa-cart-plus"></i> Store Order
                         </a>
@@ -140,11 +140,6 @@
                                 </a>
                             </td>
                         </tr>
-                        {{else}}
-                        <tr><td colspan="9" class="text-center" style="padding:30px;color:#888;">
-                            <i class="fa fa-inbox" style="font-size:40px;margin-bottom:10px;display:block;"></i>
-                            No orders found
-                        </td></tr>
                         {{end}}
                     </tbody>
                 </table>

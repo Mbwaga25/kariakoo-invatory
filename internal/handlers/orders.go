@@ -53,21 +53,9 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 		locationID = *user.LocationID
 	}
 	
-	products, _ := app.Models.GetProductsByTenant(tenantID, locationID, 0, 0)
-	allLocations, _ := app.Models.GetLocationsByTenant(tenantID)
-	
-	var locations []*models.BusinessLocation
-	if user.Role == "ShopKeeper" || user.Role == "StoreKeeper" {
-		for _, loc := range allLocations {
-			if loc.ID == locationID {
-				locations = append(locations, loc)
-				break
-			}
-		}
-	} else {
-		locations = allLocations
-	}
-
+	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, locationID, "", 0, 0)
+	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
+	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 	customers, _ := app.Models.GetContactsByTenant(tenantID, "customer")
 
 	orderType := r.URL.Query().Get("type")
@@ -76,15 +64,17 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.RenderPage(w, r, "orders/create", struct {
-		Products  []*models.Product
-		Locations []*models.BusinessLocation
-		Customers []*models.Contact
-		OrderType string
+		Products   []*models.Product
+		Categories []*models.Category
+		Brands     []*models.Brand
+		Customers  []*models.Contact
+		OrderType  string
 	}{
-		Products:  products,
-		Locations: locations,
-		Customers: customers,
-		OrderType: orderType,
+		Products:   products,
+		Categories: categories,
+		Brands:     brands,
+		Customers:  customers,
+		OrderType:  orderType,
 	})
 }
 
@@ -104,14 +94,6 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 	orderType := r.FormValue("order_type")
 	orderFrom := r.FormValue("order_from")
 	notes := r.FormValue("notes")
-	toLocationStr := r.FormValue("to_location_id")
-	
-	toLocationID := locationID
-	if toLocationStr != "" {
-		if id, err := strconv.Atoi(toLocationStr); err == nil {
-			toLocationID = id
-		}
-	}
 
 	// Auto-create customer if it doesn't exist (Bulk Orders)
 	if orderType == "BulkOrder" && orderFrom != "" {
@@ -139,8 +121,18 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 
 	refNo := app.Models.GenerateOrderRefNo(tenantID)
 
-	paymentStatus := r.FormValue("payment_status")
-	amountPaid, _ := strconv.ParseFloat(r.FormValue("amount_paid"), 64)
+	// For Store Orders: no payment info needed
+	// For Bulk Orders: payment tracking enabled
+	paymentStatus := "unpaid"
+	amountPaid := 0.0
+	
+	if orderType == "BulkOrder" {
+		paymentStatus = r.FormValue("payment_status")
+		if paymentStatus == "" {
+			paymentStatus = "unpaid"
+		}
+		amountPaid, _ = strconv.ParseFloat(r.FormValue("amount_paid"), 64)
+	}
 
 	order := &models.StoreOrder{
 		TenantID:      tenantID,
@@ -148,7 +140,7 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 		RefNo:         refNo,
 		PlacedBy:      user.ID,
 		OrderFrom:     orderFrom,
-		ToLocationID:  toLocationID,
+		ToLocationID:  locationID, // Auto-set from user's location
 		Status:        "pending",
 		PaymentStatus: paymentStatus,
 		AmountPaid:    amountPaid,
@@ -156,39 +148,64 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var totalAmount float64
-	for i, pidStr := range productIDs {
-		pid, _ := strconv.Atoi(pidStr)
-		qty := 0.0
-		if i < len(quantities) {
-			qty, _ = strconv.ParseFloat(quantities[i], 64)
+	
+	if orderType == "BulkOrder" {
+		// Bulk Order: parse from_shop_qty and from_store_qty
+		fromShopQtys := r.Form["from_shop_qty[]"]
+		fromStoreQtys := r.Form["from_store_qty[]"]
+		
+		for i, pidStr := range productIDs {
+			pid, _ := strconv.Atoi(pidStr)
+			totalQty := 0.0
+			if i < len(quantities) {
+				totalQty, _ = strconv.ParseFloat(quantities[i], 64)
+			}
+
+			fromShop := 0.0
+			fromStore := 0.0
+			if i < len(fromShopQtys) {
+				fromShop, _ = strconv.ParseFloat(fromShopQtys[i], 64)
+			}
+			if i < len(fromStoreQtys) {
+				fromStore, _ = strconv.ParseFloat(fromStoreQtys[i], 64)
+			}
+
+			// If individual splits aren't provided, use total as from_store
+			if fromShop == 0 && fromStore == 0 && totalQty > 0 {
+				fromStore = totalQty
+			}
+
+			order.Items = append(order.Items, &models.OrderItem{
+				ProductID:    pid,
+				Quantity:     totalQty,
+				FromShopQty:  fromShop,
+				FromStoreQty: fromStore,
+				UnitPrice:    0,
+				Subtotal:     0,
+			})
 		}
+	} else {
+		// Store Order: simple product + quantity
+		for i, pidStr := range productIDs {
+			pid, _ := strconv.Atoi(pidStr)
+			qty := 0.0
+			if i < len(quantities) {
+				qty, _ = strconv.ParseFloat(quantities[i], 64)
+			}
 
-		// Get product price
-		product, err := app.Models.GetProductByID(pid, tenantID)
-		if err != nil {
-			continue
+			order.Items = append(order.Items, &models.OrderItem{
+				ProductID:    pid,
+				Quantity:     qty,
+				FromShopQty:  0,
+				FromStoreQty: qty, // All from store for store orders
+				UnitPrice:    0,
+				Subtotal:     0,
+			})
 		}
-
-		subtotal := qty * product.SellingPrice
-		totalAmount += subtotal
-
-		order.Items = append(order.Items, &models.OrderItem{
-			ProductID: pid,
-			Quantity:  qty,
-			UnitPrice: product.SellingPrice,
-			Subtotal:  subtotal,
-		})
 	}
 
 	order.TotalAmount = totalAmount
 	order.RemainingAmount = totalAmount - amountPaid
-
-	// Final check on payment status if it was set to "paid" but amounts don't match
-	if order.PaymentStatus == "paid" && order.RemainingAmount > 0 {
-		order.PaymentStatus = "incomplete"
-	} else if order.PaymentStatus == "unpaid" && order.AmountPaid > 0 {
-		order.PaymentStatus = "incomplete"
-	}
 
 	orderID64, err := app.Models.InsertOrder(order)
 	if err != nil {
@@ -197,7 +214,7 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Record initial payment in history if amount > 0
+	// Record initial payment in history if amount > 0 (Bulk Orders only)
 	if order.AmountPaid > 0 {
 		err = app.Models.UpdateOrderPayment(int(orderID64), tenantID, order.AmountPaid, user.ID)
 		if err != nil {
@@ -248,9 +265,6 @@ func (app *Application) OrderAccept(w http.ResponseWriter, r *http.Request) {
 	
 	idStr := r.FormValue("order_id")
 	id, _ := strconv.Atoi(idStr)
-	
-	amountPaidStr := r.FormValue("amount_paid")
-	amountPaid, _ := strconv.ParseFloat(amountPaidStr, 64)
 
 	locID := 0
 	if user.LocationID != nil {
@@ -269,13 +283,6 @@ func (app *Application) OrderAccept(w http.ResponseWriter, r *http.Request) {
 		log.Printf("ERROR OrderAccept Model: %v", err)
 		http.Error(w, "Error accepting order: "+err.Error(), http.StatusInternalServerError)
 		return
-	}
-
-	if amountPaid > 0 {
-		err = app.Models.UpdateOrderPayment(id, tenantID, amountPaid, user.ID)
-		if err != nil {
-			log.Printf("ERROR OrderAccept Payment: %v", err)
-		}
 	}
 
 	http.Redirect(w, r, "/orders/view?id="+idStr, http.StatusSeeOther)
@@ -305,7 +312,7 @@ func (app *Application) OrderReject(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/orders/view?id="+idStr, http.StatusSeeOther)
 }
 
-// OrderPaymentUpdate handles payment status updates
+// OrderPaymentUpdate handles payment status updates (Bulk Orders only)
 func (app *Application) OrderPaymentUpdate(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Redirect(w, r, "/orders", http.StatusSeeOther)

@@ -35,14 +35,19 @@ type StoreOrder struct {
 }
 
 type OrderItem struct {
-	ID          int
-	OrderID     int
-	ProductID   int
-	Quantity    float64
-	UnitPrice   float64
-	Subtotal    float64
-	ProductName string
-	ProductSKU  string
+	ID           int
+	OrderID      int
+	ProductID    int
+	Quantity     float64
+	FromShopQty  float64 // Just recorded, no stock deduction
+	FromStoreQty float64 // Deducted from store on accept
+	UnitPrice    float64
+	Subtotal     float64
+	ProductName  string
+	ProductSKU   string
+	CategoryName string
+	BrandName    string
+	ProductType  string
 }
 
 type OrderPayment struct {
@@ -154,16 +159,23 @@ func (m *Models) GetOrderByID(id int, tenantID int) (*StoreOrder, error) {
 
 	// Get items
 	itemRows, err := m.DB.Query(`
-		SELECT oi.id, oi.order_id, oi.product_id, oi.quantity, oi.unit_price, oi.subtotal,
-		       p.name, p.sku
+		SELECT oi.id, oi.order_id, oi.product_id, oi.quantity, 
+		       COALESCE(oi.from_shop_qty, 0), COALESCE(oi.from_store_qty, 0),
+		       oi.unit_price, oi.subtotal,
+		       p.name, p.sku, COALESCE(c.name, ''), COALESCE(b.name, ''), COALESCE(p.product_type, 'Protector')
 		FROM order_items oi
 		JOIN products p ON oi.product_id = p.id
+		LEFT JOIN categories c ON p.category_id = c.id
+		LEFT JOIN brands b ON p.brand_id = b.id
 		WHERE oi.order_id = ?`, id)
 	if err == nil {
 		defer itemRows.Close()
 		for itemRows.Next() {
 			var item OrderItem
-			itemRows.Scan(&item.ID, &item.OrderID, &item.ProductID, &item.Quantity, &item.UnitPrice, &item.Subtotal, &item.ProductName, &item.ProductSKU)
+			itemRows.Scan(&item.ID, &item.OrderID, &item.ProductID, &item.Quantity, 
+				&item.FromShopQty, &item.FromStoreQty,
+				&item.UnitPrice, &item.Subtotal, &item.ProductName, &item.ProductSKU,
+				&item.CategoryName, &item.BrandName, &item.ProductType)
 			o.Items = append(o.Items, &item)
 		}
 	}
@@ -192,8 +204,8 @@ func (m *Models) InsertOrder(o *StoreOrder) (int64, error) {
 	orderID, _ := res.LastInsertId()
 
 	for _, item := range o.Items {
-		_, err = tx.Exec(`INSERT INTO order_items (order_id, product_id, quantity, unit_price, subtotal) VALUES (?, ?, ?, ?, ?)`,
-			orderID, item.ProductID, item.Quantity, item.UnitPrice, item.Subtotal)
+		_, err = tx.Exec(`INSERT INTO order_items (order_id, product_id, quantity, from_shop_qty, from_store_qty, unit_price, subtotal) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+			orderID, item.ProductID, item.Quantity, item.FromShopQty, item.FromStoreQty, item.UnitPrice, item.Subtotal)
 		if err != nil {
 			return 0, fmt.Errorf("insert order item: %v", err)
 		}
@@ -234,8 +246,8 @@ func (m *Models) AcceptOrder(orderID int, tenantID int, processedBy int, locatio
 		return fmt.Errorf("order not found or not in pending status")
 	}
 
-	// Get order items
-	rows, err := tx.Query(`SELECT product_id, quantity FROM order_items WHERE order_id = ?`, orderID)
+	// Get order items - only deduct from_store_qty (from shop items are just numbers)
+	rows, err := tx.Query(`SELECT product_id, COALESCE(from_store_qty, quantity) FROM order_items WHERE order_id = ?`, orderID)
 	if err != nil {
 		return fmt.Errorf("get order items: %v", err)
 	}
@@ -251,7 +263,9 @@ func (m *Models) AcceptOrder(orderID int, tenantID int, processedBy int, locatio
 		if err := rows.Scan(&it.pid, &it.qty); err != nil {
 			return err
 		}
-		items = append(items, it)
+		if it.qty > 0 {
+			items = append(items, it)
+		}
 	}
 	rows.Close() // Close early to free up connection for Execs
 

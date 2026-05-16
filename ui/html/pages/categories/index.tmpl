@@ -41,7 +41,7 @@
                                 <td>{{.Description}}</td>
                                 <td>
                                     <div class="btn-group">
-                                        <button class="btn btn-xs btn-primary edit_category" data-id="{{.ID}}" data-name="{{.Name}}" data-description="{{.Description}}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
+                                        <button class="btn btn-xs btn-primary edit_category" data-id="{{.ID}}" data-name="{{.Name}}" data-description="{{.Description}}" data-parent_id="{{if .ParentID}}{{.ParentID}}{{end}}"><i class="glyphicon glyphicon-edit"></i> Edit</button>
                                         <button class="btn btn-xs btn-danger delete_category" data-id="{{.ID}}"><i class="glyphicon glyphicon-trash"></i> Delete</button>
                                     </div>
                                 </td>
@@ -91,12 +91,99 @@
         </div>
     </div>
 </div>
+
+<!-- Edit Category Modal -->
+<div class="modal fade" id="edit_category_modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="category_edit_form">
+                <input type="hidden" name="id" id="edit_category_id">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Edit Category</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit_parent_id">Parent Category:</label>
+                        <select name="parent_id" id="edit_parent_id" class="form-control">
+                            <option value="">None (Main Category)</option>
+                            {{range .PageData.Categories}}
+                            <option value="{{.ID}}">{{.Name}}</option>
+                            {{end}}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_name">Category Name:*</label>
+                        <input type="text" name="name" id="edit_name" class="form-control" placeholder="Enter category name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_description">Description:</label>
+                        <textarea name="description" id="edit_description" class="form-control" rows="3" placeholder="Enter description"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 {{end}}
 
 {{define "scripts"}}
 <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', function() {
         console.log("Categories page ready.");
+        
+        // Open edit modal
+        $('.edit_category').on('click', function() {
+            var id = $(this).data('id');
+            var name = $(this).data('name');
+            var desc = $(this).data('description');
+            var parentId = $(this).data('parent_id') || "";
+            
+            $('#edit_category_id').val(id);
+            $('#edit_name').val(name);
+            $('#edit_description').val(desc);
+            $('#edit_parent_id').val(parentId);
+            
+            $('#edit_category_modal').modal('show');
+        });
+
+        // Handle edit form submit
+        $('#category_edit_form').on('submit', function(e) {
+            e.preventDefault();
+            var data = $(this).serialize();
+            $.post('/api/categories/update', data, function(res) {
+                if (res.success) {
+                    $('#edit_category_modal').modal('hide');
+                    toastr.success('Category updated successfully');
+                    setTimeout(function() { window.location.reload(); }, 1000);
+                } else {
+                    toastr.error('Failed to update category: ' + res.message);
+                }
+            }).fail(function() {
+                toastr.error('Network error occurred.');
+            });
+        });
+
+        // Handle delete
+        $('.delete_category').on('click', function() {
+            var id = $(this).data('id');
+            if (confirm("Are you sure you want to delete this category?")) {
+                $.post('/api/categories/delete', {id: id}, function(res) {
+                    if (res.success) {
+                        toastr.success('Category deleted successfully');
+                        setTimeout(function() { window.location.reload(); }, 1000);
+                    } else {
+                        toastr.error('Failed to delete category: ' + res.message);
+                    }
+                }).fail(function() {
+                    toastr.error('Network error occurred.');
+                });
+            }
+        });
     });
 </script>
 {{end}}

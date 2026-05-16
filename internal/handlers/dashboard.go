@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 	"time"
-
 	"kariakoo/inventory/internal/middleware"
 	"kariakoo/inventory/internal/models"
 )
@@ -16,6 +15,8 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tenantID := middleware.GetTenantID(r.Context())
+	user := middleware.GetUser(r.Context())
+	locationID := middleware.GetLocationID(r.Context())
 	
 	// Default to today
 	startStr := r.URL.Query().Get("start_date")
@@ -42,13 +43,32 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Get order summary
+	role := ""
+	if user != nil {
+		role = user.Role
+	}
+	orderSummary, _ := app.Models.GetOrderSummary(tenantID, role, locationID, user.ID)
+
+	// Get low stock alerts
+	lowStockProducts, _ := app.Models.GetLowStockProducts(tenantID)
+
+	// Get best selling products
+	bestSelling, _ := app.Models.GetBestSellingProducts(tenantID, 5)
+
 	app.RenderPage(w, r, "dashboard/index", struct {
-		Data  *models.DashboardData
-		Start time.Time
-		End   time.Time
+		Data            *models.DashboardData
+		OrderSummary    *models.OrderSummary
+		LowStock        []*models.Product
+		BestSelling     []*models.Product
+		Start           time.Time
+		End             time.Time
 	}{
-		Data:  dashboardData,
-		Start: start,
-		End:   end,
+		Data:         dashboardData,
+		OrderSummary: orderSummary,
+		LowStock:     lowStockProducts,
+		BestSelling:  bestSelling,
+		Start:        start,
+		End:          end,
 	})
 }

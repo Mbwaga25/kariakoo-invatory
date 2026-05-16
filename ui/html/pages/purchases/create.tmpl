@@ -1,39 +1,31 @@
-{{define "title"}}Add New Purchase{{end}}
+{{define "title"}}Add New Stock{{end}}
 
-{{define "header"}}Add Purchase{{end}}
-{{define "subheader"}}Record a new purchase transaction{{end}}
+{{define "header"}}Receive Stock{{end}}
+{{define "subheader"}}Add new inventory from supplier delivery{{end}}
 
 {{define "main"}}
 <div class="box box-primary">
+    <div class="box-header with-border">
+        <h3 class="box-title"><i class="fa fa-download"></i> Stock Entry</h3>
+        <p class="text-muted" style="margin:5px 0 0;">Record incoming stock — just select products, quantities, and which store to add them to.</p>
+    </div>
     <form action="/purchases/store" method="POST">
         <div class="box-body">
             <div class="row">
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="supplier_id"><i class="fa fa-user"></i> Supplier:*</label>
-                        <select name="supplier_id" id="supplier_id" class="form-control select2" required>
-                            <option value="">Select Supplier</option>
-                            {{range .PageData.Suppliers}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="location_id"><i class="fa fa-map-marker"></i> Business Location:*</label>
-                        <select name="location_id" id="location_id" class="form-control select2" required>
+                        <label for="location_id"><i class="fa fa-map-marker"></i> Store Location:*</label>
+                        <select name="location_id" id="location_id" class="form-control" required>
                             {{range .PageData.Locations}}
                             <option value="{{.ID}}">{{.Name}}</option>
                             {{end}}
                         </select>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label for="ref_no"><i class="fa fa-hashtag"></i> Reference No:</label>
-                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Reference No">
-                        <p class="help-block">Leave blank to auto generate</p>
+                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Optional reference number">
                     </div>
                 </div>
             </div>
@@ -42,15 +34,14 @@
             
             <div class="row">
                 <div class="col-md-12">
-                    <h4 class="box-title" style="margin-bottom: 15px;"><i class="fa fa-shopping-cart"></i> Purchase Items</h4>
+                    <h4 class="box-title" style="margin-bottom: 15px;"><i class="fa fa-cubes"></i> Products to Add</h4>
                     <div class="table-responsive">
                         <table class="table table-bordered table-hover" id="purchase_items_table">
                             <thead>
                                 <tr class="bg-blue" style="color: white;">
-                                    <th style="width: 45%">Product Name</th>
-                                    <th style="width: 20%">Quantity</th>
-                                    <th style="width: 25%">Unit Price</th>
-                                    <th style="width: 10%" class="text-center">
+                                    <th style="width: 55%">Product</th>
+                                    <th style="width: 30%">Quantity</th>
+                                    <th style="width: 15%" class="text-center">
                                         <button type="button" class="btn btn-success btn-sm" id="add_row" title="Add Product">
                                             <i class="fa fa-plus"></i>
                                         </button>
@@ -60,23 +51,17 @@
                             <tbody>
                                 <tr class="product-row">
                                     <td>
-                                        <select name="product_id[]" class="form-control select2" required style="width: 100%;">
-                                            <option value="">Search/Select Product</option>
+                                        <select name="product_id[]" class="form-control" required style="width: 100%;">
+                                            <option value="">-- Select Product --</option>
                                             {{range .PageData.Products}}
-                                            <option value="{{.ID}}" {{if eq .ID $.PageData.PreselectedProductID}}selected{{end}}>{{.Name}} ({{.SKU}})</option>
+                                            <option value="{{.ID}}">{{.ProductType}} | {{.CategoryName}} | {{.BrandName}} — {{.Name}}</option>
                                             {{end}}
                                         </select>
                                     </td>
                                     <td>
                                         <div class="input-group">
-                                            <input type="number" step="0.01" name="quantity[]" class="form-control" required placeholder="0.00">
-                                            <span class="input-group-addon">Qty</span>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group">
-                                            <span class="input-group-addon">$</span>
-                                            <input type="number" step="0.01" name="purchase_price[]" class="form-control" required placeholder="0.00">
+                                            <input type="number" step="1" name="quantity[]" class="form-control" required placeholder="e.g. 500" min="1">
+                                            <span class="input-group-addon">pcs</span>
                                         </div>
                                     </td>
                                     <td class="text-center">
@@ -88,8 +73,8 @@
                             </tbody>
                             <tfoot>
                                 <tr class="bg-gray">
-                                    <th colspan="2" class="text-right">Total Items: <span id="total_items">1</span></th>
-                                    <th colspan="2">Total Amount: <span id="grand_total">0.00</span></th>
+                                    <th class="text-right">Total Products: <span id="total_items">1</span></th>
+                                    <th colspan="2">Total Quantity: <span id="total_qty" style="color:#2E7D32;font-weight:bold;">0</span></th>
                                 </tr>
                             </tfoot>
                         </table>
@@ -107,13 +92,12 @@
                     const rows = tableBody.querySelectorAll('tr');
                     document.getElementById('total_items').textContent = rows.length;
                     
-                    let total = 0;
+                    let totalQty = 0;
                     rows.forEach(row => {
                         const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
-                        const price = parseFloat(row.querySelector('input[name="purchase_price[]"]').value) || 0;
-                        total += qty * price;
+                        totalQty += qty;
                     });
-                    document.getElementById('grand_total').textContent = total.toFixed(2);
+                    document.getElementById('total_qty').textContent = totalQty.toLocaleString();
                 }
 
                 addRowBtn.addEventListener('click', function() {
@@ -149,8 +133,8 @@
         </script>
 
         <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Save Purchase</button>
-            <a href="/purchases" class="btn btn-default">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-save"></i> Save Stock Entry</button>
+            <a href="/purchases" class="btn btn-default btn-lg">Cancel</a>
         </div>
     </form>
 </div>

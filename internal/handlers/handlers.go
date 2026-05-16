@@ -85,6 +85,12 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		"add": func(a, b float64) float64 {
 			return a + b
 		},
+		"derefInt": func(i *int) int {
+			if i == nil {
+				return 0
+			}
+			return *i
+		},
 	})
 	
 	ts, err := ts.ParseFiles(files...)

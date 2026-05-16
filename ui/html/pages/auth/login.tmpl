@@ -76,20 +76,12 @@
             .then(data => {
                 console.log("Server response:", data);
                 if (data.success === "true") {
-                    if (typeof toastr !== 'undefined') {
-                        toastr.success(data.msg);
-                    } else {
-                        alert("SUCCESS: " + data.msg);
-                    }
+                    toastr.success(data.msg);
                     setTimeout(() => {
                         window.location.href = data.redirect;
                     }, 1000);
                 } else {
-                    if (typeof toastr !== 'undefined') {
-                        toastr.error(data.msg);
-                    } else {
-                        alert("ERROR: " + data.msg);
-                    }
+                    toastr.error(data.msg);
                     btn.disabled = false;
                     btn.innerText = originalBtnText;
                 }
@@ -97,11 +89,7 @@
             .catch(error => {
                 console.error("Fetch Error:", error);
                 const msg = "An error occurred. Please try again.";
-                if (typeof toastr !== 'undefined') {
-                    toastr.error(msg);
-                } else {
-                    alert("NETWORK ERROR: " + msg);
-                }
+                toastr.error(msg);
                 btn.disabled = false;
                 btn.innerText = originalBtnText;
             });

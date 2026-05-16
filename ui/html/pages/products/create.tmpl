@@ -1,54 +1,53 @@
 {{define "title"}}Add New Product{{end}}
 
 {{define "header"}}Add New Product{{end}}
-{{define "subheader"}}Create a new product for your inventory{{end}}
+{{define "subheader"}}Register a new Protector or Cover{{end}}
 
 {{define "main"}}
 <div class="box box-primary">
     <div class="box-header with-border">
-        <h3 class="box-title">Product Details</h3>
+        <h3 class="box-title"><i class="fa fa-cubes"></i> Product Details</h3>
     </div>
     
     <form action="/products/store" method="POST">
         <div class="box-body">
+            <!-- Step 1: Product Type -->
             <div class="row">
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="form-group">
-                        <label for="name">Product Name:*</label>
-                        <input type="text" name="name" class="form-control" id="name" placeholder="Enter product name" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sku">SKU:</label>
-                        <input type="text" name="sku" class="form-control" id="sku" placeholder="Auto-generated if empty">
+                        <label><i class="fa fa-tag"></i> Product Type:*</label>
+                        <div style="display:flex;gap:15px;margin-top:5px;">
+                            <label class="product-type-card" style="flex:1;cursor:pointer;">
+                                <input type="radio" name="product_type" value="Protector" checked style="display:none;">
+                                <div class="type-card-inner" id="typeCardProtector" style="border:3px solid #2E7D32;border-radius:12px;padding:20px;text-align:center;background:#E8F5E9;transition:all 0.3s;">
+                                    <i class="fa fa-shield-alt" style="font-size:36px;color:#2E7D32;"></i>
+                                    <h4 style="margin:10px 0 5px;color:#1B2A4A;font-weight:700;">Protector</h4>
+                                    <small style="color:#666;">Screen protectors, tempered glass, etc.</small>
+                                </div>
+                            </label>
+                            <label class="product-type-card" style="flex:1;cursor:pointer;">
+                                <input type="radio" name="product_type" value="Cover" style="display:none;">
+                                <div class="type-card-inner" id="typeCardCover" style="border:3px solid #ddd;border-radius:12px;padding:20px;text-align:center;background:#fff;transition:all 0.3s;">
+                                    <i class="fa fa-mobile-alt" style="font-size:36px;color:#999;"></i>
+                                    <h4 style="margin:10px 0 5px;color:#1B2A4A;font-weight:700;">Cover</h4>
+                                    <small style="color:#666;">Phone cases, back covers, etc.</small>
+                                </div>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            <hr>
+
+            <!-- Step 2: Category (Type of protector/cover) -->
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="unit_id">Unit:*</label>
+                        <label for="category_id"><i class="fa fa-tags"></i> Category (Type):* <small class="text-muted">e.g. 21D, Privacy, Clear</small></label>
                         <div class="input-group">
-                            <select name="unit_id" id="unit_id" class="form-control" required>
-                                <option value="">Please Select</option>
-                                {{range .PageData.Units}}
-                                <option value="{{.ID}}">{{.ActualName}}</option>
-                                {{end}}
-                            </select>
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#quick_add_unit"><i class="fa fa-plus text-primary"></i></button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="category_id">Category:</label>
-                        <div class="input-group">
-                            <select name="category_id" id="category_id" class="form-control">
-                                <option value="">Please Select</option>
+                            <select name="category_id" id="category_id" class="form-control" required>
+                                <option value="">-- Select Category --</option>
                                 {{range .PageData.Categories}}
                                 <option value="{{.ID}}">{{.Name}}</option>
                                 {{end}}
@@ -59,12 +58,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="brand_id">Brand:</label>
+                        <label for="brand_id"><i class="fa fa-mobile-alt"></i> Phone Model (Brand):* <small class="text-muted">e.g. iPhone 11, Samsung S21</small></label>
                         <div class="input-group">
-                            <select name="brand_id" id="brand_id" class="form-control">
-                                <option value="">Please Select</option>
+                            <select name="brand_id" id="brand_id" class="form-control" required>
+                                <option value="">-- Select Phone Model --</option>
                                 {{range .PageData.Brands}}
                                 <option value="{{.ID}}">{{.Name}}</option>
                                 {{end}}
@@ -77,29 +76,40 @@
                 </div>
             </div>
 
+            <!-- Product Name (Auto-generated or Manual) -->
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group">
-                        <label for="purchase_price">Purchase Price:*</label>
-                        <div class="input-group">
-                            <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="purchase_price" class="form-control" id="purchase_price" value="0.00" required>
-                        </div>
+                        <label for="name"><i class="fa fa-pencil-alt"></i> Product Name:</label>
+                        <input type="text" name="name" class="form-control" id="name" placeholder="Auto-generated: Type - Category - Model">
+                        <p class="help-block"><i class="fa fa-info-circle"></i> Leave blank to auto-generate from Product Type + Category + Model</p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="form-group">
-                        <label for="margin">Profit Margin (%):*</label>
-                        <input type="number" step="0.1" name="margin" class="form-control" id="margin" value="25.0">
+                        <label for="sku">SKU:</label>
+                        <input type="text" name="sku" class="form-control" id="sku" placeholder="Auto-generated">
                     </div>
                 </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="alert_quantity"><i class="fa fa-exclamation-triangle"></i> Low Stock Alert:</label>
+                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="50" placeholder="e.g. 50">
+                        <p class="help-block">Alert when stock goes below this</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row" style="display:none;">
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label for="selling_price">Selling Price:*</label>
-                        <div class="input-group">
-                            <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="selling_price" class="form-control" id="selling_price" value="0.00" required>
-                        </div>
+                        <label for="unit_id">Unit:</label>
+                        <select name="unit_id" id="unit_id" class="form-control">
+                            <option value="">Pieces</option>
+                            {{range .PageData.Units}}
+                            <option value="{{.ID}}">{{.ActualName}}</option>
+                            {{end}}
+                        </select>
                     </div>
                 </div>
             </div>
@@ -107,17 +117,8 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="form-group">
-                        <label for="description">Product Description:</label>
-                        <textarea name="description" class="form-control" rows="3" placeholder="Enter product description"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="alert_quantity">Alert Quantity:</label>
-                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="0">
+                        <label for="description">Notes/Description:</label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="Optional notes about this product"></textarea>
                     </div>
                 </div>
             </div>
@@ -127,21 +128,21 @@
                 <div class="col-md-12">
                     <div class="box box-solid box-primary">
                         <div class="box-header with-border">
-                            <h3 class="box-title">Inventory & Locations</h3>
+                            <h3 class="box-title"><i class="fa fa-map-marker-alt"></i> Location Assignment</h3>
                         </div>
                         <div class="box-body">
                             <div class="form-group">
-                                <label>Location Assignment:*</label>
+                                <label>Assign to:*</label>
                                 <div class="radio">
                                     <label>
                                         <input type="radio" name="location_type" id="location_type_all" value="all" checked>
-                                        Add to All Locations
+                                        Add to All Stores
                                     </label>
                                 </div>
                                 <div class="radio">
                                     <label>
                                         <input type="radio" name="location_type" id="location_type_specific" value="specific">
-                                        Add to Specific Location(s)
+                                        Add to Specific Store(s)
                                     </label>
                                 </div>
                             </div>
@@ -151,7 +152,7 @@
                                     <thead>
                                         <tr class="bg-gray">
                                             <th style="width: 50px;">Select</th>
-                                            <th>Business Location</th>
+                                            <th>Store</th>
                                             <th style="width: 200px;">Opening Stock</th>
                                         </tr>
                                     </thead>
@@ -163,11 +164,11 @@
                                             </td>
                                             <td>
                                                 <span class="tw-font-bold">{{.Name}}</span><br>
-                                                <small class="text-muted">{{.City}}, {{.Country}}</small>
+                                                <small class="text-muted">{{.City}}</small>
                                             </td>
                                             <td>
                                                 <div class="input-group">
-                                                    <input type="number" step="0.01" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0.00">
+                                                    <input type="number" step="1" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0">
                                                     <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
                                                 </div>
                                             </td>
@@ -175,7 +176,6 @@
                                         {{end}}
                                     </tbody>
                                 </table>
-                                <p class="help-block"><i class="fa fa-info-circle"></i> Enable the checkbox and set initial stock levels for specific shop branches.</p>
                             </div>
                         </div>
                     </div>
@@ -184,7 +184,7 @@
         </div>
 
         <div class="box-footer">
-            <button type="submit" class="btn btn-primary btn-lg">Save Product</button>
+            <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-save"></i> Save Product</button>
             <a href="/products" class="btn btn-default btn-lg">Cancel</a>
         </div>
     </form>
@@ -196,12 +196,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add Category</h4>
+                <h4 class="modal-title"><i class="fa fa-tags"></i> Add Category (Type)</h4>
             </div>
             <div class="modal-body">
+                <p class="text-muted">Examples: 21D, Privacy, Clear, Matte, Full Glue</p>
                 <div class="form-group">
                     <label>Category Name:*</label>
-                    <input type="text" id="new_category_name" class="form-control">
+                    <input type="text" id="new_category_name" class="form-control" placeholder="e.g. 21D">
                 </div>
             </div>
             <div class="modal-footer">
@@ -216,40 +217,17 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add Brand</h4>
+                <h4 class="modal-title"><i class="fa fa-mobile-alt"></i> Add Phone Model</h4>
             </div>
             <div class="modal-body">
+                <p class="text-muted">Examples: iPhone 11, iPhone 12, Samsung S21, Tecno Spark</p>
                 <div class="form-group">
-                    <label>Brand Name:*</label>
-                    <input type="text" id="new_brand_name" class="form-control">
+                    <label>Phone Model Name:*</label>
+                    <input type="text" id="new_brand_name" class="form-control" placeholder="e.g. iPhone 11">
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" onclick="quickAdd('brand')">Save</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="quick_add_unit" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Add Unit</h4>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Unit Name:*</label>
-                    <input type="text" id="new_unit_name" class="form-control" placeholder="e.g. Pieces">
-                </div>
-                <div class="form-group">
-                    <label>Short Name:*</label>
-                    <input type="text" id="new_unit_short" class="form-control" placeholder="e.g. pc">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="quickAdd('unit')">Save</button>
             </div>
         </div>
     </div>
@@ -267,18 +245,15 @@
         } else if (type === 'brand') {
             name = document.getElementById('new_brand_name').value;
             url = '/api/brands/store';
-        } else if (type === 'unit') {
-            name = document.getElementById('new_unit_name').value;
-            shortName = document.getElementById('new_unit_short').value;
-            url = '/api/units/store';
         }
 
-        if (!name) return alert("Name is required");
+        if (!name) {
+            toastr.error("Name is required");
+            return;
+        }
 
         const data = new URLSearchParams();
         data.append('name', name);
-        if (shortName) data.append('short_name', shortName);
-        if (type === 'unit') data.append('actual_name', name);
 
         fetch(url, {
             method: 'POST',
@@ -300,40 +275,37 @@
                 // Reset inputs
                 if (type === 'category') document.getElementById('new_category_name').value = '';
                 if (type === 'brand') document.getElementById('new_brand_name').value = '';
-                if (type === 'unit') {
-                    document.getElementById('new_unit_name').value = '';
-                    document.getElementById('new_unit_short').value = '';
-                }
             } else {
-                alert("Error: " + res.message);
+                toastr.error("Error: " + res.message);
             }
         });
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        const purchaseInput = document.getElementById('purchase_price');
-        const marginInput = document.getElementById('margin');
-        const sellingInput = document.getElementById('selling_price');
+        // Product Type Card Selection
+        const typeCards = document.querySelectorAll('input[name="product_type"]');
+        typeCards.forEach(radio => {
+            radio.addEventListener('change', function() {
+                // Reset all cards
+                document.getElementById('typeCardProtector').style.borderColor = '#ddd';
+                document.getElementById('typeCardProtector').style.backgroundColor = '#fff';
+                document.getElementById('typeCardProtector').querySelector('i').style.color = '#999';
+                document.getElementById('typeCardCover').style.borderColor = '#ddd';
+                document.getElementById('typeCardCover').style.backgroundColor = '#fff';
+                document.getElementById('typeCardCover').querySelector('i').style.color = '#999';
 
-        function calculateSellingPrice() {
-            const purchase = parseFloat(purchaseInput.value) || 0;
-            const margin = parseFloat(marginInput.value) || 0;
-            const selling = purchase + (purchase * (margin / 100));
-            sellingInput.value = selling.toFixed(2);
-        }
-
-        function calculateMargin() {
-            const purchase = parseFloat(purchaseInput.value) || 0;
-            const selling = parseFloat(sellingInput.value) || 0;
-            if (purchase > 0) {
-                const margin = ((selling - purchase) / purchase) * 100;
-                marginInput.value = margin.toFixed(1);
-            }
-        }
-
-        purchaseInput.addEventListener('input', calculateSellingPrice);
-        marginInput.addEventListener('input', calculateSellingPrice);
-        sellingInput.addEventListener('input', calculateMargin);
+                // Highlight selected
+                if (this.value === 'Protector') {
+                    document.getElementById('typeCardProtector').style.borderColor = '#2E7D32';
+                    document.getElementById('typeCardProtector').style.backgroundColor = '#E8F5E9';
+                    document.getElementById('typeCardProtector').querySelector('i').style.color = '#2E7D32';
+                } else {
+                    document.getElementById('typeCardCover').style.borderColor = '#0277BD';
+                    document.getElementById('typeCardCover').style.backgroundColor = '#E1F5FE';
+                    document.getElementById('typeCardCover').querySelector('i').style.color = '#0277BD';
+                }
+            });
+        });
 
         // Location toggle logic
         const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');

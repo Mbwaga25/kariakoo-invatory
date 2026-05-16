@@ -171,7 +171,10 @@
         initSearch();
 
         document.getElementById('btn_checkout').addEventListener('click', function() {
-            if (cart.length === 0) return alert("Cart is empty!");
+            if (cart.length === 0) {
+                toastr.warning("Cart is empty!");
+                return;
+            }
             const total = parseFloat(document.getElementById('grand_total').innerText);
             
             // Setup Modal
@@ -337,8 +340,8 @@
         };
 
         console.log("Submitting Sale:", saleData);
-        alert("Sale successful! Redirecting to list...");
-        window.location.href = "/sales";
+        toastr.success("Sale successful! Redirecting to list...");
+        setTimeout(function() { window.location.href = "/sales"; }, 1000);
     }
 </script>
 {{end}}

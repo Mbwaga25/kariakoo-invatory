@@ -1,115 +1,127 @@
 {{define "title"}}Edit Product{{end}}
 
 {{define "header"}}Edit Product{{end}}
-{{define "subheader"}}Update details for {{.PageData.Product.Name}}{{end}}
+{{define "subheader"}}Update product details{{end}}
 
 {{define "main"}}
-<div class="box box-primary">
-    <div class="box-header with-border">
-        <h3 class="box-title">Edit Product Details</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-edit"></i> Edit: {{.PageData.Product.Name}}</h3>
+            </div>
+            <form action="/products/update" method="POST">
+                <input type="hidden" name="id" value="{{.PageData.Product.ID}}">
+                <div class="box-body">
+                    <!-- Product Type -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Product Type:*</label>
+                                <div style="display:flex;gap:15px;">
+                                    <label style="flex:1;cursor:pointer;">
+                                        <input type="radio" name="product_type" value="Protector" {{if eq .PageData.Product.ProductType "Protector"}}checked{{end}} style="display:none;">
+                                        <div class="type-card" id="editTypeProtector" style="border:3px solid {{if eq .PageData.Product.ProductType "Protector"}}#2E7D32{{else}}#ddd{{end}};border-radius:12px;padding:15px;text-align:center;background:{{if eq .PageData.Product.ProductType "Protector"}}#E8F5E9{{else}}#fff{{end}};">
+                                            <i class="fa fa-shield-alt" style="font-size:24px;color:{{if eq .PageData.Product.ProductType "Protector"}}#2E7D32{{else}}#999{{end}};"></i>
+                                            <h5 style="margin:5px 0;">Protector</h5>
+                                        </div>
+                                    </label>
+                                    <label style="flex:1;cursor:pointer;">
+                                        <input type="radio" name="product_type" value="Cover" {{if eq .PageData.Product.ProductType "Cover"}}checked{{end}} style="display:none;">
+                                        <div class="type-card" id="editTypeCover" style="border:3px solid {{if eq .PageData.Product.ProductType "Cover"}}#0277BD{{else}}#ddd{{end}};border-radius:12px;padding:15px;text-align:center;background:{{if eq .PageData.Product.ProductType "Cover"}}#E1F5FE{{else}}#fff{{end}};">
+                                            <i class="fa fa-mobile-alt" style="font-size:24px;color:{{if eq .PageData.Product.ProductType "Cover"}}#0277BD{{else}}#999{{end}};"></i>
+                                            <h5 style="margin:5px 0;">Cover</h5>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="name">Product Name:*</label>
+                                <input type="text" name="name" class="form-control" value="{{.PageData.Product.Name}}" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="category_id">Category (Type):</label>
+                                <select name="category_id" class="form-control">
+                                    <option value="">-- Select --</option>
+                                    {{range .PageData.Categories}}
+                                    <option value="{{.ID}}" {{if and $.PageData.Product.CategoryID (eq (derefInt $.PageData.Product.CategoryID) .ID)}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="brand_id">Phone Model:</label>
+                                <select name="brand_id" class="form-control">
+                                    <option value="">-- Select --</option>
+                                    {{range .PageData.Brands}}
+                                    <option value="{{.ID}}" {{if and $.PageData.Product.BrandID (eq (derefInt $.PageData.Product.BrandID) .ID)}}selected{{end}}>{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sku">SKU:</label>
+                                <input type="text" name="sku" class="form-control" value="{{.PageData.Product.SKU}}">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="alert_quantity">Low Stock Alert:</label>
+                                <input type="number" name="alert_quantity" class="form-control" value="{{if .PageData.Product.AlertQuantity}}{{.PageData.Product.AlertQuantity}}{{else}}50{{end}}">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description:</label>
+                                <textarea name="description" class="form-control" rows="2">{{if .PageData.Product.Description}}{{.PageData.Product.Description}}{{end}}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-save"></i> Update Product</button>
+                    <a href="/products/view?id={{.PageData.Product.ID}}" class="btn btn-default btn-lg">Cancel</a>
+                </div>
+            </form>
+        </div>
     </div>
-    
-    <form action="/products/update" method="POST">
-        <input type="hidden" name="id" value="{{.PageData.Product.ID}}">
-        <div class="box-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="name">Product Name:*</label>
-                        <input type="text" name="name" class="form-control" id="name" value="{{.PageData.Product.Name}}" required>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="sku">SKU:*</label>
-                        <input type="text" name="sku" class="form-control" id="sku" value="{{.PageData.Product.SKU}}" required>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="purchase_price">Purchase Price:*</label>
-                        <div class="input-group">
-                            <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="purchase_price" class="form-control" id="purchase_price" value="{{.PageData.Product.PurchasePrice}}" required>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="margin">Profit Margin (%)</label>
-                        <input type="number" step="0.1" name="margin" class="form-control" id="margin" value="0">
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="selling_price">Selling Price:*</label>
-                        <div class="input-group">
-                            <span class="input-group-addon">$</span>
-                            <input type="number" step="0.01" name="selling_price" class="form-control" id="selling_price" value="{{.PageData.Product.SellingPrice}}" required>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="description">Product Description:</label>
-                        <textarea name="description" class="form-control" rows="3">{{.PageData.Product.Description}}</textarea>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="alert_quantity">Alert Quantity:</label>
-                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="{{.PageData.Product.AlertQuantity}}">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Update Product</button>
-            <a href="/products" class="btn btn-default">Cancel</a>
-        </div>
-    </form>
 </div>
-{{end}}
 
-{{define "scripts"}}
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        const purchaseInput = document.getElementById('purchase_price');
-        const marginInput = document.getElementById('margin');
-        const sellingInput = document.getElementById('selling_price');
-
-        function calculateSellingPrice() {
-            const purchase = parseFloat(purchaseInput.value) || 0;
-            const margin = parseFloat(marginInput.value) || 0;
-            const selling = purchase + (purchase * (margin / 100));
-            sellingInput.value = selling.toFixed(2);
-        }
-
-        function calculateMargin() {
-            const purchase = parseFloat(purchaseInput.value) || 0;
-            const selling = parseFloat(sellingInput.value) || 0;
-            if (purchase > 0) {
-                const margin = ((selling - purchase) / purchase) * 100;
-                marginInput.value = margin.toFixed(1);
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('input[name="product_type"]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            document.getElementById('editTypeProtector').style.borderColor = '#ddd';
+            document.getElementById('editTypeProtector').style.backgroundColor = '#fff';
+            document.getElementById('editTypeCover').style.borderColor = '#ddd';
+            document.getElementById('editTypeCover').style.backgroundColor = '#fff';
+            if (this.value === 'Protector') {
+                document.getElementById('editTypeProtector').style.borderColor = '#2E7D32';
+                document.getElementById('editTypeProtector').style.backgroundColor = '#E8F5E9';
+            } else {
+                document.getElementById('editTypeCover').style.borderColor = '#0277BD';
+                document.getElementById('editTypeCover').style.backgroundColor = '#E1F5FE';
             }
-        }
-        
-        // Calculate initial margin
-        calculateMargin();
-
-        purchaseInput.addEventListener('input', calculateSellingPrice);
-        marginInput.addEventListener('input', calculateSellingPrice);
-        sellingInput.addEventListener('input', calculateMargin);
+        });
     });
+});
 </script>
 {{end}}

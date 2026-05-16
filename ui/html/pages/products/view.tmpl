@@ -1,73 +1,113 @@
 {{define "title"}}Product Details{{end}}
 
 {{define "header"}}Product Details{{end}}
-{{define "subheader"}}{{.PageData.Product.Name}} ({{.PageData.Product.SKU}}){{end}}
+{{define "subheader"}}View product information and stock levels{{end}}
 
 {{define "main"}}
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="box box-primary">
-            <div class="box-body box-profile">
-                <img class="profile-user-img img-responsive img-circle" src="https://ui-avatars.com/api/?name={{.PageData.Product.Name}}&size=128" alt="Product picture">
-                <h3 class="profile-username text-center">{{.PageData.Product.Name}}</h3>
-                <p class="text-muted text-center">{{.PageData.Product.SKU}}</p>
-                <ul class="list-group list-group-unbordered">
-                    <li class="list-group-item">
-                        <b>Purchase Price</b> <a class="pull-right">${{.PageData.Product.PurchasePrice}}</a>
-                    </li>
-                    <li class="list-group-item">
-                        <b>Selling Price</b> <a class="pull-right">${{.PageData.Product.SellingPrice}}</a>
-                    </li>
-                    <li class="list-group-item">
-                        <b>Alert Quantity</b> <a class="pull-right">{{.PageData.Product.AlertQuantity}}</a>
-                    </li>
-                </ul>
-                <a href="/products/edit?id={{.PageData.Product.ID}}" class="btn btn-primary btn-block"><b>Edit Product</b></a>
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-info-circle"></i> Product Information</h3>
+                <div class="box-tools">
+                    <a href="/products/edit?id={{.PageData.Product.ID}}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i> Edit</a>
+                </div>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered">
+                    <tr>
+                        <th style="width:35%;">Product Type</th>
+                        <td>
+                            {{if eq .PageData.Product.ProductType "Protector"}}
+                            <span class="label" style="background:#2E7D32;font-size:13px;"><i class="fa fa-shield-alt"></i> Protector</span>
+                            {{else}}
+                            <span class="label" style="background:#0277BD;font-size:13px;"><i class="fa fa-mobile-alt"></i> Cover</span>
+                            {{end}}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Product Name</th>
+                        <td><strong>{{.PageData.Product.Name}}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>SKU</th>
+                        <td><code>{{.PageData.Product.SKU}}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Category (Type)</th>
+                        <td>{{.PageData.Product.CategoryName}}</td>
+                    </tr>
+                    <tr>
+                        <th>Phone Model</th>
+                        <td>{{.PageData.Product.BrandName}}</td>
+                    </tr>
+                    <tr>
+                        <th>Low Stock Alert</th>
+                        <td>
+                            {{if .PageData.Product.AlertQuantity}}
+                            <span class="label label-warning">{{.PageData.Product.AlertQuantity}} pcs</span>
+                            {{else}}
+                            <span class="text-muted">Not set</span>
+                            {{end}}
+                        </td>
+                    </tr>
+                    {{if .PageData.Product.Description}}
+                    <tr>
+                        <th>Description</th>
+                        <td>{{.PageData.Product.Description}}</td>
+                    </tr>
+                    {{end}}
+                </table>
             </div>
         </div>
     </div>
-    <div class="col-md-8">
-        <div class="nav-tabs-custom">
-            <ul class="nav nav-tabs">
-                <li class="active"><a href="#details" data-toggle="tab">Details</a></li>
-                <li><a href="#stock" data-toggle="tab">Stock History</a></li>
-            </ul>
-            <div class="tab-content">
-                <div class="active tab-pane" id="details">
-                    <strong><i class="fa fa-file-text-o margin-r-5"></i> Description</strong>
-                    <p class="text-muted">
-                        {{if .PageData.Product.Description}}{{.PageData.Product.Description}}{{else}}No description provided.{{end}}
-                    </p>
-                    <hr>
-                    <strong><i class="fa fa-calendar margin-r-5"></i> Created At</strong>
-                    <p class="text-muted">{{.PageData.Product.CreatedAt.Format "Jan 02, 2006"}}</p>
+    <div class="col-md-6">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-cubes"></i> Stock by Store</h3>
+                {{if or (eq $.Role "StoreKeeper") (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                <div class="box-tools">
+                    <a href="/purchases/create?product_id={{.PageData.Product.ID}}" class="btn btn-success btn-sm"><i class="fa fa-download"></i> Add Stock</a>
                 </div>
-                <div class="tab-pane" id="stock">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Location</th>
-                                <th>City</th>
-                                <th>Current Stock</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {{range .PageData.Stock}}
-                            <tr>
-                                <td>{{.LocationName}}</td>
-                                <td>{{.City}}</td>
-                                <td>
-                                    <span class="label {{if gt .Qty 0.0}}label-success{{else}}label-danger{{end}}">
-                                        {{.Qty}}
-                                    </span>
-                                </td>
-                            </tr>
-                            {{end}}
-                        </tbody>
-                    </table>
-                </div>
+                {{end}}
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Store</th>
+                            <th class="text-center">Quantity</th>
+                            <th class="text-center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{range .PageData.Stock}}
+                        <tr>
+                            <td>
+                                <strong>{{.LocationName}}</strong>
+                                {{if .City}}<br><small class="text-muted">{{.City}}</small>{{end}}
+                            </td>
+                            <td class="text-center" style="font-size:18px;font-weight:bold;">{{.Qty}}</td>
+                            <td class="text-center">
+                                {{if gt .Qty 50.0}}
+                                <span class="label label-success"><i class="fa fa-check"></i> In Stock</span>
+                                {{else if gt .Qty 0.0}}
+                                <span class="label label-warning"><i class="fa fa-exclamation-triangle"></i> Low Stock</span>
+                                {{else}}
+                                <span class="label label-danger"><i class="fa fa-times"></i> Out of Stock</span>
+                                {{end}}
+                            </td>
+                        </tr>
+                        {{end}}
+                    </tbody>
+                </table>
             </div>
         </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <a href="/products" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back to Products</a>
     </div>
 </div>
 {{end}}

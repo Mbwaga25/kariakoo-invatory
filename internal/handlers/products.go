@@ -42,8 +42,9 @@ func (app *Application) ProductList(w http.ResponseWriter, r *http.Request) {
 
 	categoryID, _ := strconv.Atoi(r.URL.Query().Get("category_id"))
 	brandID, _ := strconv.Atoi(r.URL.Query().Get("brand_id"))
+	productType := r.URL.Query().Get("product_type")
 	
-	products, err := app.Models.GetProductsByTenant(tenantID, locationID, categoryID, brandID)
+	products, err := app.Models.GetProductsByTenantFiltered(tenantID, locationID, productType, categoryID, brandID)
 	if err != nil {
 		log.Printf("ERROR GetProductsByTenant: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -55,20 +56,21 @@ func (app *Application) ProductList(w http.ResponseWriter, r *http.Request) {
 	locations, _ := app.Models.GetLocationsByTenant(tenantID)
 
 	app.RenderPage(w, r, "products/index", struct {
-		Products   []*models.Product
-		Categories []*models.Category
-		Brands     []*models.Brand
-		Locations  []*models.BusinessLocation
-		Filters    map[string]int
+		Products    []*models.Product
+		Categories  []*models.Category
+		Brands      []*models.Brand
+		Locations   []*models.BusinessLocation
+		Filters     map[string]interface{}
 	}{
 		Products:   products,
 		Categories: categories,
 		Brands:     brands,
 		Locations:  locations,
-		Filters: map[string]int{
-			"CategoryID": categoryID,
-			"BrandID":    brandID,
-			"LocationID": locationID,
+		Filters: map[string]interface{}{
+			"CategoryID":  categoryID,
+			"BrandID":     brandID,
+			"LocationID":  locationID,
+			"ProductType": productType,
 		},
 	})
 }
@@ -125,14 +127,41 @@ func (app *Application) ProductStore(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tenantID := middleware.GetTenantID(r.Context())
-	purchasePrice, _ := strconv.ParseFloat(r.FormValue("purchase_price"), 64)
-	sellingPrice, _ := strconv.ParseFloat(r.FormValue("selling_price"), 64)
 	alertQty, _ := strconv.ParseFloat(r.FormValue("alert_quantity"), 64)
 	
 	var unitID, categoryID, brandID *int
 	if id, _ := strconv.Atoi(r.FormValue("unit_id")); id > 0 { unitID = &id }
 	if id, _ := strconv.Atoi(r.FormValue("category_id")); id > 0 { categoryID = &id }
 	if id, _ := strconv.Atoi(r.FormValue("brand_id")); id > 0 { brandID = &id }
+
+	productType := r.FormValue("product_type")
+	if productType == "" {
+		productType = "Protector"
+	}
+
+	// Auto-generate product name from type + category + brand
+	name := r.FormValue("name")
+	if name == "" {
+		name = productType
+		if categoryID != nil {
+			cats, _ := app.Models.GetCategoriesByTenant(tenantID)
+			for _, c := range cats {
+				if c.ID == *categoryID {
+					name += " - " + c.Name
+					break
+				}
+			}
+		}
+		if brandID != nil {
+			brands, _ := app.Models.GetBrandsByTenant(tenantID)
+			for _, b := range brands {
+				if b.ID == *brandID {
+					name += " - " + b.Name
+					break
+				}
+			}
+		}
+	}
 
 	sku := r.FormValue("sku")
 	if sku == "" {
@@ -163,10 +192,9 @@ func (app *Application) ProductStore(w http.ResponseWriter, r *http.Request) {
 
 	p := &models.Product{
 		TenantID:      tenantID,
-		Name:          r.FormValue("name"),
+		ProductType:   productType,
+		Name:          name,
 		SKU:           sku,
-		PurchasePrice: purchasePrice,
-		SellingPrice:  sellingPrice,
 		AlertQuantity: app.Float64Ptr(alertQty),
 		UnitID:        unitID,
 		CategoryID:    categoryID,
@@ -350,8 +378,6 @@ func (app *Application) ProductUpdate(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	id, _ := strconv.Atoi(r.FormValue("id"))
 
-	purchasePrice, _ := strconv.ParseFloat(r.FormValue("purchase_price"), 64)
-	sellingPrice, _ := strconv.ParseFloat(r.FormValue("selling_price"), 64)
 	alertQty, _ := strconv.ParseFloat(r.FormValue("alert_quantity"), 64)
 	
 	var unitID, categoryID, brandID *int
@@ -359,13 +385,17 @@ func (app *Application) ProductUpdate(w http.ResponseWriter, r *http.Request) {
 	if cid, _ := strconv.Atoi(r.FormValue("category_id")); cid > 0 { categoryID = &cid }
 	if bid, _ := strconv.Atoi(r.FormValue("brand_id")); bid > 0 { brandID = &bid }
 
+	productType := r.FormValue("product_type")
+	if productType == "" {
+		productType = "Protector"
+	}
+
 	p := &models.Product{
 		ID:            id,
 		TenantID:      tenantID,
+		ProductType:   productType,
 		Name:          r.FormValue("name"),
 		SKU:           r.FormValue("sku"),
-		PurchasePrice: purchasePrice,
-		SellingPrice:  sellingPrice,
 		AlertQuantity: app.Float64Ptr(alertQty),
 		UnitID:        unitID,
 		CategoryID:    categoryID,
@@ -451,8 +481,13 @@ func (app *Application) ApiProductSearch(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	sqlQuery := "SELECT id, name, sku, selling_price FROM products WHERE tenant_id = ? AND (name LIKE ? OR sku LIKE ?) LIMIT 10"
-	rows, err := app.DB.Query(sqlQuery, tenantID, "%"+query+"%", "%"+query+"%")
+	sqlQuery := `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'),
+				 COALESCE(c.name, ''), COALESCE(b.name, '')
+				 FROM products p
+				 LEFT JOIN categories c ON p.category_id = c.id
+				 LEFT JOIN brands b ON p.brand_id = b.id
+				 WHERE p.tenant_id = ? AND (p.name LIKE ? OR p.sku LIKE ? OR c.name LIKE ? OR b.name LIKE ?) LIMIT 10`
+	rows, err := app.DB.Query(sqlQuery, tenantID, "%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%")
 	if err != nil {
 		app.jsonResponse(w, http.StatusOK, []interface{}{})
 		return
@@ -462,16 +497,130 @@ func (app *Application) ApiProductSearch(w http.ResponseWriter, r *http.Request)
 	var products []map[string]interface{}
 	for rows.Next() {
 		var id int
-		var name, sku string
-		var price float64
-		rows.Scan(&id, &name, &sku, &price)
+		var name, sku, pType, catName, brandName string
+		rows.Scan(&id, &name, &sku, &pType, &catName, &brandName)
 		products = append(products, map[string]interface{}{
-			"id": id,
-			"name": name,
-			"sku": sku,
-			"price": price,
+			"id":        id,
+			"name":      name,
+			"sku":       sku,
+			"type":      pType,
+			"category":  catName,
+			"brand":     brandName,
 		})
 	}
 
 	app.jsonResponse(w, http.StatusOK, products)
+}
+
+func (app *Application) ApiCategoryUpdate(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	var parentID *int
+	if pid, _ := strconv.Atoi(r.FormValue("parent_id")); pid > 0 {
+		parentID = &pid
+	}
+
+	c := &models.Category{
+		ID:          id,
+		TenantID:    tenantID,
+		ParentID:    parentID,
+		Name:        r.FormValue("name"),
+		Description: app.StringPtr(r.FormValue("description")),
+	}
+
+	err := app.Models.UpdateCategory(c)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiCategoryDelete(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	err := app.Models.DeleteCategory(id, tenantID)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiBrandUpdate(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	b := &models.Brand{
+		ID:          id,
+		TenantID:    tenantID,
+		Name:        r.FormValue("name"),
+		Description: app.StringPtr(r.FormValue("description")),
+	}
+
+	err := app.Models.UpdateBrand(b)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiBrandDelete(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	err := app.Models.DeleteBrand(id, tenantID)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiUnitUpdate(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	allowDecimal, _ := strconv.ParseBool(r.FormValue("allow_decimal"))
+	
+	u := &models.Unit{
+		ID:           id,
+		TenantID:     tenantID,
+		ActualName:   r.FormValue("actual_name"),
+		ShortName:    r.FormValue("short_name"),
+		AllowDecimal: allowDecimal,
+	}
+
+	err := app.Models.UpdateUnit(u)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiUnitDelete(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	err := app.Models.DeleteUnit(id, tenantID)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
+}
+
+func (app *Application) ApiProductDelete(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, _ := strconv.Atoi(r.FormValue("id"))
+	
+	err := app.Models.DeleteProduct(id, tenantID)
+	if err != nil {
+		app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": false, "message": err.Error()})
+		return
+	}
+	app.jsonResponse(w, http.StatusOK, map[string]interface{}{"success": true})
 }

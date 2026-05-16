@@ -94,11 +94,12 @@ func (m *Models) GetProfitLossReport(tenantID int, start, end time.Time) (*Profi
 }
 
 func (m *Models) GetStockReport(tenantID int) ([]*StockReport, error) {
-	query := `SELECT p.name, p.sku, COALESCE(SUM(pl.qty_available), 0) as current_stock, p.purchase_price
+	query := `SELECT p.name, p.sku, COALESCE(SUM(pl.qty_available), 0) as current_stock
 			  FROM products p
 			  LEFT JOIN product_locations pl ON p.id = pl.product_id
 			  WHERE p.tenant_id = ?
-			  GROUP BY p.id`
+			  GROUP BY p.id
+			  ORDER BY p.product_type, p.name`
 	
 	rows, err := m.DB.Query(query, tenantID)
 	if err != nil {
@@ -109,12 +110,11 @@ func (m *Models) GetStockReport(tenantID int) ([]*StockReport, error) {
 	var reports []*StockReport
 	for rows.Next() {
 		var sr StockReport
-		var purchasePrice float64
-		err := rows.Scan(&sr.ProductName, &sr.SKU, &sr.CurrentStock, &purchasePrice)
+		err := rows.Scan(&sr.ProductName, &sr.SKU, &sr.CurrentStock)
 		if err != nil {
 			return nil, err
 		}
-		sr.StockValue = sr.CurrentStock * purchasePrice
+		sr.StockValue = 0
 		reports = append(reports, &sr)
 	}
 

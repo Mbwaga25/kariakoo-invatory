@@ -99,9 +99,19 @@ func main() {
 
 	// Quick Add APIs
 	mux.Handle("/api/categories/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiCategoryStore))))
+	mux.Handle("/api/categories/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiCategoryUpdate))))
+	mux.Handle("/api/categories/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiCategoryDelete))))
+	
 	mux.Handle("/api/brands/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiBrandStore))))
+	mux.Handle("/api/brands/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiBrandUpdate))))
+	mux.Handle("/api/brands/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiBrandDelete))))
+	
 	mux.Handle("/api/units/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiUnitStore))))
+	mux.Handle("/api/units/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiUnitUpdate))))
+	mux.Handle("/api/units/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiUnitDelete))))
+	
 	mux.Handle("/api/products/search", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiProductSearch))))
+	mux.Handle("/api/products/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiProductDelete))))
 	mux.Handle("/api/contacts/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactStoreQuick))))
 
 	// Sales Routes
@@ -113,6 +123,7 @@ func main() {
 	mux.Handle("/purchases", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseList))))
 	mux.Handle("/purchases/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseCreate))))
 	mux.Handle("/purchases/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseStore))))
+	mux.Handle("/purchases/view", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseView))))
 
 	// Stock Transfer Routes
 	mux.Handle("/stock-transfers", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockTransferList))))

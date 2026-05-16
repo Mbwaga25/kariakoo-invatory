@@ -29,23 +29,21 @@ func (app *Application) PurchaseList(w http.ResponseWriter, r *http.Request) {
 func (app *Application) PurchaseCreate(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	
-	// Get optional pre-selected product
-	preselectedID, _ := strconv.Atoi(r.URL.Query().Get("product_id"))
-	
-	products, _ := app.Models.GetProductsByTenant(tenantID, 0, 0, 0)
+	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, 0, "", 0, 0)
 	locations, _ := app.Models.GetLocationsByTenant(tenantID)
-	suppliers, _ := app.Models.GetContactsByTenant(tenantID, "supplier")
+	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
+	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 
 	app.RenderPage(w, r, "purchases/create", struct {
-		Products             []*models.Product
-		Locations            []*models.BusinessLocation
-		Suppliers            []*models.Contact
-		PreselectedProductID int
+		Products   []*models.Product
+		Locations  []*models.BusinessLocation
+		Categories []*models.Category
+		Brands     []*models.Brand
 	}{
-		Products:             products,
-		Locations:            locations,
-		Suppliers:            suppliers,
-		PreselectedProductID: preselectedID,
+		Products:   products,
+		Locations:  locations,
+		Categories: categories,
+		Brands:     brands,
 	})
 }
 
@@ -62,7 +60,6 @@ func (app *Application) PurchaseStore(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	locationID, _ := strconv.Atoi(r.FormValue("location_id"))
-	supplierID, _ := strconv.Atoi(r.FormValue("supplier_id"))
 	refNo := r.FormValue("ref_no")
 	
 	p := &models.Purchase{
@@ -75,30 +72,24 @@ func (app *Application) PurchaseStore(w http.ResponseWriter, r *http.Request) {
 		CreatedBy:          &user.ID,
 	}
 
-	if supplierID > 0 {
-		p.SupplierID = &supplierID
-	}
-
+	// No supplier needed
 	p.FinalTotal = 0
 	
 	productIDs := r.Form["product_id[]"]
 	quantities := r.Form["quantity[]"]
-	prices := r.Form["purchase_price[]"]
 
 	for i, pidStr := range productIDs {
 		productID, _ := strconv.Atoi(pidStr)
 		qty, _ := strconv.ParseFloat(quantities[i], 64)
-		price, _ := strconv.ParseFloat(prices[i], 64)
 
 		if productID > 0 && qty > 0 {
 			item := &models.PurchaseItem{
 				ProductID:     productID,
 				Quantity:      qty,
-				PurchasePrice: price,
-				LineTotal:     qty * price,
+				PurchasePrice: 0, // No price tracking
+				LineTotal:     0,
 			}
 			p.Items = append(p.Items, item)
-			p.FinalTotal += item.LineTotal
 		}
 	}
 
@@ -115,3 +106,25 @@ func (app *Application) PurchaseStore(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/purchases", http.StatusSeeOther)
 }
+
+func (app *Application) PurchaseView(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	purchase, err := app.Models.GetPurchaseByID(id, tenantID)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	app.RenderPage(w, r, "purchases/view", struct {
+		Purchase *models.Purchase
+	}{
+		Purchase: purchase,
+	})
+}
+

@@ -105,3 +105,44 @@ func (m *Models) InsertPurchase(p *Purchase) (int64, error) {
 	err = tx.Commit()
 	return purchaseID, err
 }
+
+func (m *Models) GetPurchaseByID(id int, tenantID int) (*Purchase, error) {
+	query := `SELECT id, tenant_id, business_location_id, supplier_id, ref_no, purchase_date, status, payment_status, total_before_tax, tax_amount, discount_amount, final_total, created_by, created_at 
+			  FROM purchases WHERE id = ? AND tenant_id = ?`
+	
+	p := &Purchase{}
+	err := m.DB.QueryRow(query, id, tenantID).Scan(
+		&p.ID, &p.TenantID, &p.BusinessLocationID, &p.SupplierID, &p.RefNo, &p.PurchaseDate, 
+		&p.Status, &p.PaymentStatus, &p.TotalBeforeTax, &p.TaxAmount, &p.DiscountAmount, &p.FinalTotal, 
+		&p.CreatedBy, &p.CreatedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get items
+	itemsQuery := `SELECT pi.id, pi.purchase_id, pi.product_id, pi.quantity, pi.purchase_price, pi.line_total, p.name, p.sku 
+				   FROM purchase_items pi
+				   JOIN products p ON pi.product_id = p.id
+				   WHERE pi.purchase_id = ?`
+	
+	rows, err := m.DB.Query(itemsQuery, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		item := &PurchaseItem{}
+		err := rows.Scan(
+			&item.ID, &item.PurchaseID, &item.ProductID, &item.Quantity, &item.PurchasePrice, &item.LineTotal,
+			&item.ProductName, &item.SKU,
+		)
+		if err != nil {
+			return nil, err
+		}
+		p.Items = append(p.Items, item)
+	}
+
+	return p, nil
+}
