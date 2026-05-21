@@ -27,9 +27,17 @@ type DashboardData struct {
 	StockAlerts         []*Product
 	RecentSales         []*Sale
 	RecentTransfers     []*StockTransfer
+	RecentOrders        []*StoreOrder
 	PendingOrders       []*Sale
 	PendingInvoices     []*Sale
+	DailyOrderFlow      []DailyOrderFlow
 }
+
+type DailyOrderFlow struct {
+	Date  string
+	Count int
+}
+
 
 type MonthlySale struct {
 	Date  string
@@ -65,6 +73,17 @@ type RegisterReport struct {
 	ClosedAt     *time.Time
 	ClosingAmount float64
 }
+
+type StockMovement struct {
+	Date         time.Time
+	ProductName  string
+	LocationName string
+	Type         string // Purchase, Sale, StoreOrder, BulkOrder
+	RefNo        string
+	Quantity     float64
+	Flow         string // IN / OUT
+}
+
 
 func (m *Models) GetProfitLossReport(tenantID int, start, end time.Time) (*ProfitLossReport, error) {
 	var report ProfitLossReport
@@ -207,15 +226,20 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 	// 6. Net (Sales - Expenses)
 	data.Net = data.TotalSales - data.TotalExpenses
 
-	// 7. Stock Alerts (All time, usually not filtered by date)
-	err = m.DB.QueryRow(`
-		SELECT COUNT(*) FROM product_locations pl
-		JOIN products p ON pl.product_id = p.id
-		WHERE p.tenant_id = ? AND pl.qty_available < 10
-	`, tenantID).Scan(&data.StockAlertsCount)
+	// 7. Stock Alerts (Filtered by location if provided)
+	alertQuery := "SELECT COUNT(*) FROM product_locations pl JOIN products p ON pl.product_id = p.id WHERE p.tenant_id = ?"
+	alertArgs := []interface{}{tenantID}
+	if locationID != nil && *locationID > 0 {
+		alertQuery += " AND pl.location_id = ?"
+		alertArgs = append(alertArgs, *locationID)
+	}
+	alertQuery += " AND pl.qty_available < COALESCE(p.alert_quantity, 10)"
+
+	err = m.DB.QueryRow(alertQuery, alertArgs...).Scan(&data.StockAlertsCount)
 	if err != nil {
 		return nil, err
 	}
+
 
 	// 7b. Stock Alerts Details
 	rows, err := m.DB.Query(`
@@ -278,6 +302,37 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 		}
 	}
 
+	// 10b. Recent Store/Bulk Orders
+	ordersQuery := `
+		SELECT o.id, o.ref_no, o.order_type, o.total_amount, o.status, o.created_at, 
+		       u.name as placed_by_name, 
+		       COALESCE(bl_from.name, '') as from_location_name,
+		       COALESCE(bl_to.name, '') as to_location_name
+		FROM orders o
+		JOIN users u ON o.placed_by = u.id
+		LEFT JOIN business_locations bl_from ON o.from_store_id = bl_from.id
+		LEFT JOIN business_locations bl_to ON o.to_location_id = bl_to.id
+		WHERE o.tenant_id = ?
+	`
+	ordersArgs := []interface{}{tenantID}
+	if locationID != nil && *locationID > 0 {
+		ordersQuery += " AND (o.from_store_id = ? OR o.to_location_id = ?)"
+		ordersArgs = append(ordersArgs, *locationID, *locationID)
+	}
+	ordersQuery += " ORDER BY o.created_at DESC LIMIT 10"
+
+	rows, err = m.DB.Query(ordersQuery, ordersArgs...)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var o StoreOrder
+			rows.Scan(&o.ID, &o.RefNo, &o.OrderType, &o.TotalAmount, &o.Status, &o.CreatedAt, 
+				&o.PlacedByName, &o.FromLocationName, &o.ToLocationName)
+			data.RecentOrders = append(data.RecentOrders, &o)
+		}
+	}
+
+
 	// 11. Pending Orders (status not final)
 	rows, err = m.DB.Query(`
 		SELECT id, invoice_no, final_total, transaction_date, status
@@ -306,8 +361,25 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 		}
 	}
 
+	// 12. Daily Order Flow (Last 30 days)
+	rows, err = m.DB.Query(`
+		SELECT DATE(created_at) as d, COUNT(*) 
+		FROM orders 
+		WHERE tenant_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+		GROUP BY d ORDER BY d ASC
+	`, tenantID)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var dof DailyOrderFlow
+			rows.Scan(&dof.Date, &dof.Count)
+			data.DailyOrderFlow = append(data.DailyOrderFlow, dof)
+		}
+	}
+
 	return data, nil
 }
+
 
 func (m *Models) GetPurchaseSellReport(tenantID int, start, end time.Time) (*PurchaseSellReport, error) {
 	report := &PurchaseSellReport{}
@@ -373,4 +445,144 @@ func (m *Models) GetExpenseReport(tenantID int, start, end time.Time) ([]*Expens
 	}
 	return reports, nil
 }
+
+func (m *Models) GetLocationStockReport(tenantID int) (interface{}, []string, error) {
+	locations, _ := m.GetLocationsByTenant(tenantID)
+	var locNames []string
+	locMap := make(map[int]string)
+	for _, l := range locations {
+		locNames = append(locNames, l.Name)
+		locMap[l.ID] = l.Name
+	}
+
+	query := `SELECT p.id, p.name, bl.id as loc_id, COALESCE(pl.qty_available, 0)
+			  FROM products p
+			  CROSS JOIN business_locations bl
+			  LEFT JOIN product_locations pl ON p.id = pl.product_id AND bl.id = pl.location_id
+			  WHERE p.tenant_id = ? AND bl.tenant_id = ?
+			  ORDER BY p.name, bl.name`
+	
+	rows, err := m.DB.Query(query, tenantID, tenantID)
+	if err != nil {
+		return nil, nil, err
+	}
+	defer rows.Close()
+
+	type ProductStockRow struct {
+		Product *Product
+		Stock   map[string]float64
+	}
+	var report []ProductStockRow
+	prodMap := make(map[int]int) // Maps pID to index in report slice
+
+	for rows.Next() {
+		var pID int
+		var pName string
+		var locID int
+		var qty float64
+		rows.Scan(&pID, &pName, &locID, &qty)
+		
+		idx, ok := prodMap[pID]
+		if !ok {
+			p := &Product{ID: pID, Name: pName}
+			idx = len(report)
+			prodMap[pID] = idx
+			report = append(report, ProductStockRow{
+				Product: p,
+				Stock:   make(map[string]float64),
+			})
+		}
+		report[idx].Stock[locMap[locID]] = qty
+	}
+
+	return report, locNames, nil
+}
+
+
+
+func (m *Models) GetStockHistory(tenantID int, start, end time.Time, productID int) ([]*StockMovement, error) {
+	var movements []*StockMovement
+
+	// Helper to add product filter
+	prodFilter := ""
+	if productID > 0 {
+		prodFilter = fmt.Sprintf(" AND prod.id = %d ", productID)
+	}
+
+	// 1. Purchases (Stock IN)
+	queryPurchases := fmt.Sprintf(`SELECT p.purchase_date, prod.name, bl.name, 'Purchase', p.ref_no, pi.quantity, 'IN'
+					   FROM purchase_items pi
+					   JOIN purchases p ON pi.purchase_id = p.id
+					   JOIN products prod ON pi.product_id = prod.id
+					   JOIN business_locations bl ON p.business_location_id = bl.id
+					   WHERE p.tenant_id = ? %s AND p.purchase_date BETWEEN ? AND ?`, prodFilter)
+	
+	rows, err := m.DB.Query(queryPurchases, tenantID, start, end)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var sm StockMovement
+			rows.Scan(&sm.Date, &sm.ProductName, &sm.LocationName, &sm.Type, &sm.RefNo, &sm.Quantity, &sm.Flow)
+			movements = append(movements, &sm)
+		}
+	}
+
+	// 2. Sales (Stock OUT)
+	querySales := fmt.Sprintf(`SELECT s.transaction_date, prod.name, bl.name, 'Sale', s.invoice_no, si.quantity, 'OUT'
+				   FROM sale_items si
+				   JOIN sales s ON si.sale_id = s.id
+				   JOIN products prod ON si.product_id = prod.id
+				   JOIN business_locations bl ON s.business_location_id = bl.id
+				   WHERE s.tenant_id = ? %s AND s.status = 'final' AND s.transaction_date BETWEEN ? AND ?`, prodFilter)
+	
+	rows, err = m.DB.Query(querySales, tenantID, start, end)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var sm StockMovement
+			rows.Scan(&sm.Date, &sm.ProductName, &sm.LocationName, &sm.Type, &sm.RefNo, &sm.Quantity, &sm.Flow)
+			movements = append(movements, &sm)
+		}
+	}
+
+	// 3. Orders (Transfers)
+	queryOrdersOut := fmt.Sprintf(`SELECT o.created_at, prod.name, bl.name, 'StoreOrder (Source)', o.ref_no, oi.quantity, 'OUT'
+					   FROM order_items oi
+					   JOIN orders o ON oi.order_id = o.id
+					   JOIN products prod ON oi.product_id = prod.id
+					   JOIN business_locations bl ON o.from_store_id = bl.id
+					   WHERE o.tenant_id = ? %s AND o.status = 'accepted' AND o.created_at BETWEEN ? AND ?`, prodFilter)
+	
+	rows, err = m.DB.Query(queryOrdersOut, tenantID, start, end)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var sm StockMovement
+			rows.Scan(&sm.Date, &sm.ProductName, &sm.LocationName, &sm.Type, &sm.RefNo, &sm.Quantity, &sm.Flow)
+			movements = append(movements, &sm)
+		}
+	}
+
+	queryOrdersIn := fmt.Sprintf(`SELECT o.created_at, prod.name, bl.name, 'StoreOrder (Dest)', o.ref_no, oi.quantity, 'IN'
+					  FROM order_items oi
+					  JOIN orders o ON oi.order_id = o.id
+					  JOIN products prod ON oi.product_id = prod.id
+					  JOIN business_locations bl ON o.to_location_id = bl.id
+					  WHERE o.tenant_id = ? %s AND o.status = 'accepted' AND o.created_at BETWEEN ? AND ?`, prodFilter)
+	
+	rows, err = m.DB.Query(queryOrdersIn, tenantID, start, end)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var sm StockMovement
+			rows.Scan(&sm.Date, &sm.ProductName, &sm.LocationName, &sm.Type, &sm.RefNo, &sm.Quantity, &sm.Flow)
+			movements = append(movements, &sm)
+		}
+	}
+
+	return movements, nil
+}
+
+
+
 

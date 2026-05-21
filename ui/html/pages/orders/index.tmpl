@@ -101,7 +101,7 @@
                             <th>Ref No</th>
                             <th>Type</th>
                             <th>Placed By</th>
-                            <th>Location</th>
+                            <th>Source -> Destination</th>
                             <th>Total ({{.CurrencySymbol}})</th>
                             <th>Status</th>
                             <th>Payment</th>
@@ -121,7 +121,16 @@
                                 {{end}}
                             </td>
                             <td>{{.PlacedByName}}</td>
-                            <td>{{.ToLocationName}}</td>
+<td>
+    {{if .FromLocationName}}
+    <small class="text-danger">{{.FromLocationName}}</small> <i class="fa fa-arrow-right" style="font-size:10px;"></i> 
+    {{end}}
+    {{if eq .OrderType "BulkOrder"}}
+    <small class="text-success">{{.OrderFrom}}</small>
+    {{else}}
+    <small class="text-success">{{.ToLocationName}}</small>
+    {{end}}
+</td>
                             <td>{{$.CurrencySymbol}} {{printf "%.2f" .TotalAmount}}</td>
                             <td>
                                 <span class="badge-{{.Status}}">{{.Status}}</span>

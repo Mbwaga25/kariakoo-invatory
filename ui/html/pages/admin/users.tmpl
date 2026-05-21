@@ -26,19 +26,31 @@
                     </div>
                     <div class="form-group">
                         <label>Role:*</label>
-                        <select name="role" class="form-control" required>
+                        <select name="role" id="role" class="form-control" required>
                             <option value="StoreKeeper">Store Keeper (Manage Stock & Orders)</option>
                             <option value="ShopKeeper">Shop Keeper (Place Orders)</option>
-                            {{if or (eq .PageData.UserRole "SuperAdmin")}}
+                            {{if eq .PageData.UserRole "SuperAdmin"}}
                             <option value="ShopAdmin">Shop Admin (New Tenant)</option>
                             {{end}}
                         </select>
                         <div style="margin-top:10px;padding:10px;background:#F0F4F8;border-radius:8px;font-size:12px;">
-                            <p style="margin:3px 0;"><span class="role-storekeeper">Store Keeper</span> — Manages stock, receives & processes orders</p>
-                            <p style="margin:3px 0;"><span class="role-shopkeeper">Shop Keeper</span> — Places store & bulk orders</p>
-                            <p style="margin:3px 0;"><span class="role-shopadmin">Shop Admin</span> — Creates a new tenant</p>
+                            <p style="margin:3px 0;"><span class="role-storekeeper">Store Keeper</span> - Manages stock, receives and processes orders</p>
+                            <p style="margin:3px 0;"><span class="role-shopkeeper">Shop Keeper</span> - Places store and bulk orders</p>
+                            <p style="margin:3px 0;"><span class="role-shopadmin">Shop Admin</span> - Creates a new tenant</p>
                         </div>
                     </div>
+                    {{if gt (len .PageData.Locations) 0}}
+                    <div class="form-group" id="location_group" style="display:none;">
+                        <label>Location:*</label>
+                        <select name="location_id" id="location_id" class="form-control">
+                            <option value="">-- Select Location --</option>
+                            {{range .PageData.Locations}}
+                            <option value="{{.ID}}">{{if .TenantName}}{{.TenantName}} - {{end}}{{.Name}}{{if .LocationType}} ({{.LocationType}}){{end}}</option>
+                            {{end}}
+                        </select>
+                        <p class="help-block">Required for Store Keeper and Shop Keeper users.</p>
+                    </div>
+                    {{end}}
                 </div>
                 <div class="box-footer">
                     <button type="submit" class="btn btn-primary btn-block">
@@ -94,6 +106,25 @@
 {{define "scripts"}}
 <script>
 $(document).ready(function() {
+    const locationGroup = $('#location_group');
+    const roleSelect = $('#role');
+
+    function toggleLocationField() {
+        if (!locationGroup.length) {
+            return;
+        }
+
+        if (roleSelect.val() === 'ShopAdmin') {
+            locationGroup.hide();
+            $('#location_id').val('');
+        } else {
+            locationGroup.show();
+        }
+    }
+
+    roleSelect.on('change', toggleLocationField);
+    toggleLocationField();
+
     $('#usersTable').DataTable({"pageLength": 25});
 });
 </script>

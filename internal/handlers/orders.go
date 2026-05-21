@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"kariakoo/inventory/internal/middleware"
 	"kariakoo/inventory/internal/models"
@@ -53,10 +54,12 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 		locationID = *user.LocationID
 	}
 	
-	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, locationID, "", 0, 0)
+	// Load the full tenant catalog so the searchable picker can find every product.
+	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, 0, "", 0, 0)
 	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
 	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 	customers, _ := app.Models.GetContactsByTenant(tenantID, "customer")
+	locations, _ := app.Models.GetLocationsByTenant(tenantID)
 
 	orderType := r.URL.Query().Get("type")
 	if orderType == "" {
@@ -68,12 +71,14 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 		Categories []*models.Category
 		Brands     []*models.Brand
 		Customers  []*models.Contact
+		Locations  []*models.BusinessLocation
 		OrderType  string
 	}{
 		Products:   products,
 		Categories: categories,
 		Brands:     brands,
 		Customers:  customers,
+		Locations:  locations,
 		OrderType:  orderType,
 	})
 }
@@ -134,17 +139,64 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 		amountPaid, _ = strconv.ParseFloat(r.FormValue("amount_paid"), 64)
 	}
 
+	toLocID, _ := strconv.Atoi(r.FormValue("to_location_id"))
+	if toLocID == 0 {
+		toLocID = locationID
+	}
+
+	fromLocID, _ := strconv.Atoi(r.FormValue("from_location_id"))
+	if orderType == "StoreOrder" {
+		if fromLocID == 0 {
+			http.Error(w, "Please select a source store", http.StatusBadRequest)
+			return
+		}
+		if toLocID == 0 {
+			http.Error(w, "Please select a destination shop", http.StatusBadRequest)
+			return
+		}
+	}
+
+	if orderType == "BulkOrder" && toLocID == 0 {
+		http.Error(w, "Unable to determine the destination location", http.StatusBadRequest)
+		return
+	}
+	
 	order := &models.StoreOrder{
 		TenantID:      tenantID,
 		OrderType:     orderType,
 		RefNo:         refNo,
 		PlacedBy:      user.ID,
 		OrderFrom:     orderFrom,
-		ToLocationID:  locationID, // Auto-set from user's location
+		ToLocationID:  toLocID,
 		Status:        "pending",
 		PaymentStatus: paymentStatus,
 		AmountPaid:    amountPaid,
 		Notes:         notes,
+	}
+
+	if orderType == "StoreOrder" {
+		order.FromStoreID = &fromLocID
+	} else if orderType == "BulkOrder" {
+		locations, err := app.Models.GetLocationsByTenant(tenantID)
+		if err != nil {
+			http.Error(w, "Unable to load tenant locations", http.StatusInternalServerError)
+			return
+		}
+
+		sourceStore := locationByID(locations, fromLocID)
+		if sourceStore != nil && !strings.EqualFold(sourceStore.LocationType, "store") {
+			http.Error(w, "Bulk orders must be assigned to a store location", http.StatusBadRequest)
+			return
+		}
+		if sourceStore == nil {
+			sourceStore = firstStoreLocation(locations)
+		}
+		if sourceStore == nil {
+			http.Error(w, "No store location is available to process this order", http.StatusBadRequest)
+			return
+		}
+
+		order.FromStoreID = &sourceStore.ID
 	}
 
 	var totalAmount float64
@@ -281,7 +333,11 @@ func (app *Application) OrderAccept(w http.ResponseWriter, r *http.Request) {
 	err := app.Models.AcceptOrder(id, tenantID, user.ID, locID)
 	if err != nil {
 		log.Printf("ERROR OrderAccept Model: %v", err)
-		http.Error(w, "Error accepting order: "+err.Error(), http.StatusInternalServerError)
+		status := http.StatusBadRequest
+		if strings.Contains(strings.ToLower(err.Error()), "not found") {
+			status = http.StatusNotFound
+		}
+		http.Error(w, "Error accepting order: "+err.Error(), status)
 		return
 	}
 
@@ -301,11 +357,19 @@ func (app *Application) OrderReject(w http.ResponseWriter, r *http.Request) {
 	idStr := r.FormValue("order_id")
 	id, _ := strconv.Atoi(idStr)
 	reason := r.FormValue("reason")
+	if reason == "" {
+		http.Error(w, "Please provide a rejection reason", http.StatusBadRequest)
+		return
+	}
 
 	err := app.Models.RejectOrder(id, tenantID, user.ID, reason)
 	if err != nil {
 		log.Printf("ERROR OrderReject: %v", err)
-		http.Error(w, "Error rejecting order", http.StatusInternalServerError)
+		status := http.StatusBadRequest
+		if strings.Contains(strings.ToLower(err.Error()), "not found") {
+			status = http.StatusNotFound
+		}
+		http.Error(w, "Error rejecting order: "+err.Error(), status)
 		return
 	}
 

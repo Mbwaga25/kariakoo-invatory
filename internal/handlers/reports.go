@@ -32,16 +32,18 @@ func (app *Application) ProfitLossReport(w http.ResponseWriter, r *http.Request)
 func (app *Application) StockReport(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	
-	reports, err := app.Models.GetStockReport(tenantID)
+	report, locNames, err := app.Models.GetLocationStockReport(tenantID)
 	if err != nil {
 		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	app.RenderPage(w, r, "reports/stock", struct {
-		StockReports []*models.StockReport
+		StockMatrix   interface{}
+		LocationNames []string
 	}{
-		StockReports: reports,
+		StockMatrix:   report,
+		LocationNames: locNames,
 	})
 }
 
@@ -109,3 +111,25 @@ func (app *Application) ExpenseReport(w http.ResponseWriter, r *http.Request) {
 		End:      end,
 	})
 }
+
+func (app *Application) StockHistoryReport(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	start, end := app.ParseDateRange(r)
+
+	movements, err := app.Models.GetStockHistory(tenantID, start, end, 0)
+	if err != nil {
+		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	app.RenderPage(w, r, "reports/stock_history", struct {
+		Movements []*models.StockMovement
+		Start     time.Time
+		End       time.Time
+	}{
+		Movements: movements,
+		Start:     start,
+		End:       end,
+	})
+}
+

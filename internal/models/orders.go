@@ -80,10 +80,12 @@ func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string
 			  o.total_amount, o.amount_paid, o.remaining_amount, 
 			  COALESCE(o.notes, ''), o.created_at,
 			  u.name as placed_by_name,
-			  COALESCE(bl.name, '') as to_location_name
+			  COALESCE(bl_to.name, '') as to_location_name,
+			  COALESCE(bl_from.name, '') as from_location_name
 			  FROM orders o
 			  JOIN users u ON o.placed_by = u.id
-			  LEFT JOIN business_locations bl ON o.to_location_id = bl.id
+			  LEFT JOIN business_locations bl_to ON o.to_location_id = bl_to.id
+			  LEFT JOIN business_locations bl_from ON o.from_store_id = bl_from.id
 			  WHERE o.tenant_id = ?`
 	
 	args := []interface{}{tenantID}
@@ -92,7 +94,7 @@ func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string
 		query += " AND o.placed_by = ?"
 		args = append(args, userID)
 	} else if role == "StoreKeeper" {
-		query += " AND o.to_location_id = ?"
+		query += " AND o.from_store_id = ?"
 		args = append(args, locationID)
 	}
 
@@ -120,7 +122,7 @@ func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string
 			&o.OrderFrom, &o.ToLocationID, &o.Status, &o.PaymentStatus,
 			&o.TotalAmount, &o.AmountPaid, &o.RemainingAmount,
 			&o.Notes, &o.CreatedAt,
-			&o.PlacedByName, &o.ToLocationName)
+			&o.PlacedByName, &o.ToLocationName, &o.FromLocationName)
 		if err != nil {
 			return nil, fmt.Errorf("scan order: %v", err)
 		}
@@ -138,11 +140,13 @@ func (m *Models) GetOrderByID(id int, tenantID int) (*StoreOrder, error) {
 			  COALESCE(o.notes, ''), o.created_at,
 			  u.name as placed_by_name,
 			  COALESCE(pu.name, '') as processed_by_name,
-			  COALESCE(bl.name, '') as to_location_name
+			  COALESCE(bl_to.name, '') as to_location_name,
+			  COALESCE(bl_from.name, '') as from_location_name
 			  FROM orders o
 			  JOIN users u ON o.placed_by = u.id
 			  LEFT JOIN users pu ON o.processed_by = pu.id
-			  LEFT JOIN business_locations bl ON o.to_location_id = bl.id
+			  LEFT JOIN business_locations bl_to ON o.to_location_id = bl_to.id
+			  LEFT JOIN business_locations bl_from ON o.from_store_id = bl_from.id
 			  WHERE o.id = ? AND o.tenant_id = ?`
 
 	var o StoreOrder
@@ -152,7 +156,7 @@ func (m *Models) GetOrderByID(id int, tenantID int) (*StoreOrder, error) {
 		&o.TotalAmount, &o.AmountPaid, &o.RemainingAmount,
 		&o.ProcessedBy, &o.ProcessedAt,
 		&o.Notes, &o.CreatedAt,
-		&o.PlacedByName, &o.ProcessedByName, &o.ToLocationName)
+		&o.PlacedByName, &o.ProcessedByName, &o.ToLocationName, &o.FromLocationName)
 	if err != nil {
 		return nil, err
 	}
@@ -221,12 +225,21 @@ func (m *Models) AcceptOrder(orderID int, tenantID int, processedBy int, locatio
 		return fmt.Errorf("database ping failed: %v", err)
 	}
 
-	// Fallback for locationID if it's 0 (e.g. SuperAdmin processing)
 	if locationID == 0 {
-		err := m.DB.QueryRow("SELECT id FROM business_locations WHERE tenant_id = ? ORDER BY id ASC LIMIT 1", tenantID).Scan(&locationID)
-		if err != nil {
-			return fmt.Errorf("could not find fallback location: %v", err)
-		}
+		return fmt.Errorf("no active location is assigned to this user")
+	}
+
+	var sourceLocationID int
+	err := m.DB.QueryRow(`SELECT COALESCE(from_store_id, 0) FROM orders WHERE id = ? AND tenant_id = ? AND status = 'pending'`,
+		orderID, tenantID).Scan(&sourceLocationID)
+	if err != nil {
+		return fmt.Errorf("order not found or not in pending status: %v", err)
+	}
+	if sourceLocationID == 0 {
+		return fmt.Errorf("this order does not have a source store assigned")
+	}
+	if sourceLocationID != locationID {
+		return fmt.Errorf("this order must be processed from the assigned source store")
 	}
 
 	tx, err := m.DB.Begin()
@@ -367,7 +380,7 @@ func (m *Models) GetOrderSummary(tenantID int, role string, locationID int, user
 		whereClause += " AND placed_by = ?"
 		args = append(args, userID)
 	} else if role == "StoreKeeper" {
-		whereClause += " AND to_location_id = ?"
+		whereClause += " AND from_store_id = ?"
 		args = append(args, locationID)
 	}
 
@@ -427,7 +440,7 @@ func (m *Models) GetPendingOrdersForStoreKeeper(tenantID int, locationID int) ([
 			  FROM orders o
 			  JOIN users u ON o.placed_by = u.id
 			  LEFT JOIN business_locations bl ON o.to_location_id = bl.id
-			  WHERE o.tenant_id = ? AND o.status = 'pending' AND o.to_location_id = ?
+			  WHERE o.tenant_id = ? AND o.status = 'pending' AND o.from_store_id = ?
 			  ORDER BY o.created_at DESC`
 
 	rows, err := m.DB.Query(query, tenantID, locationID)

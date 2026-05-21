@@ -5,48 +5,58 @@
 
 {{define "main"}}
 <div class="row">
-    <div class="col-md-4">
-        <div class="info-box">
-            <span class="info-box-icon bg-blue"><i class="fa fa-boxes"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Stock Value</span>
-                <span class="info-box-number">
-                    {{$total := 0.0}}
-                    {{range .PageData.StockReports}}{{$total = (add $total .StockValue)}}{{end}}
-                    ${{printf "%.2f" $total}}
-                </span>
-            </div>
-        </div>
+    <div class="col-md-12 text-right" style="margin-bottom:15px;">
+        <a href="/reports/stock-history" class="btn btn-primary"><i class="fa fa-history"></i> Detailed Stock History Ledger</a>
     </div>
+</div>
+<div class="row">
+    <!-- Summary can be added here if needed in future -->
 </div>
 
 <div class="box box-primary">
-    <div class="box-header with-border">
-        <h3 class="box-title">Inventory Valuation</h3>
+    <div class="box-header with-border" style="background:#1B2A4A;color:#fff;border-radius:12px 12px 0 0;">
+        <h3 class="box-title" style="color:#fff;"><i class="fa fa-map-marked-alt"></i> Stock Distribution by Location</h3>
     </div>
     <div class="box-body">
         <div class="table-responsive">
             <table class="table table-bordered table-striped datatable" id="stock_report_table">
                 <thead>
-                    <tr>
-                        <th>Product Name</th>
-                        <th>SKU</th>
-                        <th>Current Stock</th>
-                        <th>Inventory Value (at cost)</th>
+                    <tr style="background:#F0F4F8;">
+                        <th style="min-width:200px;">Product Name</th>
+                        {{range .PageData.LocationNames}}
+                        <th class="text-center">{{.}}</th>
+                        {{end}}
+                        <th class="text-center" style="background:#E3F2FD;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {{range .PageData.StockReports}}
+                    {{range $row := .PageData.StockMatrix}}
                     <tr>
-                        <td>{{.ProductName}}</td>
-                        <td>{{.SKU}}</td>
-                        <td>{{.CurrentStock}}</td>
-                        <td>${{.StockValue}}</td>
+                        <td>
+                            <a href="/products/view?id={{$row.Product.ID}}" class="tw-font-bold text-primary" style="font-size:14px;">
+                                <i class="fa fa-search-plus"></i> {{$row.Product.Name}}
+                            </a>
+                        </td>
+                        {{$rowTotal := 0.0}}
+                        {{range $locName := $.PageData.LocationNames}}
+                            {{$qty := (index $row.Stock $locName)}}
+                            <td class="text-center" style="{{if eq $qty 0.0}}color:#ccc;{{else}}font-weight:bold;{{if lt $qty 10.0}}color:#C62828;{{end}}{{end}}">
+                                {{if eq $qty 0.0}}0{{else}}{{printf "%.0f" $qty}}{{end}}
+                            </td>
+                            {{$rowTotal = (add $rowTotal $qty)}}
+                        {{end}}
+                        <td class="text-center" style="background:#F1F8E9;font-weight:bold;font-size:15px;">
+                            {{printf "%.0f" $rowTotal}}
+                        </td>
                     </tr>
                     {{end}}
                 </tbody>
             </table>
         </div>
     </div>
+</div>
+
+<div class="alert alert-info" style="margin-top:20px;background:#E3F2FD;border:1px solid #B3E5FC;color:#01579B;">
+    <i class="fa fa-info-circle"></i> <strong>Note:</strong> Red numbers indicate stock below alert level (10 units).
 </div>
 {{end}}

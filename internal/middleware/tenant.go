@@ -45,6 +45,13 @@ func TenantContext(models *models.Models) func(http.Handler) http.Handler {
 				activeLocationID = *user.LocationID
 			}
 
+			// Existing users created before location assignment support should still land on a real location.
+			if activeLocationID == 0 && user.TenantID != nil {
+				if locations, err := models.GetLocationsByTenant(*user.TenantID); err == nil && len(locations) > 0 {
+					activeLocationID = locations[0].ID
+				}
+			}
+
 			if activeLocationID != 0 {
 				ctx = context.WithValue(ctx, locationContextKey, activeLocationID)
 			}

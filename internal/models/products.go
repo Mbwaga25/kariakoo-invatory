@@ -269,17 +269,24 @@ func (m *Models) InsertUnit(u *Unit) (int64, error) {
 }
 
 // GetLowStockProducts returns products below their alert_quantity threshold
-func (m *Models) GetLowStockProducts(tenantID int) ([]*Product, error) {
+func (m *Models) GetLowStockProductsByLocation(tenantID int, locationID int) ([]*Product, error) {
 	query := `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
 			  COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
 			  FROM products p
 			  LEFT JOIN product_locations pl ON p.id = pl.product_id
-			  WHERE p.tenant_id = ?
-			  GROUP BY p.id
+			  WHERE p.tenant_id = ?`
+	
+	params := []interface{}{tenantID}
+	if locationID > 0 {
+		query += " AND pl.location_id = ? "
+		params = append(params, locationID)
+	}
+
+	query += ` GROUP BY p.id
 			  HAVING total_qty < COALESCE(p.alert_quantity, 50)
 			  ORDER BY total_qty ASC`
 	
-	rows, err := m.DB.Query(query, tenantID)
+	rows, err := m.DB.Query(query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -295,6 +302,11 @@ func (m *Models) GetLowStockProducts(tenantID int) ([]*Product, error) {
 	}
 	return products, nil
 }
+
+func (m *Models) GetLowStockProducts(tenantID int) ([]*Product, error) {
+	return m.GetLowStockProductsByLocation(tenantID, 0)
+}
+
 func (m *Models) UpdateCategory(c *Category) error {
 	_, err := m.DB.Exec("UPDATE categories SET name=?, description=?, parent_id=? WHERE id=? AND tenant_id=?", c.Name, c.Description, c.ParentID, c.ID, c.TenantID)
 	return err

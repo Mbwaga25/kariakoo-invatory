@@ -35,23 +35,23 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Get dashboard data
-	dashboardData, err := app.Models.GetDashboardData(tenantID, nil, start, end)
+	// Get dashboard data (Location specific)
+	dashboardData, err := app.Models.GetDashboardData(tenantID, &locationID, start, end)
 	if err != nil {
 		log.Printf("ERROR GetDashboardData: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	// Get order summary
+	// Get order summary (Location specific)
 	role := ""
 	if user != nil {
 		role = user.Role
 	}
 	orderSummary, _ := app.Models.GetOrderSummary(tenantID, role, locationID, user.ID)
 
-	// Get low stock alerts
-	lowStockProducts, _ := app.Models.GetLowStockProducts(tenantID)
+	// Get low stock alerts (Location specific)
+	lowStockProducts, _ := app.Models.GetLowStockProductsByLocation(tenantID, locationID)
 
 	// Get best selling products
 	bestSelling, _ := app.Models.GetBestSellingProducts(tenantID, 5)

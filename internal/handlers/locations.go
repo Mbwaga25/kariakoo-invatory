@@ -37,10 +37,11 @@ func (app *Application) LocationStore(w http.ResponseWriter, r *http.Request) {
 		TenantID:   tenantID,
 		Name:       r.FormValue("name"),
 		LocationID: r.FormValue("location_id"),
-		City:       r.FormValue("city"),
-		State:      r.FormValue("state"),
-		Country:    r.FormValue("country"),
-		ZipCode:    r.FormValue("zip_code"),
+		City:         r.FormValue("city"),
+		State:        r.FormValue("state"),
+		Country:      r.FormValue("country"),
+		ZipCode:      r.FormValue("zip_code"),
+		LocationType: r.FormValue("location_type"),
 	}
 
 	_, err := app.Models.InsertLocation(l)
@@ -67,10 +68,11 @@ func (app *Application) LocationUpdate(w http.ResponseWriter, r *http.Request) {
 		TenantID:   tenantID,
 		Name:       r.FormValue("name"),
 		LocationID: r.FormValue("location_id"),
-		City:       r.FormValue("city"),
-		State:      r.FormValue("state"),
-		Country:    r.FormValue("country"),
-		ZipCode:    r.FormValue("zip_code"),
+		City:         r.FormValue("city"),
+		State:        r.FormValue("state"),
+		Country:      r.FormValue("country"),
+		ZipCode:      r.FormValue("zip_code"),
+		LocationType: r.FormValue("location_type"),
 	}
 
 	err := app.Models.UpdateLocation(l)

@@ -1,0 +1,17 @@
+./auth.go
+./contacts.go
+./dashboard.go
+./expenses.go
+./guards.go
+./handlers.go
+./location_helpers.go
+./locations.go
+./orders.go
+./products.go
+./purchases.go
+./reports.go
+./sales.go
+./settings.go
+./stock_adjustments.go
+./stock_transfers.go
+./users.go

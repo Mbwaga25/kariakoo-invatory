@@ -3,238 +3,152 @@
 {{define "subheader"}}Business Overview{{end}}
 
 {{define "main"}}
-<!-- Date Filter -->
+<!-- Dashboard Overview -->
 <div class="row">
-    <div class="col-md-12">
-        <div class="box box-primary">
-            <div class="box-body">
-                <form action="/" method="GET" class="form-inline">
-                    <div class="form-group">
-                        <label>From: </label>
-                        <input type="date" name="start_date" class="form-control" value="{{.PageData.Start.Format "2006-01-02"}}">
-                    </div>
-                    <div class="form-group tw-ml-2">
-                        <label>To: </label>
-                        <input type="date" name="end_date" class="form-control" value="{{.PageData.End.Format "2006-01-02"}}">
-                    </div>
-                    <button type="submit" class="btn btn-primary tw-ml-2"><i class="fa fa-filter"></i> Filter</button>
-                    <a href="/" class="btn btn-default tw-ml-2">Today</a>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Order Summary Cards -->
-{{if .PageData.OrderSummary}}
-<div class="row">
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #1B2A4A;">
-            <div class="stat-number" style="color:#1B2A4A;">{{.PageData.OrderSummary.TotalOrders}}</div>
-            <div class="stat-label">Total Orders</div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #F9A825;">
-            <div class="stat-number" style="color:#F9A825;">{{.PageData.OrderSummary.PendingOrders}}</div>
-            <div class="stat-label">Pending</div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #2E7D32;">
-            <div class="stat-number" style="color:#2E7D32;">{{.PageData.OrderSummary.AcceptedOrders}}</div>
-            <div class="stat-label">Accepted</div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #C62828;">
-            <div class="stat-number" style="color:#C62828;">{{.PageData.OrderSummary.RejectedOrders}}</div>
-            <div class="stat-label">Rejected</div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #2E7D32;">
-            <div class="stat-number" style="color:#2E7D32;">{{.PageData.OrderSummary.PaidCount}}</div>
-            <div class="stat-label">Paid</div>
-        </div>
-    </div>
-    <div class="col-md-2 col-sm-4 col-xs-6">
-        <div class="stat-card" style="border-left:4px solid #E65100;">
-            <div class="stat-number" style="color:#E65100;">{{.PageData.OrderSummary.UnpaidCount}}</div>
-            <div class="stat-label">Unpaid</div>
-        </div>
-    </div>
-</div>
-<br>
-{{end}}
-
-<!-- Financial Info boxes -->
-<div class="row">
-    <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box">
-            <span class="info-box-icon bg-aqua"><i class="fa fa-shopping-cart"></i></span>
+    <!-- Stat Cards -->
+    <div class="col-md-3 col-sm-6">
+        <div class="info-box bg-navy">
+            <span class="info-box-icon"><i class="fa fa-shopping-basket"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Total Sales</span>
-                <span class="info-box-number">{{.CurrencySymbol}}{{printf "%.2f" .PageData.Data.TotalSales}}</span>
+                <span class="info-box-text">Total Orders</span>
+                <span class="info-box-number">{{.PageData.OrderSummary.TotalOrders}}</span>
+                <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                <span class="progress-description">All-time order volume</span>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box">
-            <span class="info-box-icon bg-green"><i class="fa fa-money-bill-wave"></i></span>
+    <div class="col-md-3 col-sm-6">
+        <div class="info-box bg-orange">
+            <span class="info-box-icon"><i class="fa fa-clock"></i></span>
             <div class="info-box-content">
-                <span class="info-box-text">Net Profit</span>
-                <span class="info-box-number">{{printf "%.2f" .PageData.Data.Net}}</span>
+                <span class="info-box-text">Pending Orders</span>
+                <span class="info-box-number">{{.PageData.OrderSummary.PendingOrders}}</span>
+                <div class="progress"><div class="progress-bar" style="width: 70%"></div></div>
+                <span class="progress-description">Awaiting processing</span>
             </div>
         </div>
     </div>
-
-    <div class="col-md-3 col-sm-6 col-xs-12">
-        <div class="info-box">
-            <span class="info-box-icon bg-purple"><i class="fa fa-minus-circle"></i></span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Expense</span>
-                <span class="info-box-number">{{.CurrencySymbol}}{{printf "%.2f" .PageData.Data.TotalExpenses}}</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 col-sm-6 col-xs-12">
+    <div class="col-md-3 col-sm-6">
         <div class="info-box bg-red">
-            <span class="info-box-icon"><i class="fa fa-boxes"></i></span>
+            <span class="info-box-icon"><i class="fa fa-exclamation-triangle"></i></span>
             <div class="info-box-content">
                 <span class="info-box-text">Stock Alerts</span>
                 <span class="info-box-number">{{.PageData.Data.StockAlertsCount}}</span>
-                <span class="progress-description">Items below alert level</span>
+                <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                <span class="progress-description">Items below threshold</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="info-box bg-green">
+            <span class="info-box-icon"><i class="fa fa-check-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Accepted Orders</span>
+                <span class="info-box-number">{{.PageData.OrderSummary.AcceptedOrders}}</span>
+                <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                <span class="progress-description">Successfully dispatched</span>
             </div>
         </div>
     </div>
 </div>
 
-<!-- LOW STOCK ALERTS - Most Important -->
-{{if .PageData.LowStock}}
-<div class="row">
-    <div class="col-md-12">
-        <div class="box box-danger">
-            <div class="box-header with-border" style="background:#FFEBEE;border-radius:12px 12px 0 0;">
-                <h3 class="box-title" style="color:#C62828;">
-                    <i class="fa fa-exclamation-triangle"></i> LOW STOCK ALERTS — Restock Needed!
-                </h3>
-                <span class="label label-danger pull-right" style="font-size:14px;">{{len .PageData.LowStock}} items</span>
-            </div>
-            <div class="box-body no-padding">
-                <table class="table table-condensed table-striped">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Type</th>
-                            <th class="text-center">Current Stock</th>
-                            <th class="text-center">Alert Level</th>
-                            <th class="text-center">Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{range .PageData.LowStock}}
-                        <tr>
-                            <td><strong>{{.Name}}</strong> <small class="text-muted">({{.SKU}})</small></td>
-                            <td>
-                                {{if eq .ProductType "Protector"}}
-                                <span class="label" style="background:#2E7D32;">Protector</span>
-                                {{else}}
-                                <span class="label" style="background:#0277BD;">Cover</span>
-                                {{end}}
-                            </td>
-                            <td class="text-center">
-                                <span class="label label-danger" style="font-size:14px;">{{printf "%.0f" .LocationQty}}</span>
-                            </td>
-                            <td class="text-center">
-                                {{if .AlertQuantity}}<span class="label label-warning">{{printf "%.0f" .AlertQuantity}}</span>{{end}}
-                            </td>
-                            <td class="text-center">
-                                {{if gt .LocationQty 0.0}}
-                                <span style="color:#E65100;font-weight:bold;">⚠ Low</span>
-                                {{else}}
-                                <span style="color:#C62828;font-weight:bold;">🚫 OUT</span>
-                                {{end}}
-                            </td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
-            </div>
-            <div class="box-footer text-center">
-                <a href="/purchases/create" class="btn btn-danger"><i class="fa fa-download"></i> Add Stock Now</a>
-                <a href="/products" class="btn btn-default" style="margin-left:10px;">View All Products</a>
-            </div>
-        </div>
-    </div>
-</div>
-{{end}}
-
-<!-- Best Selling & Recent Activity -->
-<div class="row">
-    {{if .PageData.BestSelling}}
-    <div class="col-md-6">
-        <div class="box box-success">
-            <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-trophy"></i> Best Selling Products</h3>
-            </div>
-            <div class="box-body no-padding">
-                <table class="table table-condensed">
-                    <tr><th>#</th><th>Product</th><th class="text-center">Qty Sold</th></tr>
-                    {{range $i, $p := .PageData.BestSelling}}
-                    <tr>
-                        <td><span class="label" style="background:#1B2A4A;">{{$i}}</span></td>
-                        <td><strong>{{$p.Name}}</strong> <small class="text-muted">({{$p.SKU}})</small></td>
-                        <td class="text-center"><span class="label label-success" style="font-size:13px;">{{printf "%.0f" $p.LocationQty}}</span></td>
-                    </tr>
-                    {{end}}
-                </table>
-            </div>
-        </div>
-    </div>
-    {{end}}
-
-    <div class="col-md-6">
-        <div class="box box-info">
-            <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-clock"></i> Recent Sales</h3>
-            </div>
-            <div class="box-body no-padding">
-                <table class="table table-condensed">
-                    <tr><th>Invoice</th><th>Total</th><th>Status</th></tr>
-                    {{range .PageData.Data.RecentSales}}
-                    <tr>
-                        <td>{{.InvoiceNo}}</td>
-                        <td>{{$.CurrencySymbol}}{{printf "%.2f" .FinalTotal}}</td>
-                        <td><span class="label label-success">{{.Status}}</span></td>
-                    </tr>
-                    {{else}}
-                    <tr><td colspan="3" class="text-center">No recent sales</td></tr>
-                    {{end}}
-                </table>
-            </div>
-            <div class="box-footer text-center">
-                <a href="/sales">View All Sales</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Sales Chart -->
+<!-- Order Flow Chart -->
 <div class="row">
     <div class="col-md-12">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title"><i class="fa fa-chart-line"></i> Sales Last 30 Days</h3>
+                <h3 class="box-title"><i class="fa fa-chart-line"></i> Logistics Flow: Daily Order Frequency (Last 30 Days)</h3>
                 <div class="box-tools pull-right">
                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
                 </div>
             </div>
             <div class="box-body">
                 <div class="chart">
-                    <canvas id="salesChart" style="height: 300px;"></canvas>
+                    <canvas id="orderFlowChart" style="height: 250px;"></canvas>
+                </div>
+            </div>
+            <div class="box-footer">
+                <div class="row">
+                    <div class="col-sm-3 col-xs-6">
+                        <div class="description-block border-right">
+                            <h5 class="description-header text-primary">{{.PageData.OrderSummary.TotalOrders}}</h5>
+                            <span class="description-text">TOTAL FLOW</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-xs-6">
+                        <div class="description-block border-right">
+                            <h5 class="description-header text-yellow">{{.PageData.OrderSummary.PendingOrders}}</h5>
+                            <span class="description-text">IN TRANSIT</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-xs-6">
+                        <div class="description-block border-right">
+                            <h5 class="description-header text-green">{{.PageData.OrderSummary.AcceptedOrders}}</h5>
+                            <span class="description-text">COMPLETED</span>
+                        </div>
+                    </div>
+                    <div class="col-sm-3 col-xs-6">
+                        <div class="description-block">
+                            <h5 class="description-header text-red">{{.PageData.Data.StockAlertsCount}}</h5>
+                            <span class="description-text">CRITICAL ALERTS</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Order Flow Table -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-exchange-alt"></i> Recent Order Traffic</h3>
+                <div class="pull-right">
+                    <a href="/orders" class="btn btn-xs btn-default">View All Traffic</a>
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead style="background:#F4F7F9;">
+                            <tr>
+                                <th>Ref No</th>
+                                <th>Type</th>
+                                <th>Routing (Source → Destination)</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Timestamp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.Data.RecentOrders}}
+                            <tr>
+                                <td><code>{{.RefNo}}</code></td>
+                                <td>
+                                    {{if eq .OrderType "StoreOrder"}}
+                                    <span class="label" style="background:#2E7D32;">STORE-TO-SHOP</span>
+                                    {{else}}
+                                    <span class="label" style="background:#0277BD;">BULK-DISPATCH</span>
+                                    {{end}}
+                                </td>
+                                <td>
+                                    {{if .FromLocationName}}
+                                    <span class="text-danger">{{.FromLocationName}}</span> 
+                                    <i class="fa fa-long-arrow-alt-right" style="margin:0 5px;"></i>
+                                    {{end}}
+                                    <span class="text-success">{{.ToLocationName}}</span>
+                                </td>
+                                <td>{{$.CurrencySymbol}}{{printf "%.2f" .TotalAmount}}</td>
+                                <td><span class="badge-{{.Status}}">{{.Status}}</span></td>
+                                <td>{{.CreatedAt.Format "Jan 02, 15:04"}}</td>
+                            </tr>
+                            {{else}}
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No recent traffic detected.</td></tr>
+                            {{end}}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -246,49 +160,42 @@
 {{define "scripts"}}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        
-        const labels = [
-            {{range .PageData.Data.MonthlySales}}
-            "{{.Date}}",
-            {{end}}
-        ];
-        
-        const data = [
-            {{range .PageData.Data.MonthlySales}}
-            {{.Total}},
-            {{end}}
-        ];
+$(function () {
+    var ctx = document.getElementById('orderFlowChart').getContext('2d');
+    var chartData = {
+        labels: [{{range .PageData.Data.DailyOrderFlow}}'{{.Date}}',{{end}}],
+        datasets: [{
+            label: 'Orders Dispatched',
+            data: [{{range .PageData.Data.DailyOrderFlow}}{{.Count}},{{end}}],
+            backgroundColor: 'rgba(27, 42, 74, 0.1)',
+            borderColor: '#1B2A4A',
+            borderWidth: 2,
+            pointRadius: 4,
+            pointBackgroundColor: '#1B2A4A',
+            fill: true,
+            tension: 0.4
+        }]
+    };
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Daily Sales',
-                    data: data,
-                    borderColor: 'rgba(60,141,188,0.8)',
-                    backgroundColor: 'rgba(60,141,188,0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return '{{.CurrencySymbol}}' + value;
-                            }
-                        }
-                    }
+    new Chart(ctx, {
+        type: 'line',
+        data: chartData,
+        options: {
+            maintainAspectRatio: false,
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
                 }
+            },
+            plugins: {
+                legend: { display: false }
             }
-        });
+        }
     });
+});
 </script>
 {{end}}
+
+

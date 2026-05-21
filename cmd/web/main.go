@@ -51,9 +51,34 @@ func main() {
 	mux := http.NewServeMux()
 
 	// Serve static assets from ui/static
-	staticDir := filepath.Join("ui", "static")
+	wd, _ := os.Getwd()
+	log.Printf("Current working directory: %s", wd)
+
+	staticDir := "ui/static"
+	if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+		staticDir = "../ui/static"
+		if _, err := os.Stat(staticDir); os.IsNotExist(err) {
+			staticDir = "invatory/ui/static"
+		}
+	}
+	
+	absStaticDir, _ := filepath.Abs(staticDir)
+	log.Printf("Serving static files from: %s", absStaticDir)
+
+	
 	fileServer := http.FileServer(http.Dir(staticDir))
-	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
+	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+	
+	mux.HandleFunc("/test-static", func(w http.ResponseWriter, r *http.Request) {
+		exists := "NO"
+		if _, err := os.Stat(staticDir); err == nil {
+			exists = "YES"
+		}
+		fmt.Fprintf(w, "WD: %s\nStaticDir: %s\nAbsStaticDir: %s\nExists: %s", wd, staticDir, absStaticDir, exists)
+	})
+
+
+
 
 	// Public Routes
 	mux.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
@@ -148,6 +173,7 @@ func main() {
 	// Report Routes
 	mux.Handle("/reports/profit-loss", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ProfitLossReport))))
 	mux.Handle("/reports/stock", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockReport))))
+	mux.Handle("/reports/stock-history", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.StockHistoryReport))))
 	mux.Handle("/reports/register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterReport))))
 	mux.Handle("/reports/purchase-sell", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseSellReport))))
 	mux.Handle("/reports/expense", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseReport))))
@@ -174,11 +200,11 @@ func main() {
 		"/discount":             "sales/discount",
 		"/subscriptions":        "admin/subscriptions",
 		"/tenants":              "admin/tenants",
-		"/users":                "admin/users",
 	}
 
 	// User Management Routes
 	mux.Handle("/users/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.UserStore))))
+	mux.Handle("/users", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.UserList))))
 	mux.Handle("/users-list", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.UserList))))
 
 	// Business Settings Routes

@@ -105,6 +105,67 @@
         </div>
     </div>
 </div>
+
+<!-- STOCK MOVEMENT HISTORY -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-info">
+            <div class="box-header with-border" style="background:#E3F2FD;">
+                <h3 class="box-title" style="color:#1B2A4A;"><i class="fa fa-history"></i> Recent Stock Movements (Last 30 Days)</h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead>
+                            <tr style="background:#F8FAFC;">
+                                <th>Date & Time</th>
+                                <th>Location</th>
+                                <th>Event Type</th>
+                                <th>Reference</th>
+                                <th class="text-center">Qty</th>
+                                <th class="text-center">Flow</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.History}}
+                            <tr>
+                                <td>{{.Date.Format "Jan 02, 2006 15:04"}}</td>
+                                <td>{{.LocationName}}</td>
+                                <td>
+                                    {{if eq .Type "Purchase"}}
+                                    <span class="label label-success">RESTOCK</span>
+                                    {{else if eq .Type "Sale"}}
+                                    <span class="label label-danger">SALE</span>
+                                    {{else}}
+                                    <span class="label label-info">TRANSFER</span>
+                                    {{end}}
+                                </td>
+                                <td><code>{{.RefNo}}</code></td>
+                                <td class="text-center"><strong>{{printf "%.0f" .Quantity}}</strong></td>
+                                <td class="text-center">
+                                    {{if eq .Flow "IN"}}
+                                    <span class="text-success" style="font-weight:bold;"><i class="fa fa-arrow-up"></i> IN</span>
+                                    {{else}}
+                                    <span class="text-danger" style="font-weight:bold;"><i class="fa fa-arrow-down"></i> OUT</span>
+                                    {{end}}
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr><td colspan="6" class="text-center text-muted" style="padding:20px;">No recent movements recorded for this product.</td></tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="box-footer">
+                <p class="text-muted small"><i class="fa fa-info-circle"></i> This ledger shows how this specific product has flowed in and out of your locations via sales, purchases, and internal transfers.</p>
+            </div>
+        </div>
+    </div>
+</div>
 <div class="row">
     <div class="col-md-12">
         <a href="/products" class="btn btn-default"><i class="fa fa-arrow-left"></i> Back to Products</a>

@@ -35,6 +35,19 @@
                         <p style="font-weight:700;font-size:15px;">{{.PageData.Order.CreatedAt.Format "Jan 02, 2006 15:04"}}</p>
                     </div>
                 </div>
+                {{if eq .PageData.Order.OrderType "StoreOrder"}}
+                <div class="row" style="margin-bottom:20px;">
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">SOURCE (FROM)</p>
+                        <p style="font-weight:700;font-size:15px;color:#C62828;"><i class="fa fa-map-marker-alt"></i> {{.PageData.Order.FromLocationName}}</p>
+                    </div>
+                    <div class="col-md-4">
+                        <p style="margin:3px 0;color:#888;font-size:12px;">DESTINATION (TO)</p>
+                        <p style="font-weight:700;font-size:15px;color:#2E7D32;"><i class="fa fa-map-pin"></i> {{.PageData.Order.ToLocationName}}</p>
+                    </div>
+                </div>
+                {{end}}
+
                 {{if .PageData.Order.OrderFrom}}
                 <div class="row" style="margin-bottom:20px;">
                     <div class="col-md-4">

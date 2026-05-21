@@ -76,12 +76,20 @@
             .then(data => {
                 console.log("Server response:", data);
                 if (data.success === "true") {
-                    toastr.success(data.msg);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.msg);
+                    } else {
+                        console.log("Toastr not loaded, redirecting immediately...");
+                    }
                     setTimeout(() => {
                         window.location.href = data.redirect;
                     }, 1000);
                 } else {
-                    toastr.error(data.msg);
+                    if (typeof toastr !== 'undefined') {
+                        toastr.error(data.msg);
+                    } else {
+                        alert(data.msg);
+                    }
                     btn.disabled = false;
                     btn.innerText = originalBtnText;
                 }
@@ -89,10 +97,15 @@
             .catch(error => {
                 console.error("Fetch Error:", error);
                 const msg = "An error occurred. Please try again.";
-                toastr.error(msg);
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(msg);
+                } else {
+                    alert(msg);
+                }
                 btn.disabled = false;
                 btn.innerText = originalBtnText;
             });
+
         });
     });
 </script>
