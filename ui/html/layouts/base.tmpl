@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>{{template "title" .}} - Inventory SaaS</title>
+    <title>{{template "title" .}} - Classic Store</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta name="csrf-token" content="go-csrf-token-placeholder">
 
@@ -19,14 +19,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700" rel="stylesheet">
 
+    <style>
+        .skin-blue .main-header .navbar {
+            background-color: #0B4E9A !important;
+        }
+        .skin-blue .main-header .logo {
+            background-color: #083c76 !important;
+        }
+        .skin-blue .main-header .logo:hover {
+            background-color: #083c76 !important;
+        }
+        .skin-blue .main-header .navbar .sidebar-toggle:hover {
+            background-color: #083c76 !important;
+        }
+        .main-footer {
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+        }
+    </style>
     {{block "styles" .}}{{end}}
 </head>
-<body class="hold-transition skin-blue-light sidebar-mini fixed {{block "bodyClass" .}}{{end}}">
+<body class="hold-transition skin-blue sidebar-mini fixed {{block "bodyClass" .}}{{end}}">
     <div class="wrapper">
         <header class="main-header">
-            <a href="/" class="logo">
-                <span class="logo-mini"><b>IS</b></span>
-                <span class="logo-lg"><b>Inventory</b>SaaS</span>
+            <a href="/" class="logo" style="display:flex;align-items:center;justify-content:center;">
+                <span class="logo-mini"><img src="/static/img/logo.png?v=3" style="height:30px;max-width:40px;object-fit:contain;margin:auto;" alt="CS"/></span>
+                <span class="logo-lg"><img src="/static/img/logo.png?v=3" style="height:45px;max-width:200px;object-fit:contain;margin:auto;" alt="Classic Store"/></span>
             </a>
 
             <nav class="navbar navbar-static-top">
@@ -326,7 +344,7 @@
             <div class="pull-right hidden-xs">
                 Version 1.0.0
             </div>
-            <strong>Copyright &copy; 2026 <a href="#">Kariakoo POS</a>.</strong>
+            <strong>Copyright &copy; 2026 <a href="#">Classic Store</a>.</strong>
         </footer>
     </div>
 

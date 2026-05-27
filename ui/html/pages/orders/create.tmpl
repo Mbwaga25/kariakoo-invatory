@@ -324,20 +324,20 @@
                                     <small class="help-block">Source must be a <b>Store</b></small>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label><i class="fa fa-map-pin text-success"></i> Destination (Order To):*</label>
-                                    <select name="to_location_id" id="toLocationSelect" class="form-control" required>
-                                        <option value="">-- Select Destination Shop --</option>
-                                        {{range .PageData.Locations}}
-                                        {{if eq .LocationType "shop"}}
-                                        <option value="{{.ID}}">{{.Name}}</option>
-                                        {{end}}
-                                        {{end}}
-                                    </select>
-                                    <small class="help-block">Destination must be a <b>Shop</b></small>
-                                </div>
-                            </div>
+<div class="col-md-6">
+    <div class="form-group">
+        <label><i class="fa fa-map-pin text-success"></i> Destination:*</label>
+        <select name="to_location_id" id="toLocationSelect" class="form-control" required>
+            <option value="">-- Select Destination Shop --</option>
+            {{range .PageData.Locations}}
+            {{if eq .LocationType "shop"}}
+            <option value="{{.ID}}">{{.Name}}</option>
+            {{end}}
+            {{end}}
+        </select>
+        <small class="help-block">Destination must be a <b>Shop</b></small>
+    </div>
+</div>
                         </div>
                         {{end}}
 

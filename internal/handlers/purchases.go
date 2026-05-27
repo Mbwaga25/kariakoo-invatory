@@ -31,6 +31,7 @@ func (app *Application) PurchaseCreate(w http.ResponseWriter, r *http.Request) {
 	
 	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, 0, "", 0, 0)
 	locations, _ := app.Models.GetLocationsByTenant(tenantID)
+	locations = storeLocationsOnly(locations)
 	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
 	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 
