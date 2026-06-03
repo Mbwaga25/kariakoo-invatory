@@ -1,0 +1,429 @@
+{{define "title"}}Invoice - {{.PageData.Order.RefNo}}{{end}}
+{{define "header"}}Invoice Preview{{end}}
+{{define "subheader"}}{{.PageData.Order.RefNo}}{{end}}
+
+{{define "styles"}}
+<style>
+    /* Invoice Card Styling */
+    .invoice-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    #invoice-card {
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 40px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        color: #333;
+        font-family: 'Source Sans Pro', sans-serif;
+    }
+
+    .invoice-header {
+        border-bottom: 2px solid #3c8dbc;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+
+    .invoice-logo {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1B2A4A;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .invoice-title-block {
+        text-align: right;
+    }
+
+    .invoice-title-block h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        color: #3c8dbc;
+    }
+
+    .invoice-meta-info {
+        margin-top: 5px;
+        color: #666;
+    }
+
+    .invoice-details-grid {
+        margin-bottom: 30px;
+    }
+
+    .details-box {
+        margin-bottom: 20px;
+    }
+
+    .details-box h5 {
+        margin: 0 0 8px 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .details-box p {
+        margin: 0;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+
+    .details-box strong {
+        color: #1B2A4A;
+    }
+
+    .invoice-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    .invoice-items-table th {
+        background: #f5f5f5;
+        border-bottom: 2px solid #ddd;
+        padding: 12px 10px;
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #555;
+    }
+
+    .invoice-items-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #eee;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+
+    .invoice-items-table tr:hover {
+        background: #fafafa;
+    }
+
+    .invoice-summary {
+        margin-top: 20px;
+    }
+
+    .summary-table {
+        width: 100%;
+        max-width: 350px;
+        margin-left: auto;
+    }
+
+    .summary-table td {
+        padding: 8px 10px;
+        font-size: 14px;
+        border-bottom: 1px solid #f1f1f1;
+    }
+
+    .summary-table tr.total-row td {
+        font-size: 18px;
+        font-weight: 700;
+        color: #3c8dbc;
+        border-bottom: 2px double #3c8dbc;
+        background: #f9f9f9;
+    }
+
+    .payment-history-section {
+        margin-top: 40px;
+        border-top: 1px dashed #ddd;
+        padding-top: 30px;
+    }
+
+    .payment-history-section h4 {
+        margin-top: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1B2A4A;
+        margin-bottom: 15px;
+    }
+
+    .action-buttons-panel {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 25px;
+        margin-bottom: 40px;
+    }
+
+    /* Print styling to strip down UI frame when printing */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .invoice-container, .invoice-container * {
+            visibility: visible;
+        }
+        .invoice-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        #invoice-card {
+            border: none;
+            box-shadow: none;
+            padding: 0;
+        }
+        .action-buttons-panel, .main-footer, .main-header, .main-sidebar, .content-header, .no-print, .no-print * {
+            display: none !important;
+            visibility: hidden !important;
+        }
+    }
+</style>
+{{end}}
+
+{{define "main"}}
+<div class="invoice-container">
+    
+    <!-- Action buttons -->
+    <div class="action-buttons-panel">
+        <a href="/orders" class="btn btn-default btn-lg"><i class="fa fa-arrow-left"></i> Back to Orders</a>
+        <button id="btnPrint" class="btn btn-primary btn-lg" onclick="window.print()"><i class="fa fa-print"></i> Print Invoice</button>
+        <button id="btnDownload" class="btn btn-success btn-lg"><i class="fa fa-download"></i> Download PDF</button>
+    </div>
+
+    <!-- Invoice Sheet Card -->
+    <div id="invoice-card">
+        
+        <!-- Header -->
+        <div class="invoice-header">
+            <div class="row">
+                <div class="col-xs-6">
+                    <div class="invoice-logo">{{if .PageData.Business.BusinessName}}{{.PageData.Business.BusinessName}}{{else}}Classic Store{{end}}</div>
+                    <p style="margin: 5px 0 0 0; color: #777; font-size: 13px;">
+                        <i class="fa fa-map-marker-alt"></i> Quality wholesale & retail stock distribution.<br>
+                        Contact support for any balance or delivery inquiries.
+                    </p>
+                </div>
+                <div class="col-xs-6 text-right">
+                    <div class="invoice-title-block">
+                        <h1>INVOICE</h1>
+                        <div class="invoice-meta-info">
+                            <strong>Order Ref:</strong> {{.PageData.Order.RefNo}}<br>
+                            <strong>Date:</strong> {{.PageData.Order.CreatedAt.Format "Jan 02, 2006"}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Grid -->
+        <div class="invoice-details-grid">
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="details-box">
+                        <h5>Billed To (Customer)</h5>
+                        {{if .PageData.Order.OrderFrom}}
+                        <p><strong>{{.PageData.Order.OrderFrom}}</strong></p>
+                        <p style="color:#666;font-size:13px;">Bulk Purchase Customer</p>
+                        {{else}}
+                        <p><strong>{{.PageData.Order.ToLocationName}}</strong></p>
+                        <p style="color:#666;font-size:13px;">Shop Branch Stock Request</p>
+                        {{end}}
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="details-box">
+                        <h5>Order Details</h5>
+                        <p><strong>Type:</strong> {{if eq .PageData.Order.OrderType "StoreOrder"}}Store Order{{else}}Bulk Order{{end}}</p>
+                        <p><strong>Status:</strong> <span class="badge-{{.PageData.Order.Status}}" style="padding: 2px 8px; font-size: 11px;">{{.PageData.Order.Status}}</span></p>
+                        <p><strong>Payment:</strong> <span class="badge-{{.PageData.Order.PaymentStatus}}" style="padding: 2px 8px; font-size: 11px;">{{.PageData.Order.PaymentStatus}}</span></p>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="details-box">
+                        <h5>Origin Store Location</h5>
+                        <p><strong>{{.PageData.Order.FromLocationName}}</strong></p>
+                        <p style="color:#666;font-size:13px;">Placed By: {{.PageData.Order.PlacedByName}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="invoice-items-table">
+            <thead>
+                <tr>
+                    <th style="width: 45%;">Item Description</th>
+                    <th style="width: 15%; text-align: center;">Qty</th>
+                    <th style="width: 20%; text-align: right;">Unit Price</th>
+                    <th style="width: 20%; text-align: right;">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .PageData.Order.Items}}
+                <tr>
+                    <td>
+                        <strong>{{.ProductName}}</strong><br>
+                        <small style="color: #888;">{{.CategoryName}} | {{.BrandName}} — SKU: {{.ProductSKU}}</small>
+                    </td>
+                    <td style="text-align: center; font-weight: 600;">{{printf "%.0f" .Quantity}}</td>
+                    <td style="text-align: right;">{{$.CurrencySymbol}} {{printf "%.2f" .UnitPrice}}</td>
+                    <td style="text-align: right; font-weight: 600;">{{$.CurrencySymbol}} {{printf "%.2f" .Subtotal}}</td>
+                </tr>
+                {{else}}
+                <tr><td colspan="4" style="text-align: center; color: #888;">No items in this order.</td></tr>
+                {{end}}
+            </tbody>
+        </table>
+
+        <!-- Summary & Totals -->
+        <div class="row invoice-summary">
+            <div class="col-xs-6">
+                {{if .PageData.Order.Notes}}
+                <div style="background: #fdfae6; border-left: 4px solid #f0ad4e; padding: 12px 15px; border-radius: 4px; font-size: 13px; color: #666; font-style: italic; margin-bottom: 10px;">
+                    <strong>Invoice Note:</strong> {{.PageData.Order.Notes}}
+                </div>
+                {{end}}
+                {{if .PageData.InvoiceDescription}}
+                <div style="background: #f4f7f9; border-left: 4px solid #3c8dbc; padding: 12px 15px; border-radius: 4px; font-size: 13px; color: #555; white-space: pre-wrap;">
+                    <strong>Terms & Description:</strong><br>{{.PageData.InvoiceDescription}}
+                </div>
+                {{end}}
+            </div>
+            <div class="col-xs-6">
+                <table class="summary-table">
+                    <tr>
+                        <td style="color: #666;">Subtotal:</td>
+                        <td style="text-align: right; font-weight: 600;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.TotalAmount}}</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #666;">Paid To Date:</td>
+                        <td style="text-align: right; font-weight: 600; color: #2e7d32;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.AmountPaid}}</td>
+                    </tr>
+                    <tr class="total-row">
+                        <td>Remaining Balance:</td>
+                        <td style="text-align: right;">{{.CurrencySymbol}} {{printf "%.2f" .PageData.Order.RemainingAmount}}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payments History -->
+        {{if and (eq .PageData.Order.OrderType "BulkOrder") .PageData.Payments}}
+        <div class="payment-history-section">
+            <h4><i class="fa fa-history"></i> Received Payments Log</h4>
+            <table class="table table-condensed table-striped" style="font-size: 13px;">
+                <thead>
+                    <tr style="color: #888;">
+                        <th>Paid Date</th>
+                        <th>Method</th>
+                        <th>Processed By</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .PageData.Payments}}
+                    <tr>
+                        <td>{{.CreatedAt.Format "Jan 02, 2006 15:04"}}</td>
+                        <td style="text-transform: uppercase;">{{.PaymentMethod}}</td>
+                        <td>{{.PaidByName}}</td>
+                        <td style="text-align: right; font-weight: 600; color: #2e7d32;">{{$.CurrencySymbol}} {{printf "%.2f" .Amount}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+        </div>
+        {{end}}
+
+    </div>
+
+    {{if and (eq .PageData.Order.OrderType "BulkOrder") (ne .PageData.Order.PaymentStatus "paid") (ne .PageData.Order.Status "rejected")}}
+    <div class="no-print" style="margin-top: 30px; margin-bottom: 50px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 30px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
+        <h3 style="margin-top:0; color:#1B2A4A; font-weight:700; font-size: 18px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa fa-money-bill-wave" style="color: #2e7d32;"></i> Record Payment Details
+        </h3>
+        
+        <form action="/orders/payment" method="POST">
+            <input type="hidden" name="order_id" value="{{.PageData.Order.ID}}">
+            
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label style="font-weight: 600; color: #4a5568; margin-bottom: 8px;">Amount Paid:*</label>
+                        <div class="input-group">
+                            <span class="input-group-addon" style="background-color: #f7fafc; border-color: #cbd5e0; font-weight: bold; color: #4a5568;">{{.CurrencySymbol}}</span>
+                            <input type="number" name="amount" class="form-control" step="0.01" min="0.01" max="{{.PageData.Order.RemainingAmount}}" required placeholder="e.g. 150.00" style="border-color: #cbd5e0; font-size: 15px; height: 42px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label style="font-weight: 600; color: #4a5568; margin-bottom: 8px;">Payment Method:*</label>
+                        <select name="payment_method" class="form-control" required style="border-color: #cbd5e0; font-size: 15px; height: 42px;">
+                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="mobile_money">Mobile Money</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label style="font-weight: 600; color: #4a5568; margin-bottom: 8px;">Payment Notes:</label>
+                        <input type="text" name="notes" class="form-control" placeholder="e.g. Reference number, bank code" style="border-color: #cbd5e0; font-size: 15px; height: 42px;">
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; text-align: right;">
+                <button type="submit" class="btn btn-success btn-lg" style="background-color: #2e7d32; border-color: #2e7d32; font-weight: 600; font-size: 14px; padding: 10px 24px; border-radius: 6px; box-shadow: 0 4px 6px -1px rgba(46, 125, 50, 0.2); transition: all 0.2s;">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Submit Payment
+                </button>
+            </div>
+        </form>
+    </div>
+    {{end}}
+</div>
+{{end}}
+
+{{define "scripts"}}
+<!-- html2pdf dependency for direct PDF download in browser -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#btnDownload').click(function() {
+        var element = document.getElementById('invoice-card');
+        
+        // Find and temporarily disable Tailwind stylesheet to avoid html2canvas oklch parsing crash
+        var tailwindLink = $('link[href*="tailwind"]');
+        var wasDisabled = tailwindLink.prop('disabled');
+        tailwindLink.prop('disabled', true);
+
+        var opt = {
+            margin:       [0.5, 0.5, 0.5, 0.5],
+            filename:     'Invoice_' + '{{.PageData.Order.RefNo}}' + '.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        
+        // Hide scrollbar & button interactions while compiling
+        $('#btnDownload').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Generating PDF...');
+        
+        html2pdf().set(opt).from(element).save().then(function() {
+            // Restore Tailwind stylesheet
+            tailwindLink.prop('disabled', wasDisabled);
+            $('#btnDownload').prop('disabled', false).html('<i class="fa fa-download"></i> Download PDF');
+        }).catch(function(err) {
+            console.error('PDF generation failed:', err);
+            // Restore Tailwind stylesheet on error
+            tailwindLink.prop('disabled', wasDisabled);
+            toastr.error('Failed to generate PDF. Please try browser print instead.');
+            $('#btnDownload').prop('disabled', false).html('<i class="fa fa-download"></i> Download PDF');
+        });
+    });
+});
+</script>
+{{end}}

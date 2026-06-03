@@ -29,6 +29,9 @@ func (app *Application) PurchaseList(w http.ResponseWriter, r *http.Request) {
 func (app *Application) PurchaseCreate(w http.ResponseWriter, r *http.Request) {
 	tenantID := middleware.GetTenantID(r.Context())
 	
+	productIDStr := r.URL.Query().Get("product_id")
+	productID, _ := strconv.Atoi(productIDStr)
+
 	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, 0, "", 0, 0)
 	locations, _ := app.Models.GetLocationsByTenant(tenantID)
 	locations = storeLocationsOnly(locations)
@@ -40,11 +43,13 @@ func (app *Application) PurchaseCreate(w http.ResponseWriter, r *http.Request) {
 		Locations  []*models.BusinessLocation
 		Categories []*models.Category
 		Brands     []*models.Brand
+		ProductID  int
 	}{
 		Products:   products,
 		Locations:  locations,
 		Categories: categories,
 		Brands:     brands,
+		ProductID:  productID,
 	})
 }
 

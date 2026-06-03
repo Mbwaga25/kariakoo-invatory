@@ -74,7 +74,7 @@ type OrderSummary struct {
 }
 
 // GetOrdersByTenant returns all orders for a tenant, optionally filtered by role and location
-func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string, role string, locationID int, userID int) ([]*StoreOrder, error) {
+func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string, role string, locationID int, userID int, start, end time.Time) ([]*StoreOrder, error) {
 	query := `SELECT o.id, o.tenant_id, o.order_type, o.ref_no, o.placed_by, 
 			  COALESCE(o.order_from, ''), o.to_location_id, o.status, o.payment_status,
 			  o.total_amount, o.amount_paid, o.remaining_amount, 
@@ -86,9 +86,9 @@ func (m *Models) GetOrdersByTenant(tenantID int, status string, orderType string
 			  JOIN users u ON o.placed_by = u.id
 			  LEFT JOIN business_locations bl_to ON o.to_location_id = bl_to.id
 			  LEFT JOIN business_locations bl_from ON o.from_store_id = bl_from.id
-			  WHERE o.tenant_id = ?`
+			  WHERE o.tenant_id = ? AND o.created_at BETWEEN ? AND ?`
 	
-	args := []interface{}{tenantID}
+	args := []interface{}{tenantID, start, end}
 
 	if role == "ShopKeeper" {
 		query += " AND o.placed_by = ?"
@@ -283,9 +283,23 @@ func (m *Models) AcceptOrder(orderID int, tenantID int, processedBy int, locatio
 	rows.Close() // Close early to free up connection for Execs
 
 	for _, it := range items {
+		// Verify sufficient stock before reducing
+		var qtyAvailable float64
+		var prodName string
+		err = tx.QueryRow(`
+			SELECT COALESCE(pl.qty_available, 0), p.name 
+			FROM products p
+			LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+			WHERE p.id = ?`, locationID, it.pid).Scan(&qtyAvailable, &prodName)
+		if err != nil {
+			return fmt.Errorf("verify stock for product %d: %v", it.pid, err)
+		}
+
+		if qtyAvailable < it.qty {
+			return fmt.Errorf("You cannot sell '%s' (ID: %d). Current available stock is %.0f, but requested is %.0f. Please add new stock or purchase in order to continue to sell.", prodName, it.pid, qtyAvailable, it.qty)
+		}
+
 		// Reduce stock from the processing store location
-		// Note: We use COALESCE and a check to ensure we don't fail if row missing (though it shouldn't be for a store)
-		// Or we can check if it exists first.
 		_, err = tx.Exec(`UPDATE product_locations SET qty_available = qty_available - ? WHERE product_id = ? AND location_id = ?`,
 			it.qty, it.pid, locationID)
 		if err != nil {
@@ -312,7 +326,7 @@ func (m *Models) CompleteOrder(orderID int, tenantID int) error {
 }
 
 // UpdateOrderPayment updates the payment status and amounts
-func (m *Models) UpdateOrderPayment(orderID int, tenantID int, amountPaid float64, paidBy int) error {
+func (m *Models) UpdateOrderPayment(orderID int, tenantID int, amountPaid float64, paymentMethod string, notes string, paidBy int) error {
 	tx, err := m.DB.Begin()
 	if err != nil {
 		return err
@@ -320,8 +334,8 @@ func (m *Models) UpdateOrderPayment(orderID int, tenantID int, amountPaid float6
 	defer tx.Rollback()
 
 	// Insert payment record
-	_, err = tx.Exec(`INSERT INTO order_payments (order_id, amount, paid_by) VALUES (?, ?, ?)`,
-		orderID, amountPaid, paidBy)
+	_, err = tx.Exec(`INSERT INTO order_payments (order_id, amount, payment_method, notes, paid_by) VALUES (?, ?, ?, ?, ?)`,
+		orderID, amountPaid, paymentMethod, notes, paidBy)
 	if err != nil {
 		return err
 	}
@@ -370,11 +384,11 @@ func (m *Models) GetOrderPayments(orderID int) ([]*OrderPayment, error) {
 }
 
 // GetOrderSummary returns aggregated order stats for the dashboard
-func (m *Models) GetOrderSummary(tenantID int, role string, locationID int, userID int) (*OrderSummary, error) {
+func (m *Models) GetOrderSummary(tenantID int, role string, locationID int, userID int, start, end time.Time) (*OrderSummary, error) {
 	summary := &OrderSummary{}
 
-	whereClause := "tenant_id = ?"
-	args := []interface{}{tenantID}
+	whereClause := "tenant_id = ? AND created_at BETWEEN ? AND ?"
+	args := []interface{}{tenantID, start, end}
 
 	if role == "ShopKeeper" {
 		whereClause += " AND placed_by = ?"

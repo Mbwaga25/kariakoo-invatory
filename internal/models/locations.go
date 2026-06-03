@@ -5,17 +5,18 @@ import (
 )
 
 type BusinessLocation struct {
-	ID           int
-	TenantID     int
-	TenantName   string
-	Name         string
-	LocationType string
-	LocationID   string
-	City         string
-	State        string
-	Country      string
-	ZipCode      string
-	CreatedAt    time.Time
+	ID                 int
+	TenantID           int
+	TenantName         string
+	Name               string
+	LocationType       string
+	LocationID         string
+	City               string
+	State              string
+	Country            string
+	ZipCode            string
+	InvoiceDescription string
+	CreatedAt          time.Time
 }
 
 func (m *Models) GetLocationsByTenant(tenantID int) ([]*BusinessLocation, error) {
@@ -26,6 +27,7 @@ func (m *Models) GetLocationsByTenant(tenantID int) ([]*BusinessLocation, error)
 			  COALESCE(state, ''), 
 			  COALESCE(country, ''), 
 			  COALESCE(zip_code, ''), 
+			  COALESCE(invoice_description, ''),
 			  created_at 
 			  FROM business_locations WHERE tenant_id = ? ORDER BY location_type DESC, name ASC`
 	
@@ -38,7 +40,7 @@ func (m *Models) GetLocationsByTenant(tenantID int) ([]*BusinessLocation, error)
 	var locations []*BusinessLocation
 	for rows.Next() {
 		var l BusinessLocation
-		err := rows.Scan(&l.ID, &l.TenantID, &l.Name, &l.LocationType, &l.LocationID, &l.City, &l.State, &l.Country, &l.ZipCode, &l.CreatedAt)
+		err := rows.Scan(&l.ID, &l.TenantID, &l.Name, &l.LocationType, &l.LocationID, &l.City, &l.State, &l.Country, &l.ZipCode, &l.InvoiceDescription, &l.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -55,6 +57,7 @@ func (m *Models) GetAllLocations() ([]*BusinessLocation, error) {
 			  COALESCE(bl.state, ''),
 			  COALESCE(bl.country, ''),
 			  COALESCE(bl.zip_code, ''),
+			  COALESCE(bl.invoice_description, ''),
 			  bl.created_at
 			  FROM business_locations bl
 			  LEFT JOIN tenants t ON bl.tenant_id = t.id
@@ -69,7 +72,7 @@ func (m *Models) GetAllLocations() ([]*BusinessLocation, error) {
 	var locations []*BusinessLocation
 	for rows.Next() {
 		var l BusinessLocation
-		err := rows.Scan(&l.ID, &l.TenantID, &l.TenantName, &l.Name, &l.LocationType, &l.LocationID, &l.City, &l.State, &l.Country, &l.ZipCode, &l.CreatedAt)
+		err := rows.Scan(&l.ID, &l.TenantID, &l.TenantName, &l.Name, &l.LocationType, &l.LocationID, &l.City, &l.State, &l.Country, &l.ZipCode, &l.InvoiceDescription, &l.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -79,9 +82,9 @@ func (m *Models) GetAllLocations() ([]*BusinessLocation, error) {
 }
 
 func (m *Models) InsertLocation(l *BusinessLocation) (int64, error) {
-	query := `INSERT INTO business_locations (tenant_id, name, location_type, location_id, city, state, country, zip_code)
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	res, err := m.DB.Exec(query, l.TenantID, l.Name, l.LocationType, l.LocationID, l.City, l.State, l.Country, l.ZipCode)
+	query := `INSERT INTO business_locations (tenant_id, name, location_type, location_id, city, state, country, zip_code, invoice_description)
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	res, err := m.DB.Exec(query, l.TenantID, l.Name, l.LocationType, l.LocationID, l.City, l.State, l.Country, l.ZipCode, l.InvoiceDescription)
 	if err != nil {
 		return 0, err
 	}
@@ -90,9 +93,9 @@ func (m *Models) InsertLocation(l *BusinessLocation) (int64, error) {
 
 func (m *Models) UpdateLocation(l *BusinessLocation) error {
 	query := `UPDATE business_locations 
-			  SET name = ?, location_type = ?, location_id = ?, city = ?, state = ?, country = ?, zip_code = ?
+			  SET name = ?, location_type = ?, location_id = ?, city = ?, state = ?, country = ?, zip_code = ?, invoice_description = ?
 			  WHERE id = ? AND tenant_id = ?`
-	_, err := m.DB.Exec(query, l.Name, l.LocationType, l.LocationID, l.City, l.State, l.Country, l.ZipCode, l.ID, l.TenantID)
+	_, err := m.DB.Exec(query, l.Name, l.LocationType, l.LocationID, l.City, l.State, l.Country, l.ZipCode, l.InvoiceDescription, l.ID, l.TenantID)
 	return err
 }
 

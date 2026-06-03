@@ -18,20 +18,13 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 	user := middleware.GetUser(r.Context())
 	locationID := middleware.GetLocationID(r.Context())
 	
-	// Default to today
-	startStr := r.URL.Query().Get("start_date")
-	endStr := r.URL.Query().Get("end_date")
-	
-	now := time.Now()
-	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
-
-	if startStr != "" && endStr != "" {
-		if s, err := time.Parse("2006-01-02", startStr); err == nil {
-			start = s
-		}
-		if e, err := time.Parse("2006-01-02", endStr); err == nil {
-			end = time.Date(e.Year(), e.Month(), e.Day(), 23, 59, 59, 0, e.Location())
+	start, end := app.ParseDateRange(r)
+	preset := r.URL.Query().Get("preset")
+	if preset == "" {
+		if r.URL.Query().Get("start_date") != "" && r.URL.Query().Get("end_date") != "" {
+			preset = "custom"
+		} else {
+			preset = "today"
 		}
 	}
 
@@ -48,7 +41,7 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 	if user != nil {
 		role = user.Role
 	}
-	orderSummary, _ := app.Models.GetOrderSummary(tenantID, role, locationID, user.ID)
+	orderSummary, _ := app.Models.GetOrderSummary(tenantID, role, locationID, user.ID, start, end)
 
 	// Get low stock alerts (Location specific)
 	lowStockProducts, _ := app.Models.GetLowStockProductsByLocation(tenantID, locationID)
@@ -63,6 +56,9 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 		BestSelling     []*models.Product
 		Start           time.Time
 		End             time.Time
+		Preset          string
+		StartDate       string
+		EndDate         string
 	}{
 		Data:         dashboardData,
 		OrderSummary: orderSummary,
@@ -70,5 +66,8 @@ func (app *Application) Home(w http.ResponseWriter, r *http.Request) {
 		BestSelling:  bestSelling,
 		Start:        start,
 		End:          end,
+		Preset:       preset,
+		StartDate:    start.Format("2006-01-02"),
+		EndDate:      end.Format("2006-01-02"),
 	})
 }

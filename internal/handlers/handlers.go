@@ -26,22 +26,67 @@ func (app *Application) jsonResponse(w http.ResponseWriter, status int, data int
 }
 
 func (app *Application) ParseDateRange(r *http.Request) (time.Time, time.Time) {
+	preset := r.URL.Query().Get("preset")
 	startStr := r.URL.Query().Get("start_date")
 	endStr := r.URL.Query().Get("end_date")
 	
 	now := time.Now()
-	// Default to today if not provided
-	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	end := time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
-
-	if startStr != "" && endStr != "" {
-		if s, err := time.Parse("2006-01-02", startStr); err == nil {
-			start = s
-		}
-		if e, err := time.Parse("2006-01-02", endStr); err == nil {
-			end = time.Date(e.Year(), e.Month(), e.Day(), 23, 59, 59, 0, e.Location())
-		}
+	
+	if preset == "" && startStr != "" && endStr != "" {
+		preset = "custom"
 	}
+	
+	if preset == "" {
+		preset = "today"
+	}
+
+	var start, end time.Time
+
+	switch preset {
+	case "today":
+		start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		end = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	case "yesterday":
+		y := now.AddDate(0, 0, -1)
+		start = time.Date(y.Year(), y.Month(), y.Day(), 0, 0, 0, 0, y.Location())
+		end = time.Date(y.Year(), y.Month(), y.Day(), 23, 59, 59, 0, y.Location())
+	case "weekly":
+		weekday := int(now.Weekday())
+		daysToMonday := weekday - 1
+		if weekday == 0 {
+			daysToMonday = 6
+		}
+		monday := now.AddDate(0, 0, -daysToMonday)
+		start = time.Date(monday.Year(), monday.Month(), monday.Day(), 0, 0, 0, 0, monday.Location())
+		sunday := monday.AddDate(0, 0, 6)
+		end = time.Date(sunday.Year(), sunday.Month(), sunday.Day(), 23, 59, 59, 0, sunday.Location())
+	case "monthly":
+		start = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
+		nextMonth := time.Date(now.Year(), now.Month()+1, 1, 0, 0, 0, 0, now.Location())
+		lastDay := nextMonth.AddDate(0, 0, -1)
+		end = time.Date(lastDay.Year(), lastDay.Month(), lastDay.Day(), 23, 59, 59, 0, lastDay.Location())
+	case "yearly":
+		start = time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location())
+		end = time.Date(now.Year(), time.December, 31, 23, 59, 59, 0, now.Location())
+	case "custom":
+		start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		end = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+		
+		if startStr != "" {
+			if s, err := time.Parse("2006-01-02", startStr); err == nil {
+				start = time.Date(s.Year(), s.Month(), s.Day(), 0, 0, 0, 0, s.Location())
+			}
+		}
+		if endStr != "" {
+			if e, err := time.Parse("2006-01-02", endStr); err == nil {
+				end = time.Date(e.Year(), e.Month(), e.Day(), 23, 59, 59, 0, e.Location())
+			}
+		}
+	default:
+		start = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+		end = time.Date(now.Year(), now.Month(), now.Day(), 23, 59, 59, 0, now.Location())
+	}
+
 	return start, end
 }
 

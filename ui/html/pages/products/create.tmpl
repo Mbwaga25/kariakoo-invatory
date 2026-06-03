@@ -8,501 +8,701 @@
 {{define "styles"}}
 <style>
     body.legacy-product-create {
-        background: #ecf0f5;
+        background: #f8fafc;
+        font-family: 'Source Sans Pro', 'Inter', sans-serif;
     }
 
     body.legacy-product-create .product-create-page {
         width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 10px 0 40px;
     }
 
-    body.legacy-product-create .product-create-page .box {
-        margin-bottom: 20px;
-        border: 1px solid #d2d6de;
-        border-top: 3px solid #3c8dbc;
-        border-radius: 0;
-        box-shadow: none;
-        background: #fff;
+    /* Modern Premium Cards */
+    body.legacy-product-create .modern-card {
+        background: #ffffff;
+        border-radius: 16px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        margin-bottom: 24px;
+        overflow: hidden;
+        transition: all 0.3s ease;
     }
 
-    body.legacy-product-create .product-create-page .box-header {
-        display: block;
-        padding: 10px 15px;
-        border-bottom: 1px solid #f4f4f4;
-        background: transparent;
+    body.legacy-product-create .modern-card:hover {
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
     }
 
-    body.legacy-product-create .product-create-page .box-header .box-title {
-        display: inline-flex;
+    body.legacy-product-create .modern-card-header {
+        padding: 18px 24px;
+        background: #fafafa;
+        border-bottom: 1px solid #f1f5f9;
+        display: flex;
         align-items: center;
-        gap: 6px;
-        font-size: 18px;
-        font-weight: 500;
-        color: #444;
+        justify-content: space-between;
     }
 
-    body.legacy-product-create .product-create-page .box-body {
-        padding: 10px 15px 0;
-    }
-
-    body.legacy-product-create .product-create-page .box-footer {
-        padding: 15px;
-        border-top: 1px solid #f4f4f4;
-        background: #fff;
-    }
-
-    body.legacy-product-create .product-create-page .form-group {
-        display: block;
-        margin-bottom: 15px;
-    }
-
-    body.legacy-product-create .product-create-page label {
-        display: inline-block;
-        margin-bottom: 5px;
+    body.legacy-product-create .modern-card-title {
+        font-size: 16px;
         font-weight: 700;
-        color: #333;
+        color: #1e293b;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
-    body.legacy-product-create .product-create-page .help-block {
+    body.legacy-product-create .modern-card-title i {
+        color: #3b82f6;
+    }
+
+    body.legacy-product-create .modern-card-body {
+        padding: 24px;
+    }
+
+    /* Custom Form Fields Styling */
+    body.legacy-product-create .form-group {
+        margin-bottom: 20px;
+    }
+
+    body.legacy-product-create .form-label {
         display: block;
-        margin-top: 5px;
-        margin-bottom: 10px;
-        font-size: 12px;
-        color: #737373;
+        font-size: 13px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
     }
 
-    body.legacy-product-create .product-create-page .text-muted {
-        color: #777 !important;
+    body.legacy-product-create .form-label i {
+        margin-right: 4px;
     }
 
-    body.legacy-product-create .product-create-page .form-control {
-        height: 34px;
-        padding: 6px 12px;
-        border: 1px solid #d2d6de;
-        border-radius: 0;
-        box-shadow: none;
-        background: #fff;
-        color: #555;
-    }
-
-    body.legacy-product-create .product-create-page textarea.form-control {
-        height: auto;
-    }
-
-    body.legacy-product-create .product-create-page .input-group {
-        display: table;
+    body.legacy-product-create .form-control {
         width: 100%;
-        border-collapse: separate;
-    }
-
-    body.legacy-product-create .product-create-page .input-group .form-control {
-        display: table-cell;
-        width: 1%;
-    }
-
-    body.legacy-product-create .product-create-page .input-group-addon,
-    body.legacy-product-create .product-create-page .input-group-btn .btn {
-        border-radius: 0;
-    }
-
-    body.legacy-product-create .product-create-page .input-group-addon {
-        display: table-cell;
-        width: 1%;
-        padding: 6px 12px;
-        white-space: nowrap;
-        vertical-align: middle;
-        background-color: #eee;
-        border: 1px solid #ccc;
-        color: #555;
-    }
-
-    body.legacy-product-create .product-create-page .input-group-btn {
-        display: table-cell;
-        width: 1%;
-        vertical-align: middle;
-    }
-
-    body.legacy-product-create .product-create-page .btn {
-        border-radius: 3px;
-        box-shadow: none;
-        height: 34px;
-        padding: 6px 12px;
+        height: 42px;
+        padding: 8px 16px;
         font-size: 14px;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        background-color: #ffffff;
+        color: #1e293b;
+        transition: all 0.2s ease;
+        box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
     }
 
-    body.legacy-product-create .product-create-page .btn-lg {
-        height: 46px;
-        padding: 10px 16px;
-        font-size: 18px;
-        line-height: 1.33;
+    body.legacy-product-create .form-control:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
     }
 
-    body.legacy-product-create .product-create-page .btn-default {
-        background-color: #f4f4f4;
-        border-color: #ddd;
-        color: #444;
+    body.legacy-product-create textarea.form-control {
+        height: auto;
+        min-height: 80px;
     }
 
-    body.legacy-product-create .product-create-page .btn-default:hover {
-        background-color: #e6e6e6;
-        border-color: #adadad;
+    /* Input Addon / Quick add triggers button */
+    body.legacy-product-create .input-group {
+        display: flex;
+        width: 100%;
+        gap: 8px;
     }
 
-    body.legacy-product-create .product-create-page .btn-primary {
-        background-color: #3c8dbc;
-        border-color: #367fa9;
-        color: #fff;
+    body.legacy-product-create .input-group-select {
+        flex: 1;
     }
 
-    body.legacy-product-create .product-create-page .btn-primary:hover,
-    body.legacy-product-create .product-create-page .btn-primary:focus {
-        background-color: #367fa9;
-        border-color: #204d74;
-        color: #fff;
+    body.legacy-product-create .btn-action-add {
+        height: 42px;
+        width: 42px;
+        border-radius: 10px;
+        background: #f8fafc;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        padding: 0;
+        font-size: 16px;
     }
 
-    body.legacy-product-create .product-create-page .btn-success {
-        background-color: #00a65a;
-        border-color: #008d4c;
-        color: #fff;
+    body.legacy-product-create .btn-action-add:hover {
+        background: #f1f5f9;
+        color: #10b981;
+        border-color: #10b981;
     }
 
-    body.legacy-product-create .product-create-page .btn-success:hover,
-    body.legacy-product-create .product-create-page .btn-success:focus {
-        background-color: #008d4c;
-        border-color: #006b3b;
-        color: #fff;
+    /* Input Prepend Currency Addon */
+    body.legacy-product-create .currency-addon-group {
+        display: flex;
+        align-items: center;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        overflow: hidden;
+        transition: all 0.2s ease;
     }
 
-    body.legacy-product-create .product-create-page .table {
-        margin-bottom: 0;
-        border: 1px solid #ddd;
-        border-collapse: collapse;
-        border-spacing: 0;
-        background: #fff;
+    body.legacy-product-create .currency-addon-group:focus-within {
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
     }
 
-    body.legacy-product-create .product-create-page .table > tbody > tr {
-        background: #fff;
-        box-shadow: none;
-        transform: none;
-        transition: none;
+    body.legacy-product-create .currency-addon {
+        background: #f1f5f9;
+        padding: 0 16px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #475569;
+        border-right: 1px solid #cbd5e1;
+        user-select: none;
     }
 
-    body.legacy-product-create .product-create-page .table > tbody > tr:hover {
-        box-shadow: none;
-        transform: none;
+    body.legacy-product-create .currency-addon-group input {
+        border: none !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        height: 40px;
+        flex: 1;
     }
 
-    body.legacy-product-create .product-create-page .table > thead > tr > th,
-    body.legacy-product-create .product-create-page .table > tbody > tr > td {
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 0;
+    /* Custom Product Type Radio Cards */
+    body.legacy-product-create .product-type-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+        margin-top: 8px;
     }
 
-    body.legacy-product-create .product-create-page .table > thead > tr > th {
-        background: #f9f9f9;
-        color: #444;
+    body.legacy-product-create .type-card {
+        cursor: pointer;
+        position: relative;
     }
 
-    body.legacy-product-create .product-create-page .radio {
-        margin-top: 0;
-        margin-bottom: 10px;
-    }
-
-    body.legacy-product-create .product-create-page .radio label {
-        font-weight: 400;
-    }
-
-    body.legacy-product-create .product-create-page .bg-gray {
-        color: #000 !important;
-        background-color: #d2d6de !important;
-    }
-
-    body.legacy-product-create .product-create-page .box.box-solid.box-primary {
-        border-top-width: 0;
-    }
-
-    body.legacy-product-create .product-create-page .box.box-solid.box-primary > .box-header {
-        background-color: #3c8dbc;
-        border-bottom-color: #3c8dbc;
-    }
-
-    body.legacy-product-create .product-create-page .box.box-solid.box-primary > .box-header .box-title {
-        color: #fff;
-    }
-
-    body.legacy-product-create .product-create-page hr {
-        margin: 20px 0;
-        border-top: 1px solid #ddd;
-    }
-
-    body.legacy-product-create .product-create-page .modal {
+    body.legacy-product-create .type-card input[type="radio"] {
         display: none;
     }
 
-    body.legacy-product-create .product-create-page .modal.in {
-        display: block;
+    body.legacy-product-create .type-card-inner {
+        padding: 20px;
+        border-radius: 14px;
+        border: 2px solid #e2e8f0;
+        text-align: center;
+        background: #ffffff;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        position: relative;
     }
 
-    body.legacy-product-create .product-create-page .modal-dialog {
-        width: 600px;
-        max-width: calc(100vw - 30px);
-        margin: 30px auto;
+    body.legacy-product-create .type-card-inner:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.06);
     }
 
-    body.legacy-product-create .product-create-page .modal-content {
-        border: 1px solid rgba(0, 0, 0, 0.2);
-        border-radius: 6px;
-        box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5);
+    body.legacy-product-create .type-card-inner i {
+        font-size: 32px;
+        transition: all 0.2s;
     }
 
-    body.legacy-product-create .product-create-page .modal-header,
-    body.legacy-product-create .product-create-page .modal-body,
-    body.legacy-product-create .product-create-page .modal-footer {
-        padding: 15px;
-    }
-
-    body.legacy-product-create .product-create-page .modal-header {
-        border-bottom: 1px solid #e5e5e5;
-    }
-
-    body.legacy-product-create .product-create-page .modal-footer {
-        border-top: 1px solid #e5e5e5;
-        text-align: right;
-    }
-
-    body.legacy-product-create .product-create-page .close {
-        float: right;
-        font-size: 21px;
+    body.legacy-product-create .type-card-inner h4 {
+        margin: 5px 0 2px;
+        color: #1e293b;
         font-weight: 700;
-        line-height: 1;
-        color: #000;
-        text-shadow: 0 1px 0 #fff;
-        opacity: 0.2;
-        background: transparent;
-        border: 0;
+        font-size: 16px;
     }
 
-    body.legacy-product-create .product-create-page .close:hover {
-        opacity: 0.5;
+    body.legacy-product-create .type-card-inner small {
+        color: #64748b;
+        font-size: 12px;
     }
 
-    body.legacy-product-create .product-create-page .type-card-inner {
-        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    body.legacy-product-create .type-card-inner .active-check {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        color: #fff;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Live Name Preview tag */
+    body.legacy-product-create .name-preview-tag {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        margin-top: 10px;
+        font-size: 13px;
+        color: #475569;
+        font-weight: 500;
+    }
+
+    body.legacy-product-create .badge-auto {
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    body.legacy-product-create .badge-override {
+        background: #fef3c7;
+        color: #b45309;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    body.legacy-product-create .badge-override:hover {
+        background: #fde68a;
+    }
+
+    /* Store allocations styles */
+    body.legacy-product-create .location-option-group {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 20px;
+        background: #f8fafc;
+        padding: 15px 20px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+
+    body.legacy-product-create .location-radio-label {
+        font-weight: 600 !important;
+        font-size: 14px;
+        color: #334155;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 0 !important;
+    }
+
+    body.legacy-product-create .store-table {
+        width: 100%;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        border-collapse: separate;
+        border-spacing: 0;
+        overflow: hidden;
+    }
+
+    body.legacy-product-create .store-table th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        padding: 14px 16px;
+        font-size: 13px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+    }
+
+    body.legacy-product-create .store-table td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+        transition: all 0.15s ease;
+    }
+
+    body.legacy-product-create .store-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    body.legacy-product-create .store-table tbody tr.row-selected {
+        background-color: rgba(99, 102, 241, 0.04);
+    }
+
+    body.legacy-product-create .store-table tbody tr.row-selected td {
+        border-bottom-color: rgba(99, 102, 241, 0.15);
+    }
+
+    /* Actions buttons footer */
+    body.legacy-product-create .form-actions-bar {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+        justify-content: flex-end;
+    }
+
+    body.legacy-product-create .btn-save-product {
+        height: 48px;
+        padding: 0 28px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        background: #10b981;
+        border: none;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2), 0 2px 4px -1px rgba(16, 185, 129, 0.1);
+        transition: all 0.2s;
+    }
+
+    body.legacy-product-create .btn-save-product:hover {
+        background: #059669;
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.25);
+    }
+
+    body.legacy-product-create .btn-cancel-product {
+        height: 48px;
+        padding: 0 28px;
+        border-radius: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        color: #475569;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        text-decoration: none;
+    }
+
+    body.legacy-product-create .btn-cancel-product:hover {
+        background: #e2e8f0;
+        color: #1e293b;
+    }
+
+    /* Custom select2 custom rounded overrides */
+    body.legacy-product-create .select2-container--default .select2-selection--single {
+        height: 42px !important;
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 10px !important;
+        outline: none !important;
+    }
+
+    body.legacy-product-create .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 40px !important;
+        padding-left: 14px !important;
+        color: #1e293b;
+    }
+
+    body.legacy-product-create .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 40px !important;
+    }
+
+    body.legacy-product-create .select2-container {
+        width: 100% !important;
+    }
+
+    /* Custom alerts badge */
+    body.legacy-product-create .help-block {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    /* Modals updates */
+    body.legacy-product-create .modal-content {
+        border-radius: 16px !important;
+        border: none !important;
+        box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04) !important;
+    }
+
+    body.legacy-product-create .modal-header {
+        border-bottom: 1px solid #f1f5f9 !important;
+        padding: 20px !important;
+    }
+
+    body.legacy-product-create .modal-body {
+        padding: 20px !important;
+    }
+
+    body.legacy-product-create .modal-footer {
+        border-top: 1px solid #f1f5f9 !important;
+        padding: 15px 20px !important;
     }
 </style>
 {{end}}
 
 {{define "main"}}
 <div class="product-create-page">
-    <div class="box box-primary">
-    <div class="box-header with-border">
-        <h3 class="box-title"><i class="fa fa-cubes"></i> Product Details</h3>
-    </div>
-    
     <form action="/products/store" method="POST">
-        <div class="box-body">
-            <!-- Step 1: Product Type -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label><i class="fa fa-tag"></i> Product Type:*</label>
-                        <div style="display:flex;gap:15px;margin-top:5px;">
-                            <label class="product-type-card" style="flex:1;cursor:pointer;">
-                                <input type="radio" name="product_type" value="Protector" checked style="display:none;">
-                                <div class="type-card-inner" id="typeCardProtector" style="border:3px solid #2E7D32;border-radius:12px;padding:20px;text-align:center;background:#E8F5E9;transition:all 0.3s;">
-                                    <i class="fa fa-shield-alt" style="font-size:36px;color:#2E7D32;"></i>
-                                    <h4 style="margin:10px 0 5px;color:#1B2A4A;font-weight:700;">Protector</h4>
-                                    <small style="color:#666;">Screen protectors, tempered glass, etc.</small>
-                                </div>
-                            </label>
-                            <label class="product-type-card" style="flex:1;cursor:pointer;">
-                                <input type="radio" name="product_type" value="Cover" style="display:none;">
-                                <div class="type-card-inner" id="typeCardCover" style="border:3px solid #ddd;border-radius:12px;padding:20px;text-align:center;background:#fff;transition:all 0.3s;">
-                                    <i class="fa fa-mobile-alt" style="font-size:36px;color:#999;"></i>
-                                    <h4 style="margin:10px 0 5px;color:#1B2A4A;font-weight:700;">Cover</h4>
-                                    <small style="color:#666;">Phone cases, back covers, etc.</small>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+        
+        <!-- Section 1: Product Basics -->
+        <div class="modern-card">
+            <div class="modern-card-header">
+                <h3 class="modern-card-title"><i class="fa fa-cubes"></i> Product Details</h3>
             </div>
-
-            <hr>
-
-            <!-- Step 2: Category (Type of protector/cover) -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="category_id"><i class="fa fa-tags"></i> Category (Type):* <small class="text-muted">e.g. 21D, Privacy, Clear</small></label>
-                        <div class="input-group">
-                            <select name="category_id" id="category_id" class="form-control" required>
-                                <option value="">-- Select Category --</option>
-                                {{range .PageData.Categories}}
-                                <option value="{{.ID}}">{{.Name}}</option>
-                                {{end}}
-                            </select>
-                            {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#quick_add_category"><i class="fa fa-plus text-primary"></i></button>
-                            </span>
-                            {{end}}
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="brand_id"><i class="fa fa-mobile-alt"></i> Phone Model (Brand):* <small class="text-muted">e.g. iPhone 11, Samsung S21</small></label>
-                        <div class="input-group">
-                            <select name="brand_id" id="brand_id" class="form-control" required>
-                                <option value="">-- Select Phone Model --</option>
-                                {{range .PageData.Brands}}
-                                <option value="{{.ID}}">{{.Name}}</option>
-                                {{end}}
-                            </select>
-                            {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
-                            <span class="input-group-btn">
-                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#quick_add_brand"><i class="fa fa-plus text-primary"></i></button>
-                            </span>
-                            {{end}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Product Name (Auto-generated or Manual) -->
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="name"><i class="fa fa-pencil-alt"></i> Product Name:</label>
-                        <input type="text" name="name" class="form-control" id="name" placeholder="Auto-generated: Type - Category - Model">
-                        <p class="help-block"><i class="fa fa-info-circle"></i> Leave blank to auto-generate from Product Type + Category + Model</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="sku">SKU:</label>
-                        <input type="text" name="sku" class="form-control" id="sku" placeholder="Auto-generated">
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-group">
-                        <label for="alert_quantity"><i class="fa fa-exclamation-triangle"></i> Low Stock Alert:</label>
-                        <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="50" placeholder="e.g. 50">
-                        <p class="help-block">Alert when stock goes below this</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row" style="display:none;">
-                <div class="col-md-4">
-                    <div class="form-group">
-                        <label for="unit_id">Unit:</label>
-                        <select name="unit_id" id="unit_id" class="form-control">
-                            <option value="">Pieces</option>
-                            {{range .PageData.Units}}
-                            <option value="{{.ID}}">{{.ActualName}}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label for="description">Notes/Description:</label>
-                        <textarea name="description" class="form-control" rows="2" placeholder="Optional notes about this product"></textarea>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="box box-solid box-primary">
-                        <div class="box-header with-border">
-                            <h3 class="box-title"><i class="fa fa-map-marker-alt"></i> Location Assignment</h3>
-                        </div>
-                        <div class="box-body">
-                            <div class="form-group">
-                                <label>Assign to:*</label>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="location_type" id="location_type_all" value="all" checked>
-                                        Add to All Stores
-                                    </label>
-                                </div>
-                                <div class="radio">
-                                    <label>
-                                        <input type="radio" name="location_type" id="location_type_specific" value="specific">
-                                        Add to Specific Store(s)
-                                    </label>
-                                </div>
+            
+            <div class="modern-card-body">
+                <!-- Product Type -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fa fa-tag"></i> Product Type:*</label>
+                            <div class="product-type-grid">
+                                <label class="type-card">
+                                    <input type="radio" name="product_type" value="Protector" checked>
+                                    <div class="type-card-inner" id="typeCardProtector" style="border-color:#10b981; background:#f0fdf4;">
+                                        <i class="fa fa-shield-alt" style="color:#10b981;"></i>
+                                        <h4>Protector</h4>
+                                        <small>Screen protectors, tempered glass, etc.</small>
+                                        <span class="active-check" style="background:#10b981; opacity:1; transform:scale(1);"><i class="fa fa-check"></i></span>
+                                    </div>
+                                </label>
+                                <label class="type-card">
+                                    <input type="radio" name="product_type" value="Cover">
+                                    <div class="type-card-inner" id="typeCardCover" style="border-color:#cbd5e1; background:#ffffff;">
+                                        <i class="fa fa-mobile-alt" style="color:#64748b;"></i>
+                                        <h4>Cover</h4>
+                                        <small>Phone cases, back covers, etc.</small>
+                                        <span class="active-check" style="background:#3b82f6; opacity:0; transform:scale(0.5);"><i class="fa fa-check"></i></span>
+                                    </div>
+                                </label>
                             </div>
-                            
-                            <div id="specific_locations_container" style="display: none;">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr class="bg-gray">
-                                            <th style="width: 50px;">Select</th>
-                                            <th>Store</th>
-                                            <th style="width: 200px;">Opening Stock</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {{range .PageData.Locations}}
-                                        <tr>
-                                            <td class="text-center">
-                                                <input type="checkbox" name="location_ids" value="{{.ID}}" class="location-check">
-                                            </td>
-                                            <td>
-                                                <span class="tw-font-bold">{{.Name}}</span><br>
-                                                <small class="text-muted">{{.City}}</small>
-                                            </td>
-                                            <td>
-                                                <div class="input-group">
-                                                    <input type="number" step="1" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0">
-                                                    <span class="input-group-addon"><i class="fa fa-cubes"></i></span>
-                                                </div>
-                                            </td>
-                                        </tr>
+                        </div>
+                    </div>
+                </div>
+
+                <hr style="border-top:1px solid #f1f5f9; margin:20px 0;">
+
+                <!-- Category and Brand Selector Grid -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="category_id"><i class="fa fa-tags"></i> Category (Type):* <span style="font-weight:400; color:#64748b; font-size:12px;">e.g. 21D, Privacy, Clear</span></label>
+                            <div class="input-group">
+                                <div class="input-group-select" style="flex:1;">
+                                    <select name="category_id" id="category_id" class="form-control" required>
+                                        <option value="">-- Select Category --</option>
+                                        {{range .PageData.Categories}}
+                                        <option value="{{.ID}}">{{.Name}}</option>
                                         {{end}}
-                                    </tbody>
-                                </table>
+                                    </select>
+                                </div>
+                                {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                                <button type="button" class="btn-action-add" data-toggle="modal" data-target="#quick_add_category" title="Quick Add Category">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                {{end}}
                             </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="brand_id"><i class="fa fa-mobile-alt"></i> Phone Model (Brand):* <span style="font-weight:400; color:#64748b; font-size:12px;">e.g. iPhone 11, Samsung S21</span></label>
+                            <div class="input-group">
+                                <div class="input-group-select" style="flex:1;">
+                                    <select name="brand_id" id="brand_id" class="form-control" required>
+                                        <option value="">-- Select Phone Model --</option>
+                                        {{range .PageData.Brands}}
+                                        <option value="{{.ID}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                </div>
+                                {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                                <button type="button" class="btn-action-add" data-toggle="modal" data-target="#quick_add_brand" title="Quick Add Phone Model">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Name inputs & live preview tag -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label" for="name"><i class="fa fa-pencil-alt"></i> Product Name:</label>
+                            <input type="text" name="name" class="form-control" id="name" placeholder="Custom product name (Optional)">
+                            <div class="name-preview-tag" id="namePreviewBlock">
+                                <span>Auto-generated preview: <strong style="color: #10b981;">Protector</strong></span>
+                                <span class="badge-auto">Auto-Name</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label" for="sku"><i class="fa fa-barcode"></i> SKU:</label>
+                            <input type="text" name="sku" class="form-control" id="sku" placeholder="Auto-generated">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="form-label" for="alert_quantity"><i class="fa fa-exclamation-triangle"></i> Low Stock Alert:</label>
+                            <input type="number" name="alert_quantity" class="form-control" id="alert_quantity" value="50" placeholder="e.g. 50">
+                            <small class="help-block">Alerts when store count drops below this</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="display:none;">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label" for="unit_id">Unit:</label>
+                            <select name="unit_id" id="unit_id" class="form-control">
+                                <option value="">Pieces</option>
+                                {{range .PageData.Units}}
+                                <option value="{{.ID}}">{{.ActualName}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group" style="margin-bottom:0;">
+                            <label class="form-label" for="description"><i class="fa fa-sticky-note"></i> Description/Notes:</label>
+                            <textarea name="description" class="form-control" rows="2" placeholder="Write any specific product specifications or store notes here..."></textarea>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="box-footer">
-            <button type="submit" class="btn btn-success btn-lg"><i class="fa fa-save"></i> Save Product</button>
-            <a href="/products" class="btn btn-default btn-lg">Cancel</a>
+        <!-- Section 2: Pricing Tiers / Groups -->
+        <div class="modern-card">
+            <div class="modern-card-header" style="border-left: 4px solid #f59e0b;">
+                <h3 class="modern-card-title" style="color: #b45309;"><i class="fa fa-tags" style="color: #f59e0b;"></i> Selling Price Groups (Pricing Tiers)</h3>
+            </div>
+            <div class="modern-card-body">
+                <p style="color: #64748b; font-size: 13.5px; margin-bottom: 20px;">Assign specific prices for bulk customer tier lists. If left blank, store defaults will be used.</p>
+                <div class="row">
+                    {{range .PageData.Groups}}
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="form-label">{{.Name}} Price:</label>
+                            <div class="currency-addon-group">
+                                <span class="currency-addon">{{$.CurrencySymbol}}</span>
+                                <input type="number" step="0.01" name="group_price_{{.ID}}" class="form-control" placeholder="Default price">
+                            </div>
+                        </div>
+                    </div>
+                    {{else}}
+                    <div class="col-md-12">
+                        <div style="background: #f8fafc; border-radius: 12px; padding: 15px; text-align: center; border: 1px solid #e2e8f0; color: #64748b;">
+                            <i class="fa fa-info-circle" style="font-size: 18px; margin-bottom: 6px;"></i><br>
+                            No custom pricing tiers are defined. Configure them under settings to use selling groups.
+                        </div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Store & Location Allocations -->
+        <div class="modern-card">
+            <div class="modern-card-header" style="border-left: 4px solid #6366f1;">
+                <h3 class="modern-card-title" style="color: #4f46e5;"><i class="fa fa-map-marker-alt" style="color:#6366f1;"></i> Location & Stock Assignment</h3>
+            </div>
+            <div class="modern-card-body">
+                <div class="form-group">
+                    <label class="form-label">Assign To Store Location(s):*</label>
+                    <div class="location-option-group">
+                        <label class="location-radio-label">
+                            <input type="radio" name="location_type" id="location_type_all" value="all" checked style="width: 16px; height: 16px; margin: 0; cursor: pointer;">
+                            Add to All Stores
+                        </label>
+                        <label class="location-radio-label">
+                            <input type="radio" name="location_type" id="location_type_specific" value="specific" style="width: 16px; height: 16px; margin: 0; cursor: pointer;">
+                            Add to Specific Store(s)
+                        </label>
+                    </div>
+                </div>
+
+                <div id="specific_locations_container" style="display: none; margin-top: 15px;">
+                    <div class="table-responsive">
+                        <table class="store-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px; text-align: center;">
+                                        <input type="checkbox" id="selectAllLocations" style="width: 16px; height: 16px; cursor: pointer;">
+                                    </th>
+                                    <th>Store Location Details</th>
+                                    <th style="width: 250px;">Opening Stock Count</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{range .PageData.Locations}}
+                                <tr id="store-row-{{.ID}}">
+                                    <td style="text-align: center;">
+                                        <input type="checkbox" name="location_ids" value="{{.ID}}" class="location-check" style="width: 16px; height: 16px; cursor: pointer;">
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 700; color: #1e293b;">{{.Name}}</div>
+                                        <div style="font-size: 11.5px; color: #64748b;"><i class="fa fa-map-marker-alt"></i> {{.City}}</div>
+                                    </td>
+                                    <td>
+                                        <div class="currency-addon-group">
+                                            <input type="number" step="1" name="opening_stock_{{.ID}}" class="form-control stock-input" value="0">
+                                            <span class="currency-addon" style="border-right: none; border-left: 1px solid #cbd5e1;"><i class="fa fa-cubes"></i></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {{end}}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Submission Footer Actions -->
+        <div class="form-actions-bar">
+            <a href="/products" class="btn-cancel-product"><i class="fa fa-times" style="margin-right: 6px;"></i> Cancel</a>
+            <button type="submit" class="btn-save-product"><i class="fa fa-save"></i> Save Product Details</button>
         </div>
     </form>
 </div>
 
-<!-- Quick Add Modals -->
+<!-- Modal Dialogs for Category and Brand Quick Add -->
 <div class="modal fade" id="quick_add_category" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa-tags"></i> Add Category (Type)</h4>
+                <h4 class="modal-title" style="font-weight: 700; color: #1e293b;"><i class="fa fa-tags" style="color: #10b981;"></i> Add Category (Type)</h4>
             </div>
             <div class="modal-body">
-                <p class="text-muted">Examples: 21D, Privacy, Clear, Matte, Full Glue</p>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 15px;">Examples: 21D, Privacy, Clear, Matte, Full Glue, UV Tempered</p>
                 <div class="form-group">
-                    <label>Category Name:*</label>
-                    <input type="text" id="new_category_name" class="form-control" placeholder="e.g. 21D">
+                    <label class="form-label">Category Name:*</label>
+                    <input type="text" id="new_category_name" class="form-control" placeholder="e.g. Privacy Glass">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="quickAdd('category')">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="quickAdd('category')" style="border-radius: 8px; font-weight: 600; background: #10b981; border: none; padding: 6px 16px;">Save Category</button>
             </div>
         </div>
     </div>
@@ -513,35 +713,34 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><i class="fa fa-mobile-alt"></i> Add Phone Model</h4>
+                <h4 class="modal-title" style="font-weight: 700; color: #1e293b;"><i class="fa fa-mobile-alt" style="color: #3b82f6;"></i> Add Phone Model</h4>
             </div>
             <div class="modal-body">
-                <p class="text-muted">Examples: iPhone 11, iPhone 12, Samsung S21, Tecno Spark</p>
+                <p style="color: #64748b; font-size: 13px; margin-bottom: 15px;">Examples: iPhone 12 Pro Max, Samsung Galaxy S22 Ultra, Tecno Camon 18</p>
                 <div class="form-group">
-                    <label>Phone Model Name:*</label>
-                    <input type="text" id="new_brand_name" class="form-control" placeholder="e.g. iPhone 11">
+                    <label class="form-label">Phone Model Name:*</label>
+                    <input type="text" id="new_brand_name" class="form-control" placeholder="e.g. iPhone 13 Pro">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="quickAdd('brand')">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="quickAdd('brand')" style="border-radius: 8px; font-weight: 600; background: #3b82f6; border: none; padding: 6px 16px;">Save Phone Model</button>
             </div>
         </div>
     </div>
 </div>
-
-</div>
-
 {{end}}
 
 {{define "scripts"}}
 <script type="text/javascript">
     function quickAdd(type) {
-        let name, shortName = "", url = "";
+        var name = "";
+        var url = "";
         if (type === 'category') {
-            name = document.getElementById('new_category_name').value;
+            name = document.getElementById('new_category_name').value.trim();
             url = '/api/categories/store';
         } else if (type === 'brand') {
-            name = document.getElementById('new_brand_name').value;
+            name = document.getElementById('new_brand_name').value.trim();
             url = '/api/brands/store';
         }
 
@@ -550,57 +749,125 @@
             return;
         }
 
-        const data = new URLSearchParams();
-        data.append('name', name);
-
-        fetch(url, {
+        $.ajax({
+            url: url,
             method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: data
-        })
-        .then(res => res.json())
-        .then(res => {
-            if (res.success) {
-                const select = document.getElementById(type + '_id');
-                const opt = document.createElement('option');
-                opt.value = res.id;
-                opt.text = name;
-                opt.selected = true;
-                select.add(opt);
-                
-                // Close modal
-                $('#quick_add_' + type).modal('hide');
-                // Reset inputs
-                if (type === 'category') document.getElementById('new_category_name').value = '';
-                if (type === 'brand') document.getElementById('new_brand_name').value = '';
-            } else {
-                toastr.error("Error: " + res.message);
+            data: { name: name },
+            success: function(res) {
+                if (res.success) {
+                    var select = $('#' + type + '_id');
+                    var newOption = new Option(name, res.id, true, true);
+                    select.append(newOption).trigger('change');
+                    
+                    // Close modal
+                    $('#quick_add_' + type).modal('hide');
+                    
+                    // Reset inputs
+                    if (type === 'category') document.getElementById('new_category_name').value = '';
+                    if (type === 'brand') document.getElementById('new_brand_name').value = '';
+                    
+                    toastr.success("Added successfully");
+                    updateNamePreview();
+                } else {
+                    toastr.error("Error: " + res.message);
+                }
+            },
+            error: function() {
+                toastr.error("Connection error");
             }
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        // Product Type Card Selection
+    function updateNamePreview() {
+        var ptype = $('input[name="product_type"]:checked').val() || 'Protector';
+        var category = $('#category_id option:selected').text();
+        var brand = $('#brand_id option:selected').text();
+        
+        if (!category || category.indexOf('--') >= 0) category = '';
+        if (!brand || brand.indexOf('--') >= 0) brand = '';
+        
+        var nameParts = [ptype];
+        if (category) nameParts.push(category);
+        if (brand) nameParts.push(brand);
+        
+        var preview = nameParts.join(' - ');
+        
+        var userTyped = $('#name').val().trim();
+        if (userTyped === '') {
+            $('#namePreviewBlock').html(
+                '<span>Auto-generated preview: <strong style="color: #10b981;">' + preview + '</strong></span>' +
+                '<span class="badge-auto">Auto-Name</span>'
+            );
+        } else {
+            $('#namePreviewBlock').html(
+                '<span>Manual Entry Override: <strong style="color: #b45309;">' + userTyped + '</strong></span>' +
+                '<button type="button" class="badge-override" id="resetToAutoBtn"><i class="fa fa-undo"></i> Reset to Auto</button>'
+            );
+        }
+    }
+
+    $(document).ready(function() {
+        // Initialize Select2 on dropdowns
+        if ($.fn.select2) {
+            $('#category_id').select2({
+                width: '100%',
+                placeholder: "-- Select Category --",
+                allowClear: true,
+                minimumResultsForSearch: 0
+            });
+            $('#brand_id').select2({
+                width: '100%',
+                placeholder: "-- Select Phone Model --",
+                allowClear: true,
+                minimumResultsForSearch: 0
+            });
+        }
+
+        // Live Preview Listeners
+        $(document).on('change', 'input[name="product_type"], #category_id, #brand_id', updateNamePreview);
+        $(document).on('input', '#name', updateNamePreview);
+        
+        $(document).on('click', '#resetToAutoBtn', function() {
+            $('#name').val('').trigger('input');
+        });
+        
+        updateNamePreview();
+
+        // Product Type Card Selection Highlights
         const typeCards = document.querySelectorAll('input[name="product_type"]');
         typeCards.forEach(radio => {
             radio.addEventListener('change', function() {
-                // Reset all cards
-                document.getElementById('typeCardProtector').style.borderColor = '#ddd';
-                document.getElementById('typeCardProtector').style.backgroundColor = '#fff';
-                document.getElementById('typeCardProtector').querySelector('i').style.color = '#999';
-                document.getElementById('typeCardCover').style.borderColor = '#ddd';
-                document.getElementById('typeCardCover').style.backgroundColor = '#fff';
-                document.getElementById('typeCardCover').querySelector('i').style.color = '#999';
+                // Reset styling
+                document.getElementById('typeCardProtector').style.borderColor = '#cbd5e1';
+                document.getElementById('typeCardProtector').style.backgroundColor = '#ffffff';
+                document.getElementById('typeCardProtector').querySelector('i').style.color = '#64748b';
+                document.getElementById('typeCardProtector').querySelector('.active-check').style.opacity = '0';
+                document.getElementById('typeCardProtector').querySelector('.active-check').style.transform = 'scale(0.5)';
+                
+                document.getElementById('typeCardCover').style.borderColor = '#cbd5e1';
+                document.getElementById('typeCardCover').style.backgroundColor = '#ffffff';
+                document.getElementById('typeCardCover').querySelector('i').style.color = '#64748b';
+                document.getElementById('typeCardCover').querySelector('.active-check').style.opacity = '0';
+                document.getElementById('typeCardCover').querySelector('.active-check').style.transform = 'scale(0.5)';
 
-                // Highlight selected
                 if (this.value === 'Protector') {
-                    document.getElementById('typeCardProtector').style.borderColor = '#2E7D32';
-                    document.getElementById('typeCardProtector').style.backgroundColor = '#E8F5E9';
-                    document.getElementById('typeCardProtector').querySelector('i').style.color = '#2E7D32';
+                    var card = document.getElementById('typeCardProtector');
+                    card.style.borderColor = '#10b981';
+                    card.style.backgroundColor = '#f0fdf4';
+                    card.querySelector('i').style.color = '#10b981';
+                    var check = card.querySelector('.active-check');
+                    check.style.background = '#10b981';
+                    check.style.opacity = '1';
+                    check.style.transform = 'scale(1)';
                 } else {
-                    document.getElementById('typeCardCover').style.borderColor = '#0277BD';
-                    document.getElementById('typeCardCover').style.backgroundColor = '#E1F5FE';
-                    document.getElementById('typeCardCover').querySelector('i').style.color = '#0277BD';
+                    var card = document.getElementById('typeCardCover');
+                    card.style.borderColor = '#3b82f6';
+                    card.style.backgroundColor = '#eff6ff';
+                    card.querySelector('i').style.color = '#3b82f6';
+                    var check = card.querySelector('.active-check');
+                    check.style.background = '#3b82f6';
+                    check.style.opacity = '1';
+                    check.style.transform = 'scale(1)';
                 }
             });
         });
@@ -612,11 +879,26 @@
         locationTypeRadios.forEach(radio => {
             radio.addEventListener('change', function() {
                 if (this.value === 'specific') {
-                    specificLocationsContainer.style.display = 'block';
+                    $('#specific_locations_container').slideDown(250);
                 } else {
-                    specificLocationsContainer.style.display = 'none';
+                    $('#specific_locations_container').slideUp(200);
                 }
             });
+        });
+
+        // Locations Select All & Row Highlight
+        $('#selectAllLocations').change(function() {
+            var checked = $(this).prop('checked');
+            $('.location-check').prop('checked', checked).trigger('change');
+        });
+
+        $(document).on('change', '.location-check', function() {
+            var row = $(this).closest('tr');
+            if ($(this).prop('checked')) {
+                row.addClass('row-selected');
+            } else {
+                row.removeClass('row-selected');
+            }
         });
     });
 </script>

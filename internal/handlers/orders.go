@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -19,14 +21,24 @@ func (app *Application) OrderList(w http.ResponseWriter, r *http.Request) {
 	statusFilter := r.URL.Query().Get("status")
 	typeFilter := r.URL.Query().Get("type")
 
-	orders, err := app.Models.GetOrdersByTenant(tenantID, statusFilter, typeFilter, user.Role, locationID, user.ID)
+	start, end := app.ParseDateRange(r)
+	preset := r.URL.Query().Get("preset")
+	if preset == "" {
+		if r.URL.Query().Get("start_date") != "" && r.URL.Query().Get("end_date") != "" {
+			preset = "custom"
+		} else {
+			preset = "today"
+		}
+	}
+
+	orders, err := app.Models.GetOrdersByTenant(tenantID, statusFilter, typeFilter, user.Role, locationID, user.ID, start, end)
 	if err != nil {
 		log.Printf("ERROR OrderList: %v", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	summary, _ := app.Models.GetOrderSummary(tenantID, user.Role, locationID, user.ID)
+	summary, _ := app.Models.GetOrderSummary(tenantID, user.Role, locationID, user.ID, start, end)
 
 	app.RenderPage(w, r, "orders/index", struct {
 		Orders       []*models.StoreOrder
@@ -34,12 +46,18 @@ func (app *Application) OrderList(w http.ResponseWriter, r *http.Request) {
 		StatusFilter string
 		TypeFilter   string
 		UserRole     string
+		Preset       string
+		StartDate    string
+		EndDate      string
 	}{
 		Orders:       orders,
 		Summary:      summary,
 		StatusFilter: statusFilter,
 		TypeFilter:   typeFilter,
 		UserRole:     user.Role,
+		Preset:       preset,
+		StartDate:    start.Format("2006-01-02"),
+		EndDate:      end.Format("2006-01-02"),
 	})
 }
 
@@ -66,20 +84,43 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 		orderType = "StoreOrder"
 	}
 
+	sellingGroups, _ := app.Models.GetSellingPriceGroupsByTenant(tenantID)
+
+	rows, err := app.DB.Query(`SELECT product_id, selling_price_group_id, price FROM product_group_prices WHERE tenant_id = ?`, tenantID)
+	groupPrices := make(map[int]map[int]float64)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var pid, gid int
+			var price float64
+			rows.Scan(&pid, &gid, &price)
+			if _, ok := groupPrices[pid]; !ok {
+				groupPrices[pid] = make(map[int]float64)
+			}
+			groupPrices[pid][gid] = price
+		}
+	}
+
+	groupPricesJSON, _ := json.Marshal(groupPrices)
+
 	app.RenderPage(w, r, "orders/create", struct {
-		Products   []*models.Product
-		Categories []*models.Category
-		Brands     []*models.Brand
-		Customers  []*models.Contact
-		Locations  []*models.BusinessLocation
-		OrderType  string
+		Products        []*models.Product
+		Categories      []*models.Category
+		Brands          []*models.Brand
+		Customers       []*models.Contact
+		Locations       []*models.BusinessLocation
+		OrderType       string
+		SellingGroups   []*models.SellingPriceGroup
+		GroupPricesJSON string
 	}{
-		Products:   products,
-		Categories: categories,
-		Brands:     brands,
-		Customers:  customers,
-		Locations:  locations,
-		OrderType:  orderType,
+		Products:        products,
+		Categories:      categories,
+		Brands:          brands,
+		Customers:       customers,
+		Locations:       locations,
+		OrderType:       orderType,
+		SellingGroups:   sellingGroups,
+		GroupPricesJSON: string(groupPricesJSON),
 	})
 }
 
@@ -199,6 +240,7 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 		order.FromStoreID = &sourceStore.ID
 	}
 
+	unitPrices := r.Form["unit_price[]"]
 	var totalAmount float64
 	
 	if orderType == "BulkOrder" {
@@ -227,13 +269,32 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 				fromStore = totalQty
 			}
 
+			// Fetch product selling price (locations first, then products default, fallback to 0)
+			var unitPrice float64
+			if i < len(unitPrices) {
+				unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
+			}
+			if unitPrice == 0 {
+				err := app.DB.QueryRow(`
+					SELECT COALESCE(pl.selling_price, p.selling_price, 0)
+					FROM products p
+					LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+					WHERE p.id = ? AND p.tenant_id = ?`, toLocID, pid, tenantID).Scan(&unitPrice)
+				if err != nil {
+					log.Printf("Error fetching price for product %d: %v", pid, err)
+				}
+			}
+
+			subtotal := unitPrice * totalQty
+			totalAmount += subtotal
+
 			order.Items = append(order.Items, &models.OrderItem{
 				ProductID:    pid,
 				Quantity:     totalQty,
 				FromShopQty:  fromShop,
 				FromStoreQty: fromStore,
-				UnitPrice:    0,
-				Subtotal:     0,
+				UnitPrice:    unitPrice,
+				Subtotal:     subtotal,
 			})
 		}
 	} else {
@@ -245,19 +306,60 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 				qty, _ = strconv.ParseFloat(quantities[i], 64)
 			}
 
+			// Fetch product selling price (locations first, then products default, fallback to 0)
+			var unitPrice float64
+			if i < len(unitPrices) {
+				unitPrice, _ = strconv.ParseFloat(unitPrices[i], 64)
+			}
+			if unitPrice == 0 {
+				err := app.DB.QueryRow(`
+					SELECT COALESCE(pl.selling_price, p.selling_price, 0)
+					FROM products p
+					LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+					WHERE p.id = ? AND p.tenant_id = ?`, toLocID, pid, tenantID).Scan(&unitPrice)
+				if err != nil {
+					log.Printf("Error fetching price for product %d: %v", pid, err)
+				}
+			}
+
+			subtotal := unitPrice * qty
+			totalAmount += subtotal
+
 			order.Items = append(order.Items, &models.OrderItem{
 				ProductID:    pid,
 				Quantity:     qty,
 				FromShopQty:  0,
 				FromStoreQty: qty, // All from store for store orders
-				UnitPrice:    0,
-				Subtotal:     0,
+				UnitPrice:    unitPrice,
+				Subtotal:     subtotal,
 			})
 		}
 	}
 
 	order.TotalAmount = totalAmount
 	order.RemainingAmount = totalAmount - amountPaid
+
+	if orderType == "BulkOrder" {
+		if contact, err := app.Models.GetContactByName(tenantID, orderFrom); err == nil && contact != nil {
+			if contact.CreditLimit != nil {
+				limit := *contact.CreditLimit
+				balance, err := app.Models.GetCustomerBalance(tenantID, orderFrom)
+				if err == nil {
+					remaining := totalAmount - amountPaid
+					if balance + remaining > limit {
+						repaymentNeeded := (balance + remaining) - limit
+						currencySymbol := "TSh"
+						if settings, err := app.Models.GetBusinessSettings(tenantID); err == nil {
+							currencySymbol = settings.CurrencySymbol
+						}
+						http.Error(w, fmt.Sprintf("Order rejected: Customer credit limit exceeded. Current Limit: %s %.2f, Current Balance: %s %.2f. Repayment of at least %s %.2f is required.", 
+							currencySymbol, limit, currencySymbol, balance, currencySymbol, repaymentNeeded), http.StatusBadRequest)
+						return
+					}
+				}
+			}
+		}
+	}
 
 	orderID64, err := app.Models.InsertOrder(order)
 	if err != nil {
@@ -268,13 +370,13 @@ func (app *Application) OrderStore(w http.ResponseWriter, r *http.Request) {
 
 	// Record initial payment in history if amount > 0 (Bulk Orders only)
 	if order.AmountPaid > 0 {
-		err = app.Models.UpdateOrderPayment(int(orderID64), tenantID, order.AmountPaid, user.ID)
+		err = app.Models.UpdateOrderPayment(int(orderID64), tenantID, order.AmountPaid, "cash", "Initial order payment", user.ID)
 		if err != nil {
 			log.Printf("ERROR OrderStore Payment History: %v", err)
 		}
 	}
 
-	http.Redirect(w, r, "/orders", http.StatusSeeOther)
+	http.Redirect(w, r, "/orders/invoice?id="+strconv.FormatInt(orderID64, 10), http.StatusSeeOther)
 }
 
 // OrderView shows order details
@@ -390,15 +492,25 @@ func (app *Application) OrderPaymentUpdate(w http.ResponseWriter, r *http.Reques
 	id, _ := strconv.Atoi(idStr)
 	amountStr := r.FormValue("amount")
 	amount, _ := strconv.ParseFloat(amountStr, 64)
+	paymentMethod := r.FormValue("payment_method")
+	if paymentMethod == "" {
+		paymentMethod = "cash"
+	}
+	notes := r.FormValue("notes")
 
-	err := app.Models.UpdateOrderPayment(id, tenantID, amount, user.ID)
+	err := app.Models.UpdateOrderPayment(id, tenantID, amount, paymentMethod, notes, user.ID)
 	if err != nil {
 		log.Printf("ERROR OrderPaymentUpdate: %v", err)
 		http.Error(w, "Error updating payment", http.StatusInternalServerError)
 		return
 	}
 
-	http.Redirect(w, r, "/orders/view?id="+idStr, http.StatusSeeOther)
+	referer := r.Header.Get("Referer")
+	if strings.Contains(referer, "invoice") {
+		http.Redirect(w, r, "/orders/invoice?id="+idStr, http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/orders/view?id="+idStr, http.StatusSeeOther)
+	}
 }
 
 // PendingOrders shows pending orders for Store Keeper
@@ -415,5 +527,47 @@ func (app *Application) PendingOrdersList(w http.ResponseWriter, r *http.Request
 		Orders []*models.StoreOrder
 	}{
 		Orders: orders,
+	})
+}
+
+// OrderInvoice shows the invoice preview and print/download options
+func (app *Application) OrderInvoice(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	user := middleware.GetUser(r.Context())
+	
+	idStr := r.URL.Query().Get("id")
+	id, _ := strconv.Atoi(idStr)
+
+	order, err := app.Models.GetOrderByID(id, tenantID)
+	if err != nil {
+		log.Printf("ERROR OrderInvoice: %v", err)
+		http.Error(w, "Order not found", http.StatusNotFound)
+		return
+	}
+
+	payments, _ := app.Models.GetOrderPayments(id)
+	business, _ := app.Models.GetBusinessSettings(tenantID)
+
+	var invoiceDescription string
+	_ = app.DB.QueryRow("SELECT COALESCE(invoice_description, '') FROM business_locations WHERE id = ?", order.ToLocationID).Scan(&invoiceDescription)
+	if invoiceDescription == "" && order.FromStoreID != nil {
+		_ = app.DB.QueryRow("SELECT COALESCE(invoice_description, '') FROM business_locations WHERE id = ?", *order.FromStoreID).Scan(&invoiceDescription)
+	}
+	if invoiceDescription == "" && business != nil {
+		invoiceDescription = business.DefaultInvoiceDescription
+	}
+
+	app.RenderPage(w, r, "orders/invoice", struct {
+		Order              *models.StoreOrder
+		Payments           []*models.OrderPayment
+		UserRole           string
+		Business           *models.BusinessSetting
+		InvoiceDescription string
+	}{
+		Order:              order,
+		Payments:           payments,
+		UserRole:           user.Role,
+		Business:           business,
+		InvoiceDescription: invoiceDescription,
 	})
 }

@@ -54,7 +54,8 @@
                                         data-city="{{.City}}"
                                         data-state="{{.State}}"
                                         data-country="{{.Country}}"
-                                        data-zip_code="{{.ZipCode}}">
+                                        data-zip_code="{{.ZipCode}}"
+                                        data-invoice_description="{{.InvoiceDescription}}">
                                     <i class="fa fa-edit"></i> Edit
                                 </button>
                                 <a href="/business-location/delete?id={{.ID}}" class="btn btn-xs btn-danger" onclick="return confirm('Are you sure you want to delete this location?')">
@@ -123,6 +124,10 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label>Invoice Description / Terms (Appears on Invoices for this location):</label>
+                        <textarea name="invoice_description" class="form-control" rows="3" placeholder="e.g. Thank you for shopping with us! Terms & Conditions apply."></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -187,6 +192,10 @@
                             </div>
                         </div>
                     </div>
+                    <div class="form-group" style="margin-top:15px;">
+                        <label>Invoice Description / Terms (Appears on Invoices for this location):</label>
+                        <textarea name="invoice_description" id="edit_invoice_description" class="form-control" rows="3" placeholder="e.g. Thank you for shopping with us! Terms & Conditions apply."></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -218,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#edit_state').val(data.state);
         $('#edit_country').val(data.country);
         $('#edit_zip_code').val(data.zip_code);
+        $('#edit_invoice_description').val(data.invoice_description);
         
         $('#editLocationModal').modal('show');
     });

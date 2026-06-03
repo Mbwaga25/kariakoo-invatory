@@ -583,6 +583,162 @@ func (m *Models) GetStockHistory(tenantID int, start, end time.Time, productID i
 	return movements, nil
 }
 
+type OrderReportData struct {
+	Summary   OrderReportSummary
+	Orders    []*StoreOrder
+	Customers []*CustomerReportAnalysis
+}
+
+type OrderReportSummary struct {
+	TotalOrders      int
+	TotalAmount      float64
+	TotalPaid        float64
+	TotalRemaining   float64
+	PaidFullCount    int
+	PaidPartialCount int
+	PendingCount     int
+}
+
+type CustomerReportAnalysis struct {
+	CustomerName     string
+	CreditLimit      float64
+	InvoiceDueDays   int
+	RangeTotal       float64
+	RangePaid        float64
+	RangeRemaining   float64
+	TotalDebt        float64
+	OldestUnpaidDays int
+	LimitExceeded    bool
+	Overdue          bool
+}
+
+func (m *Models) GetOrderReport(tenantID int, start, end time.Time, paymentStatus string) (*OrderReportData, error) {
+	data := &OrderReportData{}
+
+	// 1. Fetch Summary
+	summaryQuery := `
+		SELECT COUNT(*), COALESCE(SUM(total_amount), 0), COALESCE(SUM(amount_paid), 0), COALESCE(SUM(remaining_amount), 0),
+		       COUNT(CASE WHEN payment_status = 'paid' THEN 1 END),
+		       COUNT(CASE WHEN payment_status = 'incomplete' THEN 1 END),
+		       COUNT(CASE WHEN payment_status = 'unpaid' THEN 1 END)
+		FROM orders
+		WHERE tenant_id = ? AND created_at BETWEEN ? AND ?`
+	summaryArgs := []interface{}{tenantID, start, end}
+	if paymentStatus != "" {
+		summaryQuery += " AND payment_status = ?"
+		summaryArgs = append(summaryArgs, paymentStatus)
+	}
+
+	err := m.DB.QueryRow(summaryQuery, summaryArgs...).Scan(
+		&data.Summary.TotalOrders, &data.Summary.TotalAmount, &data.Summary.TotalPaid, &data.Summary.TotalRemaining,
+		&data.Summary.PaidFullCount, &data.Summary.PaidPartialCount, &data.Summary.PendingCount)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Fetch Orders List
+	ordersQuery := `
+		SELECT o.id, o.tenant_id, o.order_type, o.ref_no, o.placed_by,
+		       COALESCE(o.order_from, ''), o.to_location_id, o.status, o.payment_status,
+		       o.total_amount, o.amount_paid, o.remaining_amount, o.created_at,
+		       u.name as placed_by_name,
+		       COALESCE(bl_to.name, '') as to_location_name,
+		       COALESCE(bl_from.name, '') as from_location_name
+		FROM orders o
+		JOIN users u ON o.placed_by = u.id
+		LEFT JOIN business_locations bl_to ON o.to_location_id = bl_to.id
+		LEFT JOIN business_locations bl_from ON o.from_store_id = bl_from.id
+		WHERE o.tenant_id = ? AND o.created_at BETWEEN ? AND ?`
+	ordersArgs := []interface{}{tenantID, start, end}
+	if paymentStatus != "" {
+		ordersQuery += " AND o.payment_status = ?"
+		ordersArgs = append(ordersArgs, paymentStatus)
+	}
+	ordersQuery += " ORDER BY o.created_at DESC"
+
+	rows, err := m.DB.Query(ordersQuery, ordersArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var o StoreOrder
+		err := rows.Scan(&o.ID, &o.TenantID, &o.OrderType, &o.RefNo, &o.PlacedBy,
+			&o.OrderFrom, &o.ToLocationID, &o.Status, &o.PaymentStatus,
+			&o.TotalAmount, &o.AmountPaid, &o.RemainingAmount, &o.CreatedAt,
+			&o.PlacedByName, &o.ToLocationName, &o.FromLocationName)
+		if err != nil {
+			return nil, err
+		}
+		data.Orders = append(data.Orders, &o)
+	}
+
+	// 3. Fetch Customer analysis
+	custRows, err := m.DB.Query(`
+		SELECT name, COALESCE(credit_limit, 0), COALESCE(invoice_due_days, 0)
+		FROM contacts
+		WHERE tenant_id = ? AND type = 'customer'
+		ORDER BY name ASC`, tenantID)
+	if err != nil {
+		return nil, err
+	}
+	defer custRows.Close()
+
+	for custRows.Next() {
+		var ca CustomerReportAnalysis
+		err := custRows.Scan(&ca.CustomerName, &ca.CreditLimit, &ca.InvoiceDueDays)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate range stats for this specific customer name
+		err = m.DB.QueryRow(`
+			SELECT COALESCE(SUM(total_amount), 0), COALESCE(SUM(amount_paid), 0), COALESCE(SUM(remaining_amount), 0)
+			FROM orders
+			WHERE tenant_id = ? AND order_type = 'BulkOrder' AND order_from = ? AND created_at BETWEEN ? AND ?`,
+			tenantID, ca.CustomerName, start, end).Scan(&ca.RangeTotal, &ca.RangePaid, &ca.RangeRemaining)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate total outstanding debt (lifetime)
+		err = m.DB.QueryRow(`
+			SELECT COALESCE(SUM(remaining_amount), 0)
+			FROM orders
+			WHERE tenant_id = ? AND order_type = 'BulkOrder' AND order_from = ? AND payment_status != 'paid' AND status != 'rejected'`,
+			tenantID, ca.CustomerName).Scan(&ca.TotalDebt)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate oldest unpaid invoice days
+		err = m.DB.QueryRow(`
+			SELECT COALESCE(TIMESTAMPDIFF(DAY, MIN(created_at), NOW()), 0)
+			FROM orders
+			WHERE tenant_id = ? AND order_type = 'BulkOrder' AND order_from = ? AND payment_status != 'paid' AND status != 'rejected'`,
+			tenantID, ca.CustomerName).Scan(&ca.OldestUnpaidDays)
+		if err != nil {
+			return nil, err
+		}
+
+		// Calculate warning flags
+		if ca.CreditLimit > 0 && ca.TotalDebt > ca.CreditLimit {
+			ca.LimitExceeded = true
+		}
+		if ca.InvoiceDueDays > 0 && ca.OldestUnpaidDays > ca.InvoiceDueDays {
+			ca.Overdue = true
+		}
+
+		// Only include in analysis report if they placed an order in the range or have outstanding debt
+		if ca.RangeTotal > 0 || ca.TotalDebt > 0 {
+			data.Customers = append(data.Customers, &ca)
+		}
+	}
+
+	return data, nil
+}
+
 
 
 

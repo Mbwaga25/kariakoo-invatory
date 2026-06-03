@@ -26,16 +26,20 @@ func (app *Application) ProductCreate(w http.ResponseWriter, r *http.Request) {
 		locations = storeLocationsOnly(locations)
 	}
 
+	groups, _ := app.Models.GetSellingPriceGroupsByTenant(tenantID)
+
 	app.RenderPage(w, r, "products/create", struct {
 		Categories []*models.Category
 		Brands     []*models.Brand
 		Units      []*models.Unit
 		Locations  []*models.BusinessLocation
+		Groups     []*models.SellingPriceGroup
 	}{
 		Categories: categories,
 		Brands:     brands,
 		Units:      units,
 		Locations:  locations,
+		Groups:     groups,
 	})
 }
 
@@ -251,11 +255,24 @@ func (app *Application) ProductStore(w http.ResponseWriter, r *http.Request) {
 		Description:   app.StringPtr(r.FormValue("description")),
 	}
 
-	_, err = app.Models.InsertProduct(p, locationStocks)
+	productID, err := app.Models.InsertProduct(p, locationStocks)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	// Save selling price group values
+	groups, _ := app.Models.GetSellingPriceGroupsByTenant(tenantID)
+	for _, g := range groups {
+		priceStr := r.FormValue("group_price_" + strconv.Itoa(g.ID))
+		if priceStr != "" {
+			price, err := strconv.ParseFloat(priceStr, 64)
+			if err == nil {
+				_ = app.Models.SetProductGroupPrice(tenantID, int(productID), g.ID, price)
+			}
+		}
+	}
+
 	http.Redirect(w, r, "/products", http.StatusSeeOther)
 }
 
@@ -428,16 +445,23 @@ func (app *Application) ProductEdit(w http.ResponseWriter, r *http.Request) {
 	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 	units, _ := app.Models.GetUnitsByTenant(tenantID)
 
+	groups, _ := app.Models.GetSellingPriceGroupsByTenant(tenantID)
+	groupPrices, _ := app.Models.GetProductGroupPrices(tenantID, id)
+
 	app.RenderPage(w, r, "products/edit", struct {
-		Product    *models.Product
-		Categories []*models.Category
-		Brands     []*models.Brand
-		Units      []*models.Unit
+		Product     *models.Product
+		Categories  []*models.Category
+		Brands      []*models.Brand
+		Units       []*models.Unit
+		Groups      []*models.SellingPriceGroup
+		GroupPrices map[int]float64
 	}{
-		Product:    product,
-		Categories: categories,
-		Brands:     brands,
-		Units:      units,
+		Product:     product,
+		Categories:  categories,
+		Brands:      brands,
+		Units:       units,
+		Groups:      groups,
+		GroupPrices: groupPrices,
 	})
 }
 
@@ -483,6 +507,18 @@ func (app *Application) ProductUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
+	}
+
+	// Update selling price group values
+	groups, _ := app.Models.GetSellingPriceGroupsByTenant(tenantID)
+	for _, g := range groups {
+		priceStr := r.FormValue("group_price_" + strconv.Itoa(g.ID))
+		if priceStr != "" {
+			price, err := strconv.ParseFloat(priceStr, 64)
+			if err == nil {
+				_ = app.Models.SetProductGroupPrice(tenantID, id, g.ID, price)
+			}
+		}
 	}
 
 	http.Redirect(w, r, "/products/view?id="+strconv.Itoa(id), http.StatusSeeOther)

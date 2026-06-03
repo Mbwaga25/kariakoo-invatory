@@ -1,141 +1,304 @@
-{{define "title"}}Add New Stock{{end}}
-
+{{define "title"}}Receive Stock{{end}}
+{{define "bodyClass"}}legacy-purchase-create{{end}}
 {{define "header"}}Receive Stock{{end}}
-{{define "subheader"}}Add new inventory from supplier delivery{{end}}
+{{define "subheader"}}Record incoming store stock from supplier delivery{{end}}
+
+{{define "styles"}}
+<style>
+    body.legacy-purchase-create {
+        background: #ecf0f5;
+    }
+    .purchase-create-page {
+        width: 100%;
+    }
+    .purchase-create-page .box {
+        margin-bottom: 20px;
+        border: 1px solid #d2d6de;
+        border-top-width: 3px;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff;
+    }
+    .purchase-create-page .box-primary {
+        border-top-color: #3c8dbc;
+    }
+    .purchase-create-page .box-header {
+        display: block;
+        padding: 15px;
+        border-bottom: 1px solid #f4f4f4;
+        background: transparent;
+    }
+    .purchase-create-page .box-header .box-title {
+        font-size: 18px;
+        font-weight: 500;
+        color: #444;
+    }
+    .purchase-create-page .box-body {
+        padding: 15px;
+    }
+    .purchase-create-page .form-group {
+        margin-bottom: 15px;
+    }
+    .purchase-create-page label {
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    .purchase-create-page .form-control {
+        height: 34px;
+        padding: 6px 12px;
+        border: 1px solid #d2d6de;
+        border-radius: 0;
+        box-shadow: none;
+        background: #fff;
+        color: #555;
+    }
+    .purchase-create-page .input-group-addon {
+        border-radius: 0;
+        background-color: #eee;
+        border: 1px solid #ccc;
+    }
+    .purchase-create-page .btn {
+        border-radius: 3px;
+        box-shadow: none;
+    }
+    .purchase-create-page .select2-container--default .select2-selection--single {
+        height: 34px !important;
+        border: 1px solid #d2d6de !important;
+        border-radius: 0 !important;
+    }
+    .purchase-create-page .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 32px !important;
+        padding-left: 12px !important;
+        color: #555;
+    }
+    .purchase-create-page .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 32px !important;
+    }
+    .purchase-create-page .select2-container {
+        width: 100% !important;
+    }
+    .purchase-create-page table .select2-container {
+        min-width: 250px;
+    }
+    .purchase-create-page .table-responsive {
+        margin-top: 10px;
+        border: none;
+    }
+    .purchase-create-page table th {
+        font-weight: 600;
+        background-color: #3c8dbc;
+        color: #fff;
+        border: 1px solid #3c8dbc !important;
+    }
+    .purchase-create-page table td {
+        vertical-align: middle !important;
+    }
+    .purchase-create-page .total-summary-card {
+        background-color: #f7f9fa;
+        border: 1px solid #e1e4e6;
+        border-radius: 4px;
+        padding: 10px 15px;
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+{{end}}
 
 {{define "main"}}
-<div class="box box-primary">
-    <div class="box-header with-border">
-        <h3 class="box-title"><i class="fa fa-download"></i> Stock Entry</h3>
-        <p class="text-muted" style="margin:5px 0 0;">Record incoming stock — just select products, quantities, and which store to add them to.</p>
-    </div>
-    <form action="/purchases/store" method="POST">
-        <div class="box-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="location_id"><i class="fa fa-map-marker"></i> Store Location:*</label>
-                        <select name="location_id" id="location_id" class="form-control" required>
-                            {{range .PageData.Locations}}
-                            <option value="{{.ID}}">{{.Name}}</option>
-                            {{end}}
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label for="ref_no"><i class="fa fa-hashtag"></i> Reference No:</label>
-                        <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="Optional reference number">
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <h4 class="box-title" style="margin-bottom: 15px;"><i class="fa fa-cubes"></i> Products to Add</h4>
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-hover" id="purchase_items_table">
-                            <thead>
-                                <tr class="bg-blue" style="color: white;">
-                                    <th style="width: 55%">Product</th>
-                                    <th style="width: 30%">Quantity</th>
-                                    <th style="width: 15%" class="text-center">
-                                        <button type="button" class="btn btn-success btn-sm" id="add_row" title="Add Product">
-                                            <i class="fa fa-plus"></i>
-                                        </button>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="product-row">
-                                    <td>
-                                        <select name="product_id[]" class="form-control" required style="width: 100%;">
-                                            <option value="">-- Select Product --</option>
-                                            {{range .PageData.Products}}
-                                            <option value="{{.ID}}">{{.ProductType}} | {{.CategoryName}} | {{.BrandName}} — {{.Name}}</option>
-                                            {{end}}
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <div class="input-group">
-                                            <input type="number" step="1" name="quantity[]" class="form-control" required placeholder="e.g. 500" min="1">
-                                            <span class="input-group-addon">pcs</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-center">
-                                        <button type="button" class="btn btn-danger btn-sm remove-row-btn" style="display: none;">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr class="bg-gray">
-                                    <th class="text-right">Total Products: <span id="total_items">1</span></th>
-                                    <th colspan="2">Total Quantity: <span id="total_qty" style="color:#2E7D32;font-weight:bold;">0</span></th>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                </div>
-            </div>
+<div class="purchase-create-page">
+    <div class="box box-primary">
+        <div class="box-header with-border">
+            <h3 class="box-title"><i class="fa fa-download"></i> Stock Entry Form</h3>
+            <p class="text-muted" style="margin:5px 0 0;">Record incoming stock — select destination store location, quantities, and reference details.</p>
         </div>
+        <form action="/purchases/store" method="POST" id="purchaseForm">
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="location_id"><i class="fa fa-map-marker-alt text-danger"></i> Store Location (Destination):*</label>
+                            <select name="location_id" id="location_id" class="form-control" required>
+                                <option value="">-- Select Store --</option>
+                                {{range .PageData.Locations}}
+                                <option value="{{.ID}}">{{.Name}}</option>
+                                {{end}}
+                            </select>
+                            <small class="help-block">Stock will be added to this warehouse/store.</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="ref_no"><i class="fa fa-hashtag text-info"></i> Reference / Delivery Note No:</label>
+                            <input type="text" name="ref_no" class="form-control" id="ref_no" placeholder="e.g. DN-12345 (Optional)">
+                            <small class="help-block">Optional supplier delivery reference code.</small>
+                        </div>
+                    </div>
+                </div>
 
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                const tableBody = document.querySelector('#purchase_items_table tbody');
-                const addRowBtn = document.getElementById('add_row');
+                <hr style="margin: 15px 0 25px;">
                 
-                function updateTotals() {
-                    const rows = tableBody.querySelectorAll('tr');
-                    document.getElementById('total_items').textContent = rows.length;
-                    
-                    let totalQty = 0;
-                    rows.forEach(row => {
-                        const qty = parseFloat(row.querySelector('input[name="quantity[]"]').value) || 0;
-                        totalQty += qty;
-                    });
-                    document.getElementById('total_qty').textContent = totalQty.toLocaleString();
-                }
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 style="color:#1b2a4a; font-weight:700; margin-bottom:15px;">
+                            <i class="fa fa-cubes text-primary"></i> Product Quantities
+                        </h4>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-hover" id="purchase_items_table">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 60%">Product Name</th>
+                                        <th style="width: 25%">Quantity Received</th>
+                                        <th style="width: 15%" class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="product-row">
+                                        <td>
+                                            <select name="product_id[]" class="form-control select2-product" required style="width: 100%;">
+                                                <option value="">-- Select Product --</option>
+                                                {{range .PageData.Products}}
+                                                <option value="{{.ID}}" {{if eq $.PageData.ProductID .ID}}selected{{end}}>
+                                                    {{.ProductType}} | {{.CategoryName}} | {{.BrandName}} — {{.Name}}
+                                                </option>
+                                                {{end}}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="input-group">
+                                                <input type="number" step="1" name="quantity[]" class="form-control qty-input" required placeholder="e.g. 500" min="1" value="">
+                                                <span class="input-group-addon">pcs</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <button type="button" class="btn btn-danger btn-sm remove-row-btn" style="display: none;" title="Remove">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Control Buttons & Total Summary -->
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                            <button type="button" class="btn btn-success" id="add_row"><i class="fa fa-plus-circle"></i> Add Another Product</button>
+                            
+                            <div class="total-summary-card">
+                                <span style="font-weight:700; color:#444; margin-right:15px;">Total Products: <span id="total_items" style="color:#3c8dbc; font-size:16px;">1</span></span>
+                                <span style="font-weight:700; color:#444;">Total Quantity: <span id="total_qty" style="color:#2e7d32; font-size:16px;">0</span> pcs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                addRowBtn.addEventListener('click', function() {
-                    const firstRow = tableBody.querySelector('tr');
-                    const newRow = firstRow.cloneNode(true);
-                    
-                    // Clear values
-                    newRow.querySelectorAll('input').forEach(input => {
-                        input.value = '';
-                        input.addEventListener('input', updateTotals);
-                    });
-                    
-                    const select = newRow.querySelector('select');
-                    select.selectedIndex = 0;
-                    
-                    // Show remove button
-                    const removeBtn = newRow.querySelector('.remove-row-btn');
-                    removeBtn.style.display = 'inline-block';
-                    removeBtn.addEventListener('click', function() {
-                        newRow.remove();
-                        updateTotals();
-                    });
-                    
-                    tableBody.appendChild(newRow);
-                    updateTotals();
-                });
-
-                // Initial events
-                tableBody.querySelectorAll('input').forEach(input => {
-                    input.addEventListener('input', updateTotals);
-                });
-            });
-        </script>
-
-        <div class="box-footer">
-            <button type="submit" class="btn btn-primary btn-lg"><i class="fa fa-save"></i> Save Stock Entry</button>
-            <a href="/purchases" class="btn btn-default btn-lg">Cancel</a>
-        </div>
-    </form>
+            <div class="box-footer" style="background-color: #fcfcfc; padding: 20px 15px;">
+                <button type="submit" class="btn btn-primary btn-lg" style="min-width: 200px;"><i class="fa fa-save"></i> Save Stock Entry</button>
+                <a href="/purchases" class="btn btn-default btn-lg" style="margin-left:10px;">Cancel</a>
+            </div>
+        </form>
+    </div>
 </div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+$(document).ready(function() {
+    // Generate options html once from server data
+    var productOptionsHtml = '<option value="">-- Select Product --</option>';
+    {{range .PageData.Products}}
+    productOptionsHtml += '<option value="{{.ID}}">{{.ProductType}} | {{.CategoryName}} | {{.BrandName}} — {{.Name}}</option>';
+    {{end}}
+
+    function updateTotals() {
+        var rows = $('#purchase_items_table tbody tr');
+        $('#total_items').text(rows.length);
+        
+        var totalQty = 0;
+        rows.each(function() {
+            var qty = parseFloat($(this).find('.qty-input').val()) || 0;
+            totalQty += qty;
+        });
+        $('#total_qty').text(totalQty.toLocaleString());
+    }
+
+    function initSelect2(element) {
+        if ($.fn.select2) {
+            $(element).select2({
+                width: '100%',
+                placeholder: "-- Select Product --",
+                minimumResultsForSearch: 0
+            });
+        }
+    }
+
+    // Initialize first row Select2 and location selector
+    initSelect2('.select2-product');
+    if ($.fn.select2) {
+        $('#location_id').select2({
+            width: '100%',
+            placeholder: "-- Select Store --",
+            minimumResultsForSearch: 0
+        });
+    }
+
+    $('#add_row').click(function() {
+        var html = '<tr class="product-row">' +
+            '<td>' +
+                '<select name="product_id[]" class="form-control select2-product" required style="width: 100%;">' + 
+                    productOptionsHtml + 
+                '</select>' +
+            '</td>' +
+            '<td>' +
+                '<div class="input-group">' +
+                    '<input type="number" step="1" name="quantity[]" class="form-control qty-input" required placeholder="e.g. 500" min="1">' +
+                    '<span class="input-group-addon">pcs</span>' +
+                '</div>' +
+            '</td>' +
+            '<td class="text-center">' +
+                '<button type="button" class="btn btn-danger btn-sm remove-row-btn" title="Remove">' +
+                    '<i class="fa fa-trash"></i>' +
+                '</button>' +
+            '</td>' +
+        '</tr>';
+        
+        var newRow = $(html);
+        $('#purchase_items_table tbody').append(newRow);
+        
+        // Initialize Select2 on new dropdown
+        initSelect2(newRow.find('.select2-product'));
+        
+        // Show remove buttons if more than 1 row
+        checkRemoveButtons();
+        updateTotals();
+    });
+
+    $(document).on('click', '.remove-row-btn', function() {
+        $(this).closest('tr').remove();
+        checkRemoveButtons();
+        updateTotals();
+    });
+
+    $(document).on('input change', '.qty-input', function() {
+        updateTotals();
+    });
+
+    function checkRemoveButtons() {
+        var rows = $('#purchase_items_table tbody tr');
+        if (rows.length <= 1) {
+            rows.find('.remove-row-btn').hide();
+        } else {
+            rows.find('.remove-row-btn').show();
+        }
+    }
+
+    // Run initial check
+    checkRemoveButtons();
+    updateTotals();
+});
+</script>
 {{end}}

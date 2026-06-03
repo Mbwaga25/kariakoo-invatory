@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -87,6 +88,21 @@ func (m *Models) InsertStockAdjustment(sa *StockAdjustment) (int64, error) {
 		_, err = tx.Exec(itemQuery, adjustmentID, item.ProductID, item.Quantity, item.UnitPrice)
 		if err != nil {
 			return 0, err
+		}
+
+		// Verify sufficient stock before deducting
+		var qtyAvailable float64
+		var prodName string
+		err = tx.QueryRow(`
+			SELECT COALESCE(pl.qty_available, 0), p.name 
+			FROM products p
+			LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+			WHERE p.id = ?`, sa.BusinessLocationID, item.ProductID).Scan(&qtyAvailable, &prodName)
+		if err != nil {
+			return 0, fmt.Errorf("verify stock for product %d: %v", item.ProductID, err)
+		}
+		if qtyAvailable < item.Quantity {
+			return 0, fmt.Errorf("You cannot adjust '%s' (ID: %d). Current available stock is %.0f, but requested is %.0f. Please add new stock or purchase in order to continue.", prodName, item.ProductID, qtyAvailable, item.Quantity)
 		}
 
 		// Update stock (subtract because adjustment is usually for loss/damage)
