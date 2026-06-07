@@ -2,42 +2,74 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 func main() {
-	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/?parseTime=true&multiStatements=true")
+	// Load .env file (optional)
+	if err := godotenv.Load(); err != nil {
+		log.Println("Warning: .env file not found, using environment variables from system")
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	if dbUser == "" {
+		dbUser = "root"
+	}
+	dbPass := os.Getenv("DB_PASS")
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		dbHost = "127.0.0.1"
+	}
+	dbPort := os.Getenv("DB_PORT")
+	if dbPort == "" {
+		dbPort = "3306"
+	}
+	dbName := os.Getenv("DB_NAME")
+	if dbName == "" {
+		dbName = "invatory"
+	}
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/?parseTime=true&multiStatements=true", dbUser, dbPass, dbHost, dbPort)
+	log.Printf("Connecting to database at %s:%s (without DB select)...", dbHost, dbPort)
+	db, err := sql.Open("mysql", dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
 	// Create database if not exists
-	_, err = db.Exec("CREATE DATABASE IF NOT EXISTS invatory")
+	_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Exec("USE invatory")
+	_, err = db.Exec(fmt.Sprintf("USE %s", dbName))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Clean tables before seeding
-	_, _ = db.Exec("SET FOREIGN_KEY_CHECKS = 0")
-	_, _ = db.Exec("DROP TABLE IF EXISTS users")
-	_, _ = db.Exec("DROP TABLE IF EXISTS products")
-	_, _ = db.Exec("DROP TABLE IF EXISTS business_locations")
-	_, _ = db.Exec("DROP TABLE IF EXISTS tenants")
-	_, _ = db.Exec("DROP TABLE IF EXISTS categories")
-	_, _ = db.Exec("DROP TABLE IF EXISTS brands")
-	_, _ = db.Exec("DROP TABLE IF EXISTS units")
-	_, _ = db.Exec("SET FOREIGN_KEY_CHECKS = 1")
+	// Clean tables before seeding ONLY if DB_CLEAN is explicitly set to true
+	if os.Getenv("DB_CLEAN") == "true" {
+		log.Println("DB_CLEAN is set to true. Dropping tables for a clean seed...")
+		_, _ = db.Exec("SET FOREIGN_KEY_CHECKS = 0")
+		_, _ = db.Exec("DROP TABLE IF EXISTS users")
+		_, _ = db.Exec("DROP TABLE IF EXISTS products")
+		_, _ = db.Exec("DROP TABLE IF EXISTS business_locations")
+		_, _ = db.Exec("DROP TABLE IF EXISTS tenants")
+		_, _ = db.Exec("DROP TABLE IF EXISTS categories")
+		_, _ = db.Exec("DROP TABLE IF EXISTS brands")
+		_, _ = db.Exec("DROP TABLE IF EXISTS units")
+		_, _ = db.Exec("SET FOREIGN_KEY_CHECKS = 1")
+	} else {
+		log.Println("DB_CLEAN is not true. Skipping table drops to prevent data loss.")
+	}
 
 	// Read and execute SQL files from cmd/migrate/sql/
 	sqlDir := filepath.Join("cmd", "migrate", "sql")

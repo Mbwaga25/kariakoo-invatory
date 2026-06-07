@@ -19,7 +19,7 @@ func main() {
 	// Load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("Warning: .env file not found, using environment variables from system")
 	}
 
 	// Build DSN from environment variables

@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: kariakoo_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS:-rootpassword}
+      MYSQL_DATABASE: ${DB_NAME:-invatory}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${DB_PASS:-rootpassword}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kariakoo_app
+    restart: always
+    ports:
+      - "${APP_PORT:-8081}:${APP_PORT:-8081}"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_USER: root
+      DB_PASS: ${DB_PASS:-rootpassword}
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-invatory}
+      APP_PORT: ${APP_PORT:-8081}
+      RUN_MIGRATIONS: "true"
+      DB_CLEAN: "false" # WARNING: Set to "true" ONLY if you want to drop and re-seed all tables. Keep as "false" for production data safety.
+
+volumes:
+  mysql_data:
