@@ -169,10 +169,6 @@
                             {{$.CurrencySymbol}} {{printf "%.2f" .RangePaid}}
                         </td>
                     </tr>
-                    {{else}}
-                    <tr>
-                        <td colspan="9" style="text-align: center; color: #888; padding: 20px;">No customers with active orders or outstanding debt in this range.</td>
-                    </tr>
                     {{end}}
                 </tbody>
             </table>
@@ -239,11 +235,6 @@
                         <td>
                             <a href="/orders/invoice?id={{.ID}}" class="btn btn-xs btn-default" target="_blank"><i class="fa fa-eye"></i> Invoice</a>
                         </td>
-                    </tr>
-                    {{else}}
-                    <tr>
-                        <td colspan="10" style="text-align: center; color: #888; padding: 20px;">No orders found in this period.</td>
-                    </tr>
                     {{end}}
                 </tbody>
             </table>
