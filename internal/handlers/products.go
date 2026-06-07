@@ -33,7 +33,6 @@ func (app *Application) ProductCreate(w http.ResponseWriter, r *http.Request) {
 		Brands     []*models.Brand
 		Units      []*models.Unit
 		Locations  []*models.BusinessLocation
-<<<<<<< HEAD
 		Groups     []*models.SellingPriceGroup
 	}{
 		Categories: categories,
