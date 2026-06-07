@@ -73,7 +73,12 @@ func (app *Application) OrderCreate(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	// Load the full tenant catalog so the searchable picker can find every product.
-	products, _ := app.Models.GetProductsByTenantFiltered(tenantID, 0, "", 0, 0)
+	products, err := app.Models.GetProductsByTenantFiltered(tenantID, locationID, "", 0, 0)
+log.Printf("INFO: Retrieved %d products for tenant %d, location %d", len(products), tenantID, locationID)
+if err != nil {
+    log.Printf("ERROR fetching products: %v", err)
+    // Proceed with empty products slice
+}
 	categories, _ := app.Models.GetCategoriesByTenant(tenantID)
 	brands, _ := app.Models.GetBrandsByTenant(tenantID)
 	customers, _ := app.Models.GetContactsByTenant(tenantID, "customer")

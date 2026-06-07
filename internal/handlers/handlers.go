@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"time"
-
+"strings"
 	"kariakoo/inventory/internal/middleware"
 	"kariakoo/inventory/internal/models"
 )
@@ -130,11 +130,18 @@ func (app *Application) RenderPage(w http.ResponseWriter, r *http.Request, templ
 		"add": func(a, b float64) float64 {
 			return a + b
 		},
+		"lower": func(s string) string { return strings.ToLower(s) },
 		"derefInt": func(i *int) int {
 			if i == nil {
 				return 0
 			}
 			return *i
+		},
+		"derefFloat": func(f *float64) float64 {
+			if f == nil {
+				return 0
+			}
+			return *f
 		},
 	})
 	

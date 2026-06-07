@@ -274,24 +274,31 @@ func (m *Models) GetLowStockProductsByLocation(tenantID int, locationID int) ([]
 	var params []interface{}
 
 	if locationID > 0 {
-		query = `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
-				  COALESCE(pl.qty_available, 0) as total_qty, COALESCE(p.alert_quantity, 50)
-				  FROM products p
-				  LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
-				  WHERE p.tenant_id = ?
-				  GROUP BY p.id
-				  HAVING total_qty < COALESCE(p.alert_quantity, 50)
-				  ORDER BY total_qty ASC`
+		query = `SELECT t.id, t.name, t.sku, t.product_type, t.total_qty, t.alert_qty
+				  FROM (
+					SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector') as product_type,
+						   COALESCE(pl.qty_available, 0) as total_qty,
+						   COALESCE(p.alert_quantity, 50) as alert_qty
+					FROM products p
+					LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+					WHERE p.tenant_id = ?
+				  ) t
+				  WHERE t.total_qty < t.alert_qty
+				  ORDER BY t.total_qty ASC`
 		params = []interface{}{locationID, tenantID}
 	} else {
-		query = `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
-				  COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
-				  FROM products p
-				  LEFT JOIN product_locations pl ON p.id = pl.product_id
-				  WHERE p.tenant_id = ?
-				  GROUP BY p.id
-				  HAVING total_qty < COALESCE(p.alert_quantity, 50)
-				  ORDER BY total_qty ASC`
+		query = `SELECT t.id, t.name, t.sku, t.product_type, t.total_qty, t.alert_qty
+				  FROM (
+					SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector') as product_type,
+						   COALESCE(SUM(pl.qty_available), 0) as total_qty,
+						   COALESCE(p.alert_quantity, 50) as alert_qty
+					FROM products p
+					LEFT JOIN product_locations pl ON p.id = pl.product_id
+					WHERE p.tenant_id = ?
+					GROUP BY p.id, p.name, p.sku, p.product_type, p.alert_quantity
+				  ) t
+				  WHERE t.total_qty < t.alert_qty
+				  ORDER BY t.total_qty ASC`
 		params = []interface{}{tenantID}
 	}
 	

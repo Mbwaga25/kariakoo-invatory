@@ -245,7 +245,7 @@
                                     </span>
                                 </td>
                                 <td style="padding: 12px 15px; vertical-align: middle; color: #64748b; font-size: 13px; font-weight: 500;">
-                                    Below {{if .AlertQuantity}}{{printf "%.0f" .AlertQuantity}}{{else}}50{{end}}
+                                    Below {{printf "%.0f" (derefFloat .AlertQuantity)}}
                                 </td>
                                 <td style="padding: 12px 15px; vertical-align: middle; text-align: right;">
                                     <a href="/purchases/create?product_id={{.ID}}" class="btn btn-sm btn-success" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 5px 12px; background-color: #16a34a; border-color: #16a34a; display: inline-flex; align-items: center; gap: 4px;">

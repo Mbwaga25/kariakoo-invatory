@@ -604,9 +604,9 @@
                                     <select name="from_location_id" id="fromLocationSelect" class="form-control" required>
                                         <option value="">-- Select Source Store --</option>
                                         {{range .PageData.Locations}}
-                                        {{if eq .LocationType "store"}}
-                                        <option value="{{.ID}}">{{.Name}}</option>
-                                        {{end}}
+                                            {{if eq (lower .LocationType) "store"}}
+                                            <option value="{{.ID}}">{{.Name}}</option>
+                                            {{end}}
                                         {{end}}
                                     </select>
                                     <small class="help-block">Source must be a <b>Store</b></small>
@@ -618,10 +618,10 @@
                                     <select name="to_location_id" id="toLocationSelect" class="form-control" required>
                                         <option value="">-- Select Destination Shop --</option>
                                         {{range .PageData.Locations}}
-                                        {{if eq .LocationType "shop"}}
-                                        <option value="{{.ID}}">{{.Name}}</option>
-                                        {{end}}
-                                        {{end}}
+                                            {{if eq (lower .LocationType) "shop"}}
+                                            <option value="{{.ID}}">{{.Name}}</option>
+                                            {{end}}
+                                         {{end}}
                                     </select>
                                     <small class="help-block">Destination must be a <b>Shop</b></small>
                                 </div>
@@ -897,16 +897,17 @@ $(document).ready(function() {
         recalculateOrderTotal();
     });
 
-    $('#smartProductSelect').change(function() {
-        var opt = $(this).find('option:selected');
-        var id = opt.val();
+    $('#smartProductSelect').on('select2:select', function(e) {
+        var data = e.params.data;
+        var opt = $(data.element);
+        var id = data.id;
         if (!id) return;
 
-        var sku = opt.data('sku');
-        var name = opt.data('name');
-        var ptype = opt.data('type') || '';
-        var category = opt.data('category') || '';
-        var brand = opt.data('brand') || '';
+        var sku = opt.attr('data-sku') || '';
+        var name = opt.attr('data-name') || data.text || '';
+        var ptype = opt.attr('data-type') || '';
+        var category = opt.attr('data-category') || '';
+        var brand = opt.attr('data-brand') || '';
         var defaultPrice = parseFloat(opt.attr('data-price')) || 0;
 
         var groupId = $('#sellingPriceGroupSelect').val();
@@ -980,7 +981,8 @@ $(document).ready(function() {
         }
 
         recalculateOrderTotal();
-        $(this).val('');
+        // Reset the select2 dropdown
+        $(this).val(null).trigger('change');
     });
 
     $(document).on('click', '.qty-minus', function() {
@@ -1080,12 +1082,12 @@ $(document).ready(function() {
             originalProductOptions.push({
                 val: opt.val(),
                 text: opt.text(),
-                sku: opt.data('sku') ? opt.data('sku').toString() : '',
-                name: opt.data('name'),
-                type: opt.data('type'),
-                category: opt.data('category'),
-                brand: opt.data('brand'),
-                price: opt.data('price')
+                sku: opt.attr('data-sku') ? opt.attr('data-sku').toString() : '',
+                name: opt.attr('data-name') || '',
+                type: opt.attr('data-type') || '',
+                category: opt.attr('data-category') || '',
+                brand: opt.attr('data-brand') || '',
+                price: parseFloat(opt.attr('data-price')) || 0
             });
         }
     });
@@ -1173,7 +1175,12 @@ $(document).ready(function() {
         });
 
         if (exactMatch) {
-            $('#smartProductSelect').val(exactMatch.val).trigger('change');
+            // Select the option and trigger the select2:select event manually
+            $('#smartProductSelect').val(exactMatch.val);
+            var option = $('#smartProductSelect option[value="' + exactMatch.val + '"]');
+            var evt = $.Event('select2:select');
+            evt.params = { data: { id: exactMatch.val, text: exactMatch.text, element: option[0] } };
+            $('#smartProductSelect').trigger(evt);
             $('#smartProductSelect').select2('close');
             toastr.success("Auto-added SKU matched: " + exactMatch.name);
         }

@@ -234,24 +234,25 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 	if locationID != nil && *locationID > 0 {
 		alertQuery = `
 			SELECT COUNT(*) FROM (
-				SELECT p.id, COALESCE(pl.qty_available, 0) as total_qty
+				SELECT p.id,
+					   COALESCE(pl.qty_available, 0) as total_qty,
+					   COALESCE(p.alert_quantity, 50) as alert_qty
 				FROM products p
 				LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
 				WHERE p.tenant_id = ?
-				GROUP BY p.id
-				HAVING total_qty < COALESCE(p.alert_quantity, 50)
-			) as temp`
+			) t WHERE t.total_qty < t.alert_qty`
 		alertArgs = []interface{}{*locationID, tenantID}
 	} else {
 		alertQuery = `
 			SELECT COUNT(*) FROM (
-				SELECT p.id, COALESCE(SUM(pl.qty_available), 0) as total_qty
+				SELECT p.id,
+					   COALESCE(SUM(pl.qty_available), 0) as total_qty,
+					   COALESCE(p.alert_quantity, 50) as alert_qty
 				FROM products p
 				LEFT JOIN product_locations pl ON p.id = pl.product_id
 				WHERE p.tenant_id = ?
-				GROUP BY p.id
-				HAVING total_qty < COALESCE(p.alert_quantity, 50)
-			) as temp`
+				GROUP BY p.id, p.alert_quantity
+			) t WHERE t.total_qty < t.alert_qty`
 		alertArgs = []interface{}{tenantID}
 	}
 
@@ -266,24 +267,33 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 	var detailsArgs []interface{}
 	if locationID != nil && *locationID > 0 {
 		detailsQuery = `
-			SELECT p.id, p.name, p.sku, COALESCE(pl.qty_available, 0) as total_qty, COALESCE(p.alert_quantity, 50)
-			FROM products p
-			LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
-			WHERE p.tenant_id = ?
-			GROUP BY p.id
-			HAVING total_qty < COALESCE(p.alert_quantity, 50)
-			ORDER BY total_qty ASC
+			SELECT t.id, t.name, t.sku, t.total_qty, t.alert_qty
+			FROM (
+				SELECT p.id, p.name, p.sku,
+					   COALESCE(pl.qty_available, 0) as total_qty,
+					   COALESCE(p.alert_quantity, 50) as alert_qty
+				FROM products p
+				LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+				WHERE p.tenant_id = ?
+			) t
+			WHERE t.total_qty < t.alert_qty
+			ORDER BY t.total_qty ASC
 			LIMIT 5`
 		detailsArgs = []interface{}{*locationID, tenantID}
 	} else {
 		detailsQuery = `
-			SELECT p.id, p.name, p.sku, COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
-			FROM products p
-			LEFT JOIN product_locations pl ON p.id = pl.product_id
-			WHERE p.tenant_id = ?
-			GROUP BY p.id
-			HAVING total_qty < COALESCE(p.alert_quantity, 50)
-			ORDER BY total_qty ASC
+			SELECT t.id, t.name, t.sku, t.total_qty, t.alert_qty
+			FROM (
+				SELECT p.id, p.name, p.sku,
+					   COALESCE(SUM(pl.qty_available), 0) as total_qty,
+					   COALESCE(p.alert_quantity, 50) as alert_qty
+				FROM products p
+				LEFT JOIN product_locations pl ON p.id = pl.product_id
+				WHERE p.tenant_id = ?
+				GROUP BY p.id, p.name, p.sku, p.alert_quantity
+			) t
+			WHERE t.total_qty < t.alert_qty
+			ORDER BY t.total_qty ASC
 			LIMIT 5`
 		detailsArgs = []interface{}{tenantID}
 	}

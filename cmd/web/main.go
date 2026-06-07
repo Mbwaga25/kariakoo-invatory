@@ -36,6 +36,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	// Ensure the invoice_description column exists to avoid query errors
+	if _, err := db.Exec(`ALTER TABLE business_locations ADD COLUMN IF NOT EXISTS invoice_description TEXT`); err != nil {
+		log.Printf("WARNING: could not add invoice_description column: %v", err)
+	}
 	defer db.Close()
 
 	if err = db.Ping(); err != nil {
