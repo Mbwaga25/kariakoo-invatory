@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>{{template "title" .}} - Classic Store</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="csrf-token" content="go-csrf-token-placeholder">
 
     <link rel="stylesheet" href="/static/css/tailwind/app.css">
@@ -39,7 +40,7 @@
     </style>
     {{block "styles" .}}{{end}}
 </head>
-<body class="hold-transition skin-blue sidebar-mini fixed {{block "bodyClass" .}}{{end}}">
+<body class="hold-transition skin-blue sidebar-mini {{block "bodyClass" .}}{{end}}">
     <div class="wrapper">
         <header class="main-header">
             <a href="/" class="logo" style="display:flex;align-items:center;justify-content:center;">
@@ -255,7 +256,7 @@
 
                     <li class="header">Logistics Strategy</li>
 
-                    {{if or (index .Modules "store_management") (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopKeeper")}}
+                    {{if or (index .Modules "store_management") (eq .Role "SuperAdmin") (eq .Role "StoreKeeper") (eq .Role "ShopKeeper") (eq .Role "ShopAdmin")}}
                     <li class="treeview" id="grp-orders">
                         <a href="#" onclick="toggleGroup('grp-orders'); return false;">
                             <i class="fa fa-store"></i>
@@ -268,14 +269,14 @@
                             <li><a href="/orders"><i class="fa fa-circle-o"></i> All Orders</a></li>
                             <li><a href="/orders/create?type=StoreOrder"><i class="fa fa-circle-o"></i> Request Shop Stock</a></li>
                             <li><a href="/orders/create?type=BulkOrder"><i class="fa fa-circle-o"></i> Request Bulk Stock</a></li>
-                            {{if or (eq .Role "StoreKeeper") (eq .Role "SuperAdmin")}}
+                            {{if or (eq .Role "StoreKeeper") (eq .Role "SuperAdmin") (eq .Role "ShopAdmin")}}
                             <li><a href="/orders/pending"><i class="fa fa-circle-o"></i> Pending Requests</a></li>
                             {{end}}
                         </ul>
                     </li>
                     {{end}}
 
-                    {{if and (index .Modules "reports") (or (eq .Role "SuperAdmin") (eq .Role "ShopAdmin"))}}
+                    {{if or (index .Modules "reports") (eq .Role "SuperAdmin") (eq .Role "ShopAdmin")}}
                     <li class="treeview" id="grp-reports">
                         <a href="#" onclick="toggleGroup('grp-reports'); return false;">
                             <i class="fa fa-chart-bar"></i>

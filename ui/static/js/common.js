@@ -19,7 +19,13 @@ $(document).ready(function () {
                 return false;
             }
             if (settings.url.indexOf('http') === -1) {
-                settings.url = base_path + settings.url;
+                var url = settings.url;
+                var base = base_path;
+                if (base.slice(-1) === '/' && url.charAt(0) === '/') {
+                    settings.url = base + url.slice(1);
+                } else {
+                    settings.url = base + url;
+                }
             }
         },
     });

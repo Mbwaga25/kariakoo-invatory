@@ -31,11 +31,13 @@ func (app *Application) ProductCreate(w http.ResponseWriter, r *http.Request) {
 		Brands     []*models.Brand
 		Units      []*models.Unit
 		Locations  []*models.BusinessLocation
+		Groups     []interface{}
 	}{
 		Categories: categories,
 		Brands:     brands,
 		Units:      units,
 		Locations:  locations,
+		Groups:     nil,
 	})
 }
 
