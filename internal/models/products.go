@@ -270,21 +270,30 @@ func (m *Models) InsertUnit(u *Unit) (int64, error) {
 
 // GetLowStockProducts returns products below their alert_quantity threshold
 func (m *Models) GetLowStockProductsByLocation(tenantID int, locationID int) ([]*Product, error) {
-	query := `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
-			  COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
-			  FROM products p
-			  LEFT JOIN product_locations pl ON p.id = pl.product_id
-			  WHERE p.tenant_id = ?`
-	
-	params := []interface{}{tenantID}
-	if locationID > 0 {
-		query += " AND pl.location_id = ? "
-		params = append(params, locationID)
-	}
+	var query string
+	var params []interface{}
 
-	query += ` GROUP BY p.id
-			  HAVING total_qty < COALESCE(p.alert_quantity, 50)
-			  ORDER BY total_qty ASC`
+	if locationID > 0 {
+		query = `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
+				  COALESCE(pl.qty_available, 0) as total_qty, COALESCE(p.alert_quantity, 50)
+				  FROM products p
+				  LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+				  WHERE p.tenant_id = ?
+				  GROUP BY p.id
+				  HAVING total_qty < COALESCE(p.alert_quantity, 50)
+				  ORDER BY total_qty ASC`
+		params = []interface{}{locationID, tenantID}
+	} else {
+		query = `SELECT p.id, p.name, p.sku, COALESCE(p.product_type, 'Protector'), 
+				  COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
+				  FROM products p
+				  LEFT JOIN product_locations pl ON p.id = pl.product_id
+				  WHERE p.tenant_id = ?
+				  GROUP BY p.id
+				  HAVING total_qty < COALESCE(p.alert_quantity, 50)
+				  ORDER BY total_qty ASC`
+		params = []interface{}{tenantID}
+	}
 	
 	rows, err := m.DB.Query(query, params...)
 	if err != nil {

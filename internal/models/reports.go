@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 )
@@ -168,6 +169,7 @@ func (m *Models) GetRegisterReport(tenantID int) ([]*RegisterReport, error) {
 
 func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time.Time) (*DashboardData, error) {
 	data := &DashboardData{}
+	var rows *sql.Rows
 
 	// Basic filters for Sales
 	salesWhere := "WHERE s.tenant_id = ? AND s.transaction_date BETWEEN ? AND ?"
@@ -227,13 +229,31 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 	data.Net = data.TotalSales - data.TotalExpenses
 
 	// 7. Stock Alerts (Filtered by location if provided)
-	alertQuery := "SELECT COUNT(*) FROM product_locations pl JOIN products p ON pl.product_id = p.id WHERE p.tenant_id = ?"
-	alertArgs := []interface{}{tenantID}
+	var alertQuery string
+	var alertArgs []interface{}
 	if locationID != nil && *locationID > 0 {
-		alertQuery += " AND pl.location_id = ?"
-		alertArgs = append(alertArgs, *locationID)
+		alertQuery = `
+			SELECT COUNT(*) FROM (
+				SELECT p.id, COALESCE(pl.qty_available, 0) as total_qty
+				FROM products p
+				LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+				WHERE p.tenant_id = ?
+				GROUP BY p.id
+				HAVING total_qty < COALESCE(p.alert_quantity, 50)
+			) as temp`
+		alertArgs = []interface{}{*locationID, tenantID}
+	} else {
+		alertQuery = `
+			SELECT COUNT(*) FROM (
+				SELECT p.id, COALESCE(SUM(pl.qty_available), 0) as total_qty
+				FROM products p
+				LEFT JOIN product_locations pl ON p.id = pl.product_id
+				WHERE p.tenant_id = ?
+				GROUP BY p.id
+				HAVING total_qty < COALESCE(p.alert_quantity, 50)
+			) as temp`
+		alertArgs = []interface{}{tenantID}
 	}
-	alertQuery += " AND pl.qty_available < COALESCE(p.alert_quantity, 10)"
 
 	err = m.DB.QueryRow(alertQuery, alertArgs...).Scan(&data.StockAlertsCount)
 	if err != nil {
@@ -242,18 +262,40 @@ func (m *Models) GetDashboardData(tenantID int, locationID *int, start, end time
 
 
 	// 7b. Stock Alerts Details
-	rows, err := m.DB.Query(`
-		SELECT p.id, p.name, p.sku, pl.qty_available 
-		FROM product_locations pl
-		JOIN products p ON pl.product_id = p.id
-		WHERE p.tenant_id = ? AND pl.qty_available < 10
-		LIMIT 5
-	`, tenantID)
+	var detailsQuery string
+	var detailsArgs []interface{}
+	if locationID != nil && *locationID > 0 {
+		detailsQuery = `
+			SELECT p.id, p.name, p.sku, COALESCE(pl.qty_available, 0) as total_qty, COALESCE(p.alert_quantity, 50)
+			FROM products p
+			LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+			WHERE p.tenant_id = ?
+			GROUP BY p.id
+			HAVING total_qty < COALESCE(p.alert_quantity, 50)
+			ORDER BY total_qty ASC
+			LIMIT 5`
+		detailsArgs = []interface{}{*locationID, tenantID}
+	} else {
+		detailsQuery = `
+			SELECT p.id, p.name, p.sku, COALESCE(SUM(pl.qty_available), 0) as total_qty, COALESCE(p.alert_quantity, 50)
+			FROM products p
+			LEFT JOIN product_locations pl ON p.id = pl.product_id
+			WHERE p.tenant_id = ?
+			GROUP BY p.id
+			HAVING total_qty < COALESCE(p.alert_quantity, 50)
+			ORDER BY total_qty ASC
+			LIMIT 5`
+		detailsArgs = []interface{}{tenantID}
+	}
+
+	rows, err = m.DB.Query(detailsQuery, detailsArgs...)
 	if err == nil {
 		defer rows.Close()
 		for rows.Next() {
 			var p Product
-			rows.Scan(&p.ID, &p.Name, &p.SKU, &p.LocationQty)
+			var alertQty float64
+			rows.Scan(&p.ID, &p.Name, &p.SKU, &p.LocationQty, &alertQty)
+			p.AlertQuantity = &alertQty
 			data.StockAlerts = append(data.StockAlerts, &p)
 		}
 	}
