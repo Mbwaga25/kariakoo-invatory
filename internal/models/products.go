@@ -64,7 +64,7 @@ type ProductLocation struct {
 func (m *Models) GetProductsByTenant(tenantID int, locationID int, categoryID int, brandID int) ([]*Product, error) {
 	query := `SELECT p.id, p.tenant_id, COALESCE(p.product_type, 'Protector'), p.name, p.sku, p.alert_quantity, p.unit_id, p.category_id, p.brand_id, p.description, p.created_at,
 			  COALESCE(pl.qty_available, 0) as location_qty,
-			  pl.selling_price as location_price,
+			  COALESCE(pl.selling_price, p.selling_price, 0) as location_price,
 			  COALESCE(c.name, '') as category_name,
 			  COALESCE(b.name, '') as brand_name
 			  FROM products p
@@ -108,7 +108,7 @@ func (m *Models) GetProductsByTenant(tenantID int, locationID int, categoryID in
 func (m *Models) GetProductsByTenantFiltered(tenantID int, locationID int, productType string, categoryID int, brandID int) ([]*Product, error) {
 	query := `SELECT p.id, p.tenant_id, COALESCE(p.product_type, 'Protector'), p.name, p.sku, p.alert_quantity, p.unit_id, p.category_id, p.brand_id, p.description, p.created_at,
 			  COALESCE(pl.qty_available, 0) as location_qty,
-			  pl.selling_price as location_price,
+			  COALESCE(pl.selling_price, p.selling_price, 0) as location_price,
 			  COALESCE(c.name, '') as category_name,
 			  COALESCE(b.name, '') as brand_name
 			  FROM products p

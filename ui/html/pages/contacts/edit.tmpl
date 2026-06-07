@@ -1,24 +1,25 @@
-{{define "title"}}Add {{.PageData.ContactType}}{{end}}
+{{define "title"}}Edit {{.PageData.Contact.Type}}{{end}}
 
-{{define "header"}}Add {{.PageData.ContactType}}{{end}}
-{{define "subheader"}}Create a new {{.PageData.ContactType}} contact{{end}}
+{{define "header"}}Edit {{.PageData.Contact.Type}}{{end}}
+{{define "subheader"}}Modify {{.PageData.Contact.Type}} contact details{{end}}
 
 {{define "main"}}
 <div class="box box-primary">
-    <form action="/contacts/store" method="POST">
-        <input type="hidden" name="type" value="{{.PageData.ContactType}}">
+    <form action="/contacts/update" method="POST">
+        <input type="hidden" name="id" value="{{.PageData.Contact.ID}}">
+        <input type="hidden" name="type" value="{{.PageData.Contact.Type}}">
         <div class="box-body">
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="name">Name:*</label>
-                        <input type="text" name="name" class="form-control" id="name" required>
+                        <input type="text" name="name" class="form-control" id="name" value="{{.PageData.Contact.Name}}" required>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="business_name">Business Name:</label>
-                        <input type="text" name="business_name" class="form-control" id="business_name">
+                        <input type="text" name="business_name" class="form-control" id="business_name" value="{{.PageData.Contact.BusinessName}}">
                     </div>
                 </div>
             </div>
@@ -27,19 +28,19 @@
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="mobile">Mobile:*</label>
-                        <input type="text" name="mobile" class="form-control" id="mobile" required>
+                        <input type="text" name="mobile" class="form-control" id="mobile" value="{{.PageData.Contact.Mobile}}" required>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="email">Email:</label>
-                        <input type="email" name="email" class="form-control" id="email">
+                        <input type="email" name="email" class="form-control" id="email" value="{{.PageData.Contact.Email}}">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="form-group">
                         <label for="tax_number">Tax Number:</label>
-                        <input type="text" name="tax_number" class="form-control" id="tax_number">
+                        <input type="text" name="tax_number" class="form-control" id="tax_number" value="{{.PageData.Contact.TaxNumber}}">
                     </div>
                 </div>
             </div>
@@ -48,13 +49,13 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="opening_balance">Opening Balance:</label>
-                        <input type="number" step="0.01" name="opening_balance" class="form-control" id="opening_balance">
+                        <input type="number" step="0.01" name="opening_balance" class="form-control" id="opening_balance" value="{{.PageData.Contact.OpeningBalance}}">
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="address">Address:</label>
-                        <textarea name="address" class="form-control" id="address"></textarea>
+                        <textarea name="address" class="form-control" id="address">{{.PageData.Contact.Address}}</textarea>
                     </div>
                 </div>
             </div>
@@ -63,14 +64,14 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="credit_limit">Credit Limit:</label>
-                        <input type="number" step="0.01" name="credit_limit" class="form-control" id="credit_limit" value="{{if .PageData.Settings}}{{.PageData.Settings.DefaultCreditLimit}}{{end}}" placeholder="e.g. 1000.00">
+                        <input type="number" step="0.01" name="credit_limit" class="form-control" id="credit_limit" value="{{if .PageData.Contact.CreditLimit}}{{.PageData.Contact.CreditLimit}}{{end}}" placeholder="e.g. 1000.00">
                         <small class="help-block">Maximum unpaid balance allowed for this customer</small>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="invoice_due_days">Invoice Due Days Limit:</label>
-                        <input type="number" name="invoice_due_days" class="form-control" id="invoice_due_days" value="{{if .PageData.Settings}}{{.PageData.Settings.DefaultInvoiceDueDays}}{{else}}30{{end}}" placeholder="e.g. 30">
+                        <input type="number" name="invoice_due_days" class="form-control" id="invoice_due_days" value="{{if .PageData.Contact.InvoiceDueDays}}{{.PageData.Contact.InvoiceDueDays}}{{end}}" placeholder="e.g. 30">
                         <small class="help-block">Number of days before unpaid invoices are marked overdue</small>
                     </div>
                 </div>
@@ -78,8 +79,8 @@
         </div>
 
         <div class="box-footer">
-            <button type="submit" class="btn btn-primary">Save Contact</button>
-            <a href="/contacts?type={{.PageData.ContactType}}" class="btn btn-default">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update Contact</button>
+            <a href="/contacts?type={{.PageData.Contact.Type}}" class="btn btn-default">Cancel</a>
         </div>
     </form>
 </div>

@@ -272,24 +272,22 @@
                                         <span class="text-muted">&mdash;</span>
                                         {{end}}
                                     </td>
-                                    <td class="text-right">
-                                        <div class="btn-group action-buttons">
-                                            <a href="/products/view?id={{.ID}}" class="btn btn-default btn-xs" title="View Details">
-                                                <i class="fa fa-eye"></i>
-                                            </a>
-                                            {{if or (eq $.Role "StoreKeeper") (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
-                                            <a href="/purchases/create?product_id={{.ID}}" class="btn btn-success btn-xs" title="Add Stock">
-                                                <i class="fa fa-download"></i>
-                                            </a>
-                                            {{end}}
-                                            {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
-                                            <a href="/products/edit?id={{.ID}}" class="btn btn-primary btn-xs" title="Edit">
-                                                <i class="fa fa-pencil"></i>
-                                            </a>
-                                            <button type="button" class="btn btn-danger btn-xs delete_product" data-id="{{.ID}}" title="Delete">
-                                                <i class="fa fa-trash"></i>
+                                    <td class="text-center">
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                                <i class="fa fa-ellipsis-v"></i>
                                             </button>
-                                            {{end}}
+                                            <ul class="dropdown-menu dropdown-menu-right" role="menu" style="text-align: left;">
+                                                <li><a href="/products/view?id={{.ID}}"><i class="fa fa-eye text-info" style="margin-right: 5px;"></i> View Details</a></li>
+                                                {{if or (eq $.Role "StoreKeeper") (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                                                <li><a href="/purchases/create?product_id={{.ID}}"><i class="fa fa-plus text-success" style="margin-right: 5px;"></i> Add Stock</a></li>
+                                                {{end}}
+                                                {{if or (eq $.Role "SuperAdmin") (eq $.Role "ShopAdmin")}}
+                                                <li><a href="/products/edit?id={{.ID}}"><i class="fa fa-pencil text-primary" style="margin-right: 5px;"></i> Edit Product</a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="#" class="delete_product" data-id="{{.ID}}" style="color: #dd4b39;"><i class="fa fa-trash" style="margin-right: 5px;"></i> Delete Product</a></li>
+                                                {{end}}
+                                            </ul>
                                         </div>
                                     </td>
                                 </tr>
@@ -330,7 +328,8 @@ $(document).ready(function() {
         $('.dataTables_length select').addClass('form-control input-sm');
     }
 
-    $(document).on('click', '.delete_product', function() {
+    $(document).on('click', '.delete_product', function(e) {
+        e.preventDefault();
         var id = $(this).data('id');
         if (confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
             $.post('/api/products/delete', { id: id }, function(res) {

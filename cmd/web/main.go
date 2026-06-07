@@ -138,6 +138,7 @@ func main() {
 	mux.Handle("/api/products/search", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiProductSearch))))
 	mux.Handle("/api/products/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ApiProductDelete))))
 	mux.Handle("/api/contacts/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactStoreQuick))))
+	mux.Handle("/api/contacts/credit-check", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactCreditCheck))))
 
 	// Sales Routes
 	mux.Handle("/sales", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SalesList))))
@@ -169,6 +170,8 @@ func main() {
 	mux.Handle("/contacts", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactList))))
 	mux.Handle("/contacts/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactCreate))))
 	mux.Handle("/contacts/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactStore))))
+	mux.Handle("/contacts/edit", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactEdit))))
+	mux.Handle("/contacts/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ContactUpdate))))
 
 	// Report Routes
 	mux.Handle("/reports/profit-loss", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ProfitLossReport))))
@@ -177,12 +180,14 @@ func main() {
 	mux.Handle("/reports/register", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.RegisterReport))))
 	mux.Handle("/reports/purchase-sell", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.PurchaseSellReport))))
 	mux.Handle("/reports/expense", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.ExpenseReport))))
+	mux.Handle("/reports/orders", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderReport))))
 
 	// Store Order Management Routes
 	mux.Handle("/orders", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderList))))
 	mux.Handle("/orders/create", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderCreate))))
 	mux.Handle("/orders/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderStore))))
 	mux.Handle("/orders/view", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderView))))
+	mux.Handle("/orders/invoice", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderInvoice))))
 	mux.Handle("/orders/accept", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderAccept))))
 	mux.Handle("/orders/reject", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderReject))))
 	mux.Handle("/orders/payment", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.OrderPaymentUpdate))))
@@ -210,12 +215,19 @@ func main() {
 	// Business Settings Routes
 	mux.Handle("/business-settings", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.BusinessSettings))))
 	mux.Handle("/business-settings/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.BusinessSettingsUpdate))))
+	mux.Handle("/invoice-settings", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.InvoiceSettings))))
+	mux.Handle("/invoice-settings/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.InvoiceSettingsUpdate))))
 	mux.Handle("/business-location", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationSettings))))
 	mux.Handle("/business-location/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationStore))))
 	mux.Handle("/business-location/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationUpdate))))
 	mux.Handle("/business-location/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationDelete))))
 	mux.Handle("/business-location/switch", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.LocationSwitch))))
 	mux.Handle("/settings/modules", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SettingsModules))))
+	
+	mux.Handle("/selling-price-groups", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SellingPriceGroupList))))
+	mux.Handle("/selling-price-groups/store", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SellingPriceGroupStore))))
+	mux.Handle("/selling-price-groups/update", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SellingPriceGroupUpdate))))
+	mux.Handle("/selling-price-groups/delete", middleware.RequireAuthentication(middleware.TenantContext(&app.Models)(http.HandlerFunc(app.SellingPriceGroupDelete))))
 
 	for route, tmpl := range routes {
 		tName := tmpl // capture for closure

@@ -3,6 +3,50 @@
 {{define "subheader"}}Business Overview{{end}}
 
 {{define "main"}}
+<!-- Date Range Filter -->
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-md-12">
+        <div class="box box-solid" style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid #e2e8f0; margin-bottom: 0;">
+            <div class="box-body" style="padding: 15px;">
+                <form action="/dashboard" method="GET" class="form-inline" id="dashboardFilterForm" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="margin-right: 8px; font-weight: 600; color: #1b2a4a; display: inline-flex; align-items: center; gap: 5px;">
+                                <i class="fa fa-calendar-alt text-primary" style="font-size: 16px;"></i> Time Period:
+                            </label>
+                            <select name="preset" id="dashboardPreset" class="form-control" style="border-radius: 6px; border-color: #cbd5e1; height: 36px; padding: 6px 12px; font-weight: 500;">
+                                <option value="today" {{if eq .PageData.Preset "today"}}selected{{end}}>Today</option>
+                                <option value="yesterday" {{if eq .PageData.Preset "yesterday"}}selected{{end}}>Yesterday</option>
+                                <option value="weekly" {{if eq .PageData.Preset "weekly"}}selected{{end}}>This Week</option>
+                                <option value="monthly" {{if eq .PageData.Preset "monthly"}}selected{{end}}>This Month</option>
+                                <option value="yearly" {{if eq .PageData.Preset "yearly"}}selected{{end}}>This Year</option>
+                                <option value="custom" {{if eq .PageData.Preset "custom"}}selected{{end}}>Custom Range</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group" id="dashboardCustomRange" style="margin-bottom: 0; display: {{if eq .PageData.Preset "custom"}}inline-flex{{else}}none{{end}}; align-items: center; gap: 8px;">
+                            <input type="date" name="start_date" id="dashboardStart" class="form-control" value="{{.PageData.StartDate}}" style="border-radius: 6px; border-color: #cbd5e1; height: 36px; width: 140px;">
+                            <span style="color: #64748b; font-weight: 500;">to</span>
+                            <input type="date" name="end_date" id="dashboardEnd" class="form-control" value="{{.PageData.EndDate}}" style="border-radius: 6px; border-color: #cbd5e1; height: 36px; width: 140px;">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button type="submit" class="btn btn-primary" style="border-radius: 6px; height: 36px; padding: 6px 16px; font-weight: 600; background-color: #1b2a4a; border-color: #1b2a4a; box-shadow: 0 1px 2px rgba(0,0,0,0.05); display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa fa-sync-alt"></i> Apply Filter
+                        </button>
+                        {{if ne .PageData.Preset "today"}}
+                        <a href="/dashboard" class="btn btn-default" style="border-radius: 6px; height: 36px; padding: 6px 16px; font-weight: 500; border-color: #cbd5e1; display: inline-flex; align-items: center; gap: 6px; margin-left: 8px;">
+                            Reset
+                        </a>
+                        {{end}}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Dashboard Overview -->
 <div class="row">
     <!-- Stat Cards -->
@@ -155,6 +199,76 @@
     </div>
 </div>
 
+<!-- Product Stock Alerts Table -->
+<div class="row" style="margin-top: 20px;">
+    <div class="col-md-12">
+        <div class="box box-danger" style="border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); border: 1px solid #cbd5e1;">
+            <div class="box-header with-border" style="padding: 15px; border-bottom: 1px solid #cbd5e1;">
+                <h3 class="box-title" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; color: #b91c1c;">
+                    <i class="fa fa-exclamation-triangle text-red"></i> Critical Stock Alerts
+                    <span class="label label-danger" style="border-radius: 12px; padding: 2px 8px; font-size: 12px;">{{len .PageData.LowStock}}</span>
+                </h3>
+                <div class="pull-right">
+                    <a href="/products" class="btn btn-xs btn-default" style="border-radius: 4px; padding: 4px 8px; font-weight: 500;">View All Products</a>
+                </div>
+            </div>
+            <div class="box-body no-padding">
+                <div class="table-responsive">
+                    <table class="table table-hover" style="margin-bottom: 0;">
+                        <thead style="background: #fdf2f2; color: #991b1b;">
+                            <tr>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px;">Type</th>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px;">Product Name</th>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px;">SKU</th>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px;">Current Stock</th>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px;">Alert Level</th>
+                                <th style="padding: 12px 15px; font-weight: 600; font-size: 13px; text-align: right;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .PageData.LowStock}}
+                            <tr>
+                                <td style="padding: 12px 15px; vertical-align: middle;">
+                                    <span class="product-type-badge" style="background-color: #f1f5f9; color: #475569; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">
+                                        {{.ProductType}}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 15px; vertical-align: middle; font-weight: 700; color: #1e293b;">
+                                    {{.Name}}
+                                </td>
+                                <td style="padding: 12px 15px; vertical-align: middle;">
+                                    <span style="font-family: monospace; font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #334155;">{{.SKU}}</span>
+                                </td>
+                                <td style="padding: 12px 15px; vertical-align: middle;">
+                                    <span class="label {{if le .LocationQty 0.0}}label-danger{{else}}label-warning{{end}}" style="font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px;">
+                                        {{printf "%.0f" .LocationQty}} available
+                                    </span>
+                                </td>
+                                <td style="padding: 12px 15px; vertical-align: middle; color: #64748b; font-size: 13px; font-weight: 500;">
+                                    Below {{if .AlertQuantity}}{{printf "%.0f" .AlertQuantity}}{{else}}50{{end}}
+                                </td>
+                                <td style="padding: 12px 15px; vertical-align: middle; text-align: right;">
+                                    <a href="/purchases/create?product_id={{.ID}}" class="btn btn-sm btn-success" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 5px 12px; background-color: #16a34a; border-color: #16a34a; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="fa fa-plus-circle"></i> Receive Stock
+                                    </a>
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted" style="padding: 30px; font-size: 14px; font-weight: 500; color: #64748b;">
+                                    <i class="fa fa-check-circle text-success" style="font-size: 24px; display: block; margin-bottom: 8px;"></i>
+                                    Excellent! No products are currently below low stock alert thresholds.
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{end}}
 
 {{define "scripts"}}
@@ -192,6 +306,15 @@ $(function () {
             plugins: {
                 legend: { display: false }
             }
+        }
+    });
+
+    $('#dashboardPreset').change(function() {
+        if ($(this).val() === 'custom') {
+            $('#dashboardCustomRange').css('display', 'inline-flex');
+        } else {
+            $('#dashboardCustomRange').hide();
+            $('#dashboardFilterForm').submit();
         }
     });
 });

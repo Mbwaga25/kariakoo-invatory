@@ -133,3 +133,27 @@ func (app *Application) StockHistoryReport(w http.ResponseWriter, r *http.Reques
 	})
 }
 
+func (app *Application) OrderReport(w http.ResponseWriter, r *http.Request) {
+	tenantID := middleware.GetTenantID(r.Context())
+	start, end := app.ParseDateRange(r)
+	paymentStatus := r.URL.Query().Get("payment_status")
+
+	report, err := app.Models.GetOrderReport(tenantID, start, end, paymentStatus)
+	if err != nil {
+		http.Error(w, "Internal Server Error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	app.RenderPage(w, r, "reports/orders", struct {
+		Report        *models.OrderReportData
+		Start         time.Time
+		End           time.Time
+		PaymentStatus string
+	}{
+		Report:        report,
+		Start:         start,
+		End:           end,
+		PaymentStatus: paymentStatus,
+	})
+}
+

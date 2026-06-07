@@ -226,8 +226,49 @@
 .pr-12{
   padding-right: 12px !important;
 }
+/* sidebar-toggle: use explicit FA icon in HTML instead of :before pseudo-element */
 .main-header .sidebar-toggle:before {
     content: "" !important;
+    display: none !important;
+}
+/* Ensure the sidebar toggle button is always visible on mobile */
+.main-header .sidebar-toggle {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    float: left;
+    padding: 0 14px;
+    height: 50px;
+    font-size: 20px;
+    color: #fff !important;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.main-header .sidebar-toggle:hover,
+.main-header .sidebar-toggle:focus {
+    background: rgba(0,0,0,0.15);
+    color: #fff !important;
+    text-decoration: none;
+    outline: none;
+}
+.main-header .sidebar-toggle .fa-bars {
+    color: #fff;
+    font-size: 20px;
+}
+@media (max-width: 767px) {
+    .main-header .sidebar-toggle {
+        width: 48px !important;
+        height: 50px !important;
+        font-size: 22px !important;
+    }
+    .main-header .navbar {
+        display: flex !important;
+        align-items: center;
+        flex-direction: row-reverse;
+    }
 }
 .ui-autocomplete {
     max-height: 300px;
@@ -1065,4 +1106,345 @@ table.table-text-center td, table.table-text-center th{
 .existing-images .img-thumbnail img {
   width: 100%;
   height: auto;
+}
+
+/* =============================================
+   GLOBAL MOBILE OPTIMIZATIONS
+   ============================================= */
+
+/* --- Touch-friendly form controls --- */
+@media (max-width: 991px) {
+  /* Larger touch targets for inputs and selects */
+  input.form-control,
+  select.form-control,
+  textarea.form-control {
+    font-size: 16px !important; /* prevents iOS zoom */
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+
+  .btn {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  /* Select2 touch sizing */
+  .select2-container--default .select2-selection--single {
+    height: 44px !important;
+    line-height: 44px !important;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 44px !important;
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 42px !important;
+  }
+}
+
+/* --- Responsive DataTables --- */
+@media (max-width: 991px) {
+  /* Horizontal scroll for wide tables */
+  .table-responsive-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  /* Wrap existing bootstrap tables */
+  .box-body .table-responsive,
+  .dataTables_wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Prevent table text wrap on small screens */
+  .dataTable td, .dataTable th {
+    white-space: nowrap;
+  }
+
+  /* DataTables control layout on mobile */
+  .dataTables_wrapper .dataTables_length,
+  .dataTables_wrapper .dataTables_filter {
+    float: none !important;
+    text-align: left !important;
+    margin-bottom: 8px;
+  }
+
+  .dataTables_wrapper .dataTables_info,
+  .dataTables_wrapper .dataTables_paginate {
+    float: none !important;
+    text-align: center !important;
+    padding-top: 8px;
+  }
+}
+
+/* --- Content wrapper padding on mobile --- */
+@media (max-width: 767px) {
+  .content-wrapper {
+    margin-left: 0 !important;
+    padding: 0 !important;
+  }
+
+  .content {
+    padding: 10px 8px !important;
+  }
+
+  .content-header {
+    padding: 8px 12px !important;
+  }
+
+  .content-header h1 {
+    font-size: 18px !important;
+  }
+
+  /* Boxes / Cards */
+  .box {
+    margin-bottom: 12px !important;
+  }
+
+  .box-body {
+    padding: 10px 10px !important;
+  }
+
+  .box-header {
+    padding: 8px 12px !important;
+  }
+
+  .box-footer {
+    padding: 10px 12px !important;
+  }
+
+  /* Collapse col-md grids to single column on phone */
+  .col-md-6,
+  .col-md-4,
+  .col-md-3,
+  .col-md-8 {
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+  }
+
+  /* Row gutters */
+  .row {
+    margin-left: -6px !important;
+    margin-right: -6px !important;
+  }
+
+  /* Small-box info cards */
+  .small-box {
+    margin-bottom: 12px;
+  }
+
+  .small-box h3 {
+    font-size: 28px !important;
+  }
+
+  /* Footer */
+  .main-footer {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+}
+
+/* --- Sidebar overlay drawer on mobile --- */
+@media (max-width: 767px) {
+  /* When sidebar is open, show overlay */
+  body.sidebar-open .main-sidebar {
+    transform: translateX(0) !important;
+    z-index: 2000 !important;
+    box-shadow: 6px 0 20px rgba(0,0,0,0.35);
+  }
+
+  /* Sidebar starts off-screen on mobile */
+  .main-sidebar {
+    transform: translateX(-230px);
+    transition: transform 0.3s ease;
+    position: fixed !important;
+    height: 100% !important;
+    z-index: 2000 !important;
+  }
+
+  /* Overlay backdrop */
+  body.sidebar-open::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1999;
+  }
+
+  /* Ensure header stays above sidebar backdrop */
+  .main-header {
+    z-index: 2001 !important;
+    position: relative;
+  }
+
+  /* Hamburger button always visible */
+  .sidebar-toggle {
+    display: block !important;
+  }
+}
+
+/* --- Main header mobile tweaks --- */
+@media (max-width: 767px) {
+  .main-header .logo {
+    width: 100% !important;
+    padding: 0 10px;
+    height: 50px;
+  }
+
+  .main-header .navbar {
+    margin-left: 0 !important;
+    min-height: 50px;
+    padding: 0 8px;
+  }
+
+  .main-header .sidebar-toggle {
+    padding: 12px 14px !important;
+    font-size: 18px;
+  }
+
+  /* User name & location dropdown text visibility */
+  .navbar-custom-menu .hidden-xs {
+    display: none !important;
+  }
+}
+
+/* --- Breadcrumbs --- */
+@media (max-width: 767px) {
+  .breadcrumb {
+    display: none !important;
+  }
+}
+
+/* --- Button groups responsive --- */
+@media (max-width: 767px) {
+  .btn-group-responsive .btn {
+    display: block;
+    width: 100%;
+    margin-bottom: 4px;
+    border-radius: 4px !important;
+  }
+}
+
+/* --- Utility for full-width on mobile --- */
+@media (max-width: 767px) {
+  .mobile-full-width {
+    width: 100% !important;
+    display: block;
+  }
+  .mobile-text-center {
+    text-align: center !important;
+  }
+}
+
+/* --- Sticky submit footer on mobile --- */
+@media (max-width: 767px) {
+  .mobile-sticky-footer {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+    border-top: 2px solid #e2e8f0;
+    padding: 12px 15px;
+    z-index: 100;
+    box-shadow: 0 -4px 15px rgba(0,0,0,0.08);
+  }
+}
+
+/* --- Info/small boxes grid on mobile --- */
+@media (max-width: 767px) {
+  .info-box {
+    min-height: 70px;
+    margin-bottom: 10px;
+  }
+
+  .info-box .info-box-icon {
+    width: 60px;
+    line-height: 70px;
+    font-size: 30px;
+  }
+
+  .info-box .info-box-content {
+    padding: 4px 10px;
+  }
+
+  .info-box .info-box-text {
+    font-size: 12px;
+  }
+
+  .info-box .info-box-number {
+    font-size: 18px;
+  }
+}
+
+/* --- Reports page filter card mobile --- */
+@media (max-width: 767px) {
+  .report-filter-row .col-md-3,
+  .report-filter-row .col-md-4,
+  .report-filter-row .col-md-2 {
+    margin-bottom: 10px;
+  }
+
+  .report-filter-row .btn {
+    width: 100%;
+    margin-bottom: 5px;
+  }
+}
+
+/* --- Orders list table actions --- */
+@media (max-width: 767px) {
+  .table-actions-col {
+    min-width: 100px;
+  }
+
+  .table-actions-col .btn {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin: 1px;
+  }
+}
+
+/* --- Horizontal scroll fix for all main tables --- */
+.table-scroll-mobile {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* --- Input number spinners shown on mobile (touch) --- */
+@media (max-width: 991px) {
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: auto;
+    opacity: 1;
+  }
+}
+
+/* --- Fix sidebar link tap area --- */
+.sidebar-menu li > a {
+  padding: 12px 15px 12px 15px !important;
+}
+
+@media (max-width: 767px) {
+  .sidebar-menu li > a {
+    padding: 14px 15px !important;
+    font-size: 15px;
+  }
+  .treeview-menu a {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* --- Close sidebar on click outside (handled via JS) --- */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1999;
+}
+body.sidebar-open .sidebar-overlay {
+  display: block;
 }

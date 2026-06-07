@@ -37,7 +37,14 @@
                         <td><span class="label label-warning">{{.PaymentStatus}}</span></td>
                         <td>${{.FinalTotal}}</td>
                         <td>
-                            <a href="/purchases/view?id={{.ID}}" class="btn btn-xs btn-info"><i class="fa fa-eye"></i> View</a>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" style="text-align: left;">
+                                    <li><a href="/purchases/view?id={{.ID}}"><i class="fa fa-eye text-info"></i> View Details</a></li>
+                                </ul>
+                            </div>
                         </td>
                     </tr>
                     {{end}}

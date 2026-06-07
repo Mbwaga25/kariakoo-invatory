@@ -1,0 +1,69 @@
+{{define "title"}}Invoice Settings{{end}}
+
+{{define "header"}}Invoice Settings{{end}}
+{{define "subheader"}}Configure default parameters and invoice layout details{{end}}
+
+{{define "main"}}
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="fa fa-file-invoice-dollar text-warning"></i> General Invoice & Customer Default Settings</h3>
+            </div>
+            <form action="/invoice-settings/update" method="POST">
+                <div class="box-body">
+                    <!-- Section 1: Customer Credit Defaults -->
+                    <h4 style="color:#1b2a4a; font-weight:700; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px; margin-bottom: 20px;">
+                        <i class="fa fa-user-shield text-info"></i> Customer Credit Risk Defaults
+                    </h4>
+                    <p class="text-muted">These settings will act as global defaults for any new customers registered in the system unless overridden on their individual profiles.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="default_credit_limit">Default Customer Credit Limit:*</label>
+                                <div class="input-group">
+                                    <span class="input-group-addon">{{.CurrencySymbol}}</span>
+                                    <input type="number" step="0.01" name="default_credit_limit" id="default_credit_limit" class="form-control" value="{{.PageData.Settings.DefaultCreditLimit}}" required>
+                                </div>
+                                <small class="help-block">Default maximum unpaid balance allowed for a new customer.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="default_invoice_due_days">Default Invoice Payment Term (Due Days):*</label>
+                                <div class="input-group">
+                                    <input type="number" name="default_invoice_due_days" id="default_invoice_due_days" class="form-control" value="{{.PageData.Settings.DefaultInvoiceDueDays}}" required>
+                                    <span class="input-group-addon"><i class="fa fa-calendar-alt"></i> Days</span>
+                                </div>
+                                <small class="help-block">Default number of days allowed for customers to clear invoice payments before marked overdue.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Default Invoice Text / Disclaimer -->
+                    <h4 style="color:#1b2a4a; font-weight:700; border-bottom: 2px solid #f4f4f4; padding-bottom: 10px; margin-top: 30px; margin-bottom: 20px;">
+                        <i class="fa fa-align-left text-success"></i> Invoice Terms & Description
+                    </h4>
+                    <p class="text-muted">Configure default terms, return policy, bank details or shop info. This text will print on all generated customer invoices unless shop-specific overrides are set.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="default_invoice_description">Default Invoice Description / Terms & Conditions:</label>
+                                <textarea name="default_invoice_description" id="default_invoice_description" class="form-control" rows="5" placeholder="e.g. Terms: Goods once sold are not returnable. Thank you for your business! Check our bank info: CRDB... / NMB...">{{.PageData.Settings.DefaultInvoiceDescription}}</textarea>
+                                <small class="help-block">Default text displayed at the bottom of customer invoices.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="box-footer">
+                    <button type="submit" class="btn btn-warning btn-lg"><i class="fa fa-save"></i> Save Invoice Settings</button>
+                    <a href="/business-settings" class="btn btn-default btn-lg">Back to Business Settings</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{{end}}

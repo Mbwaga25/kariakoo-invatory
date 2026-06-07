@@ -287,26 +287,314 @@
     body.legacy-order-create .order-create-page .select2-container {
         width: 100% !important;
     }
+
+    /* Modern Card Layout for Order Items */
+    body.legacy-order-create .order-create-page .order-item.card-item {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid #cbd5e1;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        box-sizing: border-box;
+        transition: all 0.2s ease;
+    }
+
+    body.legacy-order-create .order-create-page .order-item.card-item:hover {
+        border-color: #94a3b8;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+    }
+
+    /* Card Header */
+    body.legacy-order-create .order-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    body.legacy-order-create .product-title-area {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    body.legacy-order-create .product-type-badge {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    body.legacy-order-create .product-name {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    body.legacy-order-create .product-sku {
+        font-size: 12px;
+        color: #64748b;
+        background: #f1f5f9;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Divider */
+    body.legacy-order-create .order-item-divider {
+        height: 1px;
+        background: #cbd5e1;
+        margin: 15px 0;
+        width: 100%;
+    }
+
+    /* Card Body */
+    body.legacy-order-create .order-item-body {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 20px;
+        width: 100%;
+    }
+
+    /* Controls Area */
+    body.legacy-order-create .order-item-controls {
+        display: flex;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 15px;
+        flex: 1;
+    }
+
+    body.legacy-order-create .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    body.legacy-order-create .control-label {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #475569 !important;
+        margin: 0 !important;
+    }
+
+    body.legacy-order-create .total-qty-group {
+        width: 140px;
+    }
+
+    body.legacy-order-create .shop-qty-group,
+    body.legacy-order-create .store-qty-group {
+        width: 100px;
+    }
+
+    body.legacy-order-create .price-group {
+        width: 150px;
+    }
+
+    /* Actions Area (Subtotal & Delete) */
+    body.legacy-order-create .order-item-actions {
+        display: flex;
+        align-items: flex-end;
+        gap: 20px;
+        justify-content: flex-end;
+    }
+
+    body.legacy-order-create .subtotal-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: right;
+    }
+
+    body.legacy-order-create .subtotal-display {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        color: #16a34a !important;
+        line-height: 1.2;
+    }
+
+    body.legacy-order-create .remove-item {
+        height: 38px;
+        width: 38px;
+        border-radius: 8px !important;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        background-color: #ef4444;
+        border-color: #ef4444;
+        color: #ffffff;
+        transition: background-color 0.2s;
+    }
+
+    body.legacy-order-create .remove-item:hover {
+        background-color: #dc2626;
+        border-color: #dc2626;
+        color: #ffffff;
+    }
+
+    /* Clean Styling for Input Groups */
+    body.legacy-order-create .order-item-controls .input-group {
+        display: flex !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group .form-control {
+        display: block !important;
+        position: relative !important;
+        z-index: 5 !important;
+        flex: 1 1 auto !important;
+        width: 1% !important;
+        height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 10px !important;
+        font-size: 14px !important;
+        text-align: center;
+        box-sizing: border-box;
+        box-shadow: none;
+        pointer-events: auto !important;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group-btn {
+        display: block !important;
+        width: auto !important;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group-btn .btn {
+        height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 12px !important;
+        background-color: #f8fafc;
+        color: #475569;
+        transition: all 0.2s;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group-btn .btn:hover {
+        background-color: #e2e8f0;
+        color: #1e293b;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group-addon {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        background-color: #f1f5f9 !important;
+        padding: 0 12px !important;
+        font-size: 13px !important;
+        color: #475569 !important;
+        font-weight: 600;
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    /* Input group connecting borders */
+    body.legacy-order-create .order-item-controls .input-group-btn:first-child .btn,
+    body.legacy-order-create .order-item-controls .input-group-addon:first-child {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-right: none !important;
+    }
+    
+    body.legacy-order-create .order-item-controls .input-group-btn:last-child .btn {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-left: none !important;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group .qty-input {
+        border-radius: 0 !important;
+        position: relative !important;
+        z-index: 5 !important;
+    }
+
+    body.legacy-order-create .order-item-controls .input-group .price-input {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        position: relative !important;
+        z-index: 5 !important;
+    }
+
+    /* Standard Inputs inside Controls */
+    body.legacy-order-create .order-item-controls input.form-control:not(.qty-input):not(.price-input) {
+        height: 38px !important;
+        border-radius: 8px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 6px 10px !important;
+        font-size: 14px !important;
+        text-align: center;
+        width: 100% !important;
+        box-sizing: border-box;
+        box-shadow: none;
+        position: relative !important;
+        z-index: 5 !important;
+        pointer-events: auto !important;
+    }
+
+    /* Small Screen Responsive Stacking */
+    @media (max-width: 768px) {
+        body.legacy-order-create .order-item-body {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 15px;
+        }
+
+        body.legacy-order-create .order-item-controls {
+            width: 100%;
+        }
+
+        body.legacy-order-create .order-item-actions {
+            justify-content: space-between;
+            border-top: 1px dashed #e2e8f0;
+            padding-top: 12px;
+            width: 100%;
+        }
+    }
 </style>
 {{end}}
 
 {{define "main"}}
 <div class="order-create-page">
-    <div class="row">
-        <!-- Order Form -->
-        <div class="col-md-8">
-            <div class="box {{if eq .PageData.OrderType "BulkOrder"}}box-info{{else}}box-success{{end}}">
-                <div class="box-header with-border">
-                    <h3 class="box-title">
-                        {{if eq .PageData.OrderType "BulkOrder"}}
-                        <i class="fa fa-boxes"></i> BULK ORDER
-                        {{else}}
-                        <i class="fa fa-cart-plus"></i> STORE ORDER
-                        {{end}}
-                    </h3>
-                </div>
-                <form action="/orders/store" method="POST" id="orderForm">
-                    <input type="hidden" name="order_type" value="{{.PageData.OrderType}}">
+    <form action="/orders/store" method="POST" id="orderForm">
+        <input type="hidden" name="order_type" value="{{.PageData.OrderType}}">
+        
+        <!-- Top Row: Details & Switches (col-8 + col-4) -->
+        <div class="row">
+            <!-- Details Panel (Left Column) -->
+            <div class="col-md-8">
+                <div class="box {{if eq .PageData.OrderType "BulkOrder"}}box-info{{else}}box-success{{end}}">
+                    <div class="box-header with-border">
+                        <h3 class="box-title">
+                            {{if eq .PageData.OrderType "BulkOrder"}}
+                            <i class="fa fa-boxes"></i> Bulk Order Details
+                            {{else}}
+                            <i class="fa fa-store"></i> Store Order Details
+                            {{end}}
+                        </h3>
+                    </div>
                     <div class="box-body">
                         {{if eq .PageData.OrderType "StoreOrder"}}
                         <div class="row">
@@ -324,58 +612,139 @@
                                     <small class="help-block">Source must be a <b>Store</b></small>
                                 </div>
                             </div>
-<div class="col-md-6">
-    <div class="form-group">
-        <label><i class="fa fa-map-pin text-success"></i> Destination:*</label>
-        <select name="to_location_id" id="toLocationSelect" class="form-control" required>
-            <option value="">-- Select Destination Shop --</option>
-            {{range .PageData.Locations}}
-            {{if eq .LocationType "shop"}}
-            <option value="{{.ID}}">{{.Name}}</option>
-            {{end}}
-            {{end}}
-        </select>
-        <small class="help-block">Destination must be a <b>Shop</b></small>
-    </div>
-</div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label><i class="fa fa-map-pin text-success"></i> Destination:*</label>
+                                    <select name="to_location_id" id="toLocationSelect" class="form-control" required>
+                                        <option value="">-- Select Destination Shop --</option>
+                                        {{range .PageData.Locations}}
+                                        {{if eq .LocationType "shop"}}
+                                        <option value="{{.ID}}">{{.Name}}</option>
+                                        {{end}}
+                                        {{end}}
+                                    </select>
+                                    <small class="help-block">Destination must be a <b>Shop</b></small>
+                                </div>
+                            </div>
                         </div>
                         {{end}}
 
-{{if eq .PageData.OrderType "BulkOrder"}}
-<div class="form-group">
-    <label><i class="fa fa-user"></i> Customer Name:*</label>
-    <div class="input-group">
-        <select name="order_from" id="customerSelect" class="form-control" required>
-            <option value="">-- Select or Type New Customer --</option>
-            {{range .PageData.Customers}}
-            <option value="{{.Name}}">{{.Name}}</option>
-            {{end}}
-        </select>
-        <span class="input-group-btn">
-            <button type="button" class="btn btn-default" data-toggle="modal" data-target="#quickAddCustomerModal" title="Add New Customer">
-                <i class="fa fa-plus-circle text-primary"></i>
-            </button>
-        </span>
-    </div>
-    <small class="help-block">e.g. "Ali Mobile" - the customer ordering from you</small>
-</div>
-{{end}}
+                        {{if eq .PageData.OrderType "BulkOrder"}}
+                        <div class="form-group">
+                            <label><i class="fa fa-user"></i> Customer Name:*</label>
+                            <div class="input-group">
+                                <select name="order_from" id="customerSelect" class="form-control" required>
+                                    <option value="">-- Select or Type New Customer --</option>
+                                    {{range .PageData.Customers}}
+                                    <option value="{{.Name}}">{{.Name}}</option>
+                                    {{end}}
+                                </select>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" data-toggle="modal" data-target="#quickAddCustomerModal" title="Add New Customer" style="height:34px;">
+                                        <i class="fa fa-plus-circle text-primary"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <small class="help-block">e.g. "Ali Mobile" - the customer ordering from you</small>
+                        </div>
+                        {{end}}
 
-                        <!-- Product Items -->
-                        <div class="order-items-panel">
-                            <h4><i class="fa fa-list"></i> Order Items</h4>
+                        <!-- Selling Price Group Selection -->
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label><i class="fa fa-tags text-warning"></i> Selling Price Group (Pricing Tier):</label>
+                                    <select name="selling_price_group_id" id="sellingPriceGroupSelect" class="form-control">
+                                        <option value="">-- Default Location Price --</option>
+                                        {{range .PageData.SellingGroups}}
+                                        <option value="{{.ID}}">{{.Name}}</option>
+                                        {{end}}
+                                    </select>
+                                    <small class="help-block">Apply specific pricing group to products in this order. You can also manually edit individual item prices below.</small>
+                                </div>
+                            </div>
+                        </div>
 
+                        {{if eq .PageData.OrderType "BulkOrder"}}
+                        <div id="creditLimitAlert" class="alert alert-danger" style="display:none; border-radius:8px; margin-top:15px; margin-bottom:0; border-left:5px solid #d9534f; background-color:#fdf2f2; color:#b91c1c; padding: 12px 15px;">
+                            <h4 style="margin-top:0; font-weight:700; font-size:16px; display:inline-flex; align-items:center; gap:6px;"><i class="fa fa-exclamation-triangle"></i> Credit Limit Exceeded!</h4>
+                            <p style="margin-bottom:0; font-size:13px; font-weight:500;" id="creditLimitAlertText"></p>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar Panel (Right Column) -->
+            <div class="col-md-4">
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-exchange-alt"></i> Order Type</h3>
+                    </div>
+                    <div class="box-body order-type-card">
+                        <a href="/orders/create?type=StoreOrder" class="btn btn-block {{if eq .PageData.OrderType "StoreOrder"}}btn-success{{else}}btn-default{{end}}" style="margin-bottom:10px;">
+                            <i class="fa fa-store" style="font-size:20px;margin-right:10px;"></i>
+                            <strong>Store Order</strong><br>
+                            <small style="opacity:0.8;">Request stock from store keeper</small>
+                        </a>
+                        <a href="/orders/create?type=BulkOrder" class="btn btn-block {{if eq .PageData.OrderType "BulkOrder"}}btn-success{{else}}btn-default{{end}}">
+                            <i class="fa fa-boxes" style="font-size:20px;margin-right:10px;"></i>
+                            <strong>Bulk Order</strong><br>
+                            <small style="opacity:0.8;">External customer orders</small>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="box box-warning">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-info-circle"></i> How It Works</h3>
+                    </div>
+                    <div class="box-body how-works-card" style="font-size:13px;">
+                        {{if eq .PageData.OrderType "BulkOrder"}}
+                        <ol>
+                            <li style="margin-bottom:8px;">Enter customer name (e.g. "Ali Mobile")</li>
+                            <li style="margin-bottom:8px;">Select products and total quantity</li>
+                            <li style="margin-bottom:8px;">Set how many from <b>Shop</b> vs <b>Store</b></li>
+                            <li style="margin-bottom:8px;"><b>From Store</b> items &rarr; need Store Keeper approval</li>
+                            <li style="margin-bottom:8px;"><b>From Shop</b> items &rarr; just recorded as numbers</li>
+                            <li>Track payment: Paid / Unpaid / Incomplete</li>
+                        </ol>
+                        {{else}}
+                        <ol>
+                            <li style="margin-bottom:8px;">Select products and quantities</li>
+                            <li style="margin-bottom:8px;">Submit the order</li>
+                            <li style="margin-bottom:8px;">Store Keeper receives & reviews</li>
+                            <li style="margin-bottom:8px;">&#10004; Accept &rarr; stock reduces automatically</li>
+                            <li>&#10060; Reject &rarr; you get notified</li>
+                        </ol>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Order Items (Full Width col-md-12) -->
+        <div class="row" style="margin-top: 10px;">
+            <div class="col-md-12">
+                <div class="box {{if eq .PageData.OrderType "BulkOrder"}}box-info{{else}}box-success{{end}}">
+                    <div class="box-header with-border">
+                        <h3 class="box-title"><i class="fa fa-list"></i> Order Items & Pricing</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="order-items-panel" style="margin-top:0; background:none; padding:0;">
                             <div class="form-group" style="margin-bottom:20px;">
-                                <label><i class="fa fa-search"></i> Add Product:</label>
+                                <label><i class="fa fa-search"></i> Search Product (Type, Category, Brand, SKU or Name):</label>
                                 <select id="smartProductSelect" class="form-control" style="border-color:#2E7D32;border-width:2px;">
-                                    <option value="">-- Search and Select a Product --</option>
+                                    <option value="">-- Search by Name, Brand, Category, SKU... --</option>
                                     {{range .PageData.Products}}
-                                    <option value="{{.ID}}" data-sku="{{.SKU}}" data-name="{{.Name}}" data-type="{{.ProductType}}" data-category="{{.CategoryName}}" data-brand="{{.BrandName}}">
-                                        {{.ProductType}} | {{.CategoryName}} | {{.BrandName}} &mdash; {{.Name}} ({{.SKU}})
+                                    {{$price := 0.0}}
+                                    {{if .LocationPrice.Valid}}{{$price = .LocationPrice.Float64}}{{end}}
+                                    <option value="{{.ID}}" data-sku="{{.SKU}}" data-name="{{.Name}}" data-type="{{.ProductType}}" data-category="{{.CategoryName}}" data-brand="{{.BrandName}}" data-price="{{$price}}">
+                                        {{.ProductType}} - {{.CategoryName}} - {{.BrandName}} - {{.Name}} ({{.SKU}}){{if gt $price 0.0}} - {{$.CurrencySymbol}} {{printf "%.2f" $price}}{{end}}
                                     </option>
                                     {{end}}
                                 </select>
-                                <small class="help-block" style="color:#666;">Select product &rarr; set quantity. Same product increments qty.</small>
+                                <small class="help-block" style="color:#666;">Type to search by category, brand, or name. Barcode scanner friendly: exact SKU matches add automatically.</small>
                             </div>
 
                             <div id="orderItems">
@@ -389,8 +758,7 @@
                         </div>
 
                         {{if eq .PageData.OrderType "BulkOrder"}}
-                        <!-- Payment Information - Only for Bulk Orders -->
-                        <div class="payment-panel">
+                        <div class="payment-panel" style="margin-top:20px;">
                             <h4 style="margin-top:0;color:#1B2A4A;"><i class="fa fa-money-bill-wave"></i> Payment Information</h4>
                             <div class="row">
                                 <div class="col-md-6">
@@ -419,7 +787,10 @@
                     <div class="box-footer footer-summary">
                         <div class="row">
                             <div class="col-md-6">
-                                <h4 style="margin:5px 0;color:#1B2A4A;">Total Items: <span id="totalItemCount" style="color:#2E7D32;font-size:22px;">0</span></h4>
+                                <h4 style="margin:5px 0;color:#1B2A4A;">
+                                    Total Items: <span id="totalItemCount" style="color:#2E7D32;font-size:22px;">0</span> | 
+                                    Total Order Amount: <span style="color:#2E7D32;font-size:22px;">{{.CurrencySymbol}} <span id="totalOrderAmount">0.00</span></span>
+                                </h4>
                             </div>
                             <div class="col-md-6 text-right">
                                 <a href="/orders" class="btn btn-default" style="margin-right:10px;">Cancel</a>
@@ -430,58 +801,10 @@
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Quick Switch Panel -->
-        <div class="col-md-4">
-            <div class="box box-primary">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><i class="fa fa-exchange-alt"></i> Order Type</h3>
-                </div>
-                <div class="box-body order-type-card">
-                    <a href="/orders/create?type=StoreOrder" class="btn btn-block {{if eq .PageData.OrderType "StoreOrder"}}btn-success{{else}}btn-default{{end}}" style="margin-bottom:10px;">
-                        <i class="fa fa-store" style="font-size:20px;margin-right:10px;"></i>
-                        <strong>Store Order</strong><br>
-                        <small style="opacity:0.8;">Request stock from store keeper</small>
-                    </a>
-                    <a href="/orders/create?type=BulkOrder" class="btn btn-block {{if eq .PageData.OrderType "BulkOrder"}}btn-success{{else}}btn-default{{end}}">
-                        <i class="fa fa-boxes" style="font-size:20px;margin-right:10px;"></i>
-                        <strong>Bulk Order</strong><br>
-                        <small style="opacity:0.8;">External customer orders</small>
-                    </a>
-                </div>
-            </div>
-
-            <!-- How It Works -->
-            <div class="box box-warning">
-                <div class="box-header with-border">
-                    <h3 class="box-title"><i class="fa fa-info-circle"></i> How It Works</h3>
-                </div>
-                <div class="box-body how-works-card" style="font-size:13px;">
-                    {{if eq .PageData.OrderType "BulkOrder"}}
-                    <ol>
-                        <li style="margin-bottom:8px;">Enter customer name (e.g. "Ali Mobile")</li>
-                        <li style="margin-bottom:8px;">Select products and total quantity</li>
-                        <li style="margin-bottom:8px;">Set how many from <b>Shop</b> vs <b>Store</b></li>
-                        <li style="margin-bottom:8px;"><b>From Store</b> items &rarr; need Store Keeper approval</li>
-                        <li style="margin-bottom:8px;"><b>From Shop</b> items &rarr; just recorded as numbers</li>
-                        <li>Track payment: Paid / Unpaid / Incomplete</li>
-                    </ol>
-                    {{else}}
-                    <ol>
-                        <li style="margin-bottom:8px;">Select products and quantities</li>
-                        <li style="margin-bottom:8px;">Submit the order</li>
-                        <li style="margin-bottom:8px;">Store Keeper receives & reviews</li>
-                        <li style="margin-bottom:8px;">&#10004; Accept &rarr; stock reduces automatically</li>
-                        <li>&#10060; Reject &rarr; you get notified</li>
-                    </ol>
-                    {{end}}
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 
     <!-- Quick Add Customer Modal -->
     <div class="modal fade" id="quickAddCustomerModal" tabindex="-1" role="dialog">
@@ -519,12 +842,60 @@
 $(document).ready(function() {
     var currency = '{{.CurrencySymbol}}';
     var orderType = '{{.PageData.OrderType}}';
-    var itemCount = 0;
-
-    function updateItemCount() {
-        itemCount = $('#orderItems .order-item').length;
-        $('#totalItemCount').text(itemCount);
+    var groupPrices = {};
+    try {
+        groupPrices = JSON.parse({{.PageData.GroupPricesJSON}}) || {};
+    } catch(e) {
+        console.error("Error parsing group prices:", e);
     }
+
+    function getProductPrice(productId, groupId, defaultPrice) {
+        if (!groupId) {
+            return defaultPrice;
+        }
+        if (groupPrices[productId] && groupPrices[productId][groupId] !== undefined) {
+            return parseFloat(groupPrices[productId][groupId]) || 0;
+        }
+        return defaultPrice;
+    }
+
+    function recalculateOrderTotal() {
+        var totalAmount = 0;
+        var totalQty = 0;
+        
+        $('#orderItems .order-item').each(function() {
+            var row = $(this);
+            var qty = parseFloat(row.find('.qty-input').val()) || 0;
+            var price = parseFloat(row.find('.price-input').val()) || 0;
+            var subtotal = qty * price;
+            
+            row.find('.subtotal-display').text(currency + ' ' + subtotal.toFixed(2));
+            totalAmount += subtotal;
+            totalQty += qty;
+        });
+        
+        $('#totalItemCount').text($('#orderItems .order-item').length);
+        $('#totalOrderAmount').text(totalAmount.toFixed(2));
+        
+        if (orderType === 'BulkOrder') {
+            if ($('#paymentStatus').val() === 'paid') {
+                $('#amountPaidInput').val(totalAmount.toFixed(2));
+            }
+        }
+        validateCreditLimit();
+    }
+
+    $('#sellingPriceGroupSelect').change(function() {
+        var groupId = $(this).val();
+        $('#orderItems .order-item').each(function() {
+            var row = $(this);
+            var productId = row.find('input[name="product_id[]"]').val();
+            var defaultPrice = parseFloat(row.attr('data-default-price')) || 0;
+            var newPrice = getProductPrice(productId, groupId, defaultPrice);
+            row.find('.price-input').val(newPrice.toFixed(2));
+        });
+        recalculateOrderTotal();
+    });
 
     $('#smartProductSelect').change(function() {
         var opt = $(this).find('option:selected');
@@ -536,6 +907,10 @@ $(document).ready(function() {
         var ptype = opt.data('type') || '';
         var category = opt.data('category') || '';
         var brand = opt.data('brand') || '';
+        var defaultPrice = parseFloat(opt.attr('data-price')) || 0;
+
+        var groupId = $('#sellingPriceGroupSelect').val();
+        var initialPrice = getProductPrice(id, groupId, defaultPrice);
 
         var existingRow = $('#row-' + id);
         if (existingRow.length > 0) {
@@ -551,25 +926,60 @@ $(document).ready(function() {
             var extraCols = '';
             if (orderType === 'BulkOrder') {
                 extraCols =
-                    '<div class="col-md-2"><label class="text-xs" style="font-size:10px;color:#666;">From Shop:</label>' +
-                    '<input type="number" name="from_shop_qty[]" class="form-control input-sm shop-qty text-center" min="0" value="0"></div>' +
-                    '<div class="col-md-2"><label class="text-xs" style="font-size:10px;color:#666;">From Store:</label>' +
-                    '<input type="number" name="from_store_qty[]" class="form-control input-sm store-qty text-center" min="0" value="1"></div>';
+                    '<div class="control-group shop-qty-group"><label class="control-label">Shop Qty:</label>' +
+                    '<input type="number" name="from_shop_qty[]" class="form-control shop-qty" min="0" value="0"></div>' +
+                    '<div class="control-group store-qty-group"><label class="control-label">Store Qty:</label>' +
+                    '<input type="number" name="from_store_qty[]" class="form-control store-qty" min="0" value="1"></div>';
             }
 
-            var qtyColSize = orderType === 'BulkOrder' ? '3' : '4';
-
-            var html = '<div class="order-item row" id="row-' + id + '" style="margin-bottom:10px; background:#fff; padding:10px; border-radius:0; border:1px solid #ddd;">' +
+            var html = '<div class="order-item card-item" id="row-' + id + '" data-default-price="' + defaultPrice + '">' +
                 '<input type="hidden" name="product_id[]" value="' + id + '">' +
-                '<div class="col-md-' + (orderType === 'BulkOrder' ? '4' : '6') + '"><p style="margin:5px 0;font-weight:bold;">' + displayName + '</p><small style="color:#888;">SKU: ' + sku + '</small></div>' +
-                '<div class="col-md-' + qtyColSize + '"><label class="text-xs" style="font-size:10px;color:#666;">Total Qty:</label><div class="input-group"><span class="input-group-btn"><button type="button" class="btn btn-default btn-sm qty-minus"><i class="fa fa-minus"></i></button></span><input type="number" name="quantity[]" class="form-control input-sm qty-input text-center" min="1" value="1" required><span class="input-group-btn"><button type="button" class="btn btn-default btn-sm qty-plus"><i class="fa fa-plus"></i></button></span></div></div>' +
+                '<div class="order-item-header">' +
+                '<div class="product-title-area">' +
+                '<span class="product-type-badge">' + (ptype || 'Product') + '</span>' +
+                '<h4 class="product-name">' + displayName + '</h4>' +
+                '</div>' +
+                '<span class="product-sku"><i class="fa fa-barcode"></i> SKU: ' + sku + '</span>' +
+                '</div>' +
+                '<div class="order-item-divider"></div>' +
+                '<div class="order-item-body">' +
+                '<div class="order-item-controls">' +
+                '<div class="control-group total-qty-group">' +
+                '<label class="control-label">Total Qty:</label>' +
+                '<div class="input-group">' +
+                '<span class="input-group-btn">' +
+                '<button type="button" class="btn btn-default qty-minus"><i class="fa fa-minus"></i></button>' +
+                '</span>' +
+                '<input type="number" name="quantity[]" class="form-control qty-input" min="1" value="1" required>' +
+                '<span class="input-group-btn">' +
+                '<button type="button" class="btn btn-default qty-plus"><i class="fa fa-plus"></i></button>' +
+                '</span>' +
+                '</div>' +
+                '</div>' +
                 extraCols +
-                '<div class="col-md-1"><button type="button" class="btn btn-danger btn-sm remove-item" title="Remove" style="margin-top:18px;"><i class="fa fa-trash"></i></button></div>' +
+                '<div class="control-group price-group">' +
+                '<label class="control-label">Unit Price:</label>' +
+                '<div class="input-group">' +
+                '<span class="input-group-addon">' + currency + '</span>' +
+                '<input type="number" step="0.01" name="unit_price[]" class="form-control price-input" value="' + initialPrice.toFixed(2) + '" required>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="order-item-actions">' +
+                '<div class="subtotal-group">' +
+                '<label class="control-label">Subtotal:</label>' +
+                '<span class="subtotal-display">' + currency + ' ' + initialPrice.toFixed(2) + '</span>' +
+                '</div>' +
+                '<button type="button" class="btn btn-danger remove-item" title="Remove Item">' +
+                '<i class="fa fa-trash"></i>' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
                 '</div>';
             $('#orderItems').append(html);
         }
 
-        updateItemCount();
+        recalculateOrderTotal();
         $(this).val('');
     });
 
@@ -586,41 +996,54 @@ $(document).ready(function() {
         input.val(parseInt(input.val()) + 1).trigger('input');
     });
 
-    $(document).on('input change', '.qty-input', function() {
-        if (orderType === 'BulkOrder') {
-            var row = $(this).closest('.order-item');
-            var totalQty = parseInt($(this).val()) || 0;
-            var shopQty = parseInt(row.find('.shop-qty').val()) || 0;
-            row.find('.store-qty').val(Math.max(0, totalQty - shopQty));
+    function syncQuantities(row, changedField) {
+        if (orderType !== 'BulkOrder') {
+            recalculateOrderTotal();
+            return;
         }
-        updateItemCount();
+
+        var totalInput = row.find('.qty-input');
+        var shopInput = row.find('.shop-qty');
+        var storeInput = row.find('.store-qty');
+
+        var totalQty = parseInt(totalInput.val()) || 0;
+        var shopQty = parseInt(shopInput.val()) || 0;
+        var storeQty = parseInt(storeInput.val()) || 0;
+
+        if (changedField === 'total') {
+            if (totalQty >= shopQty) {
+                storeQty = totalQty - shopQty;
+            } else {
+                shopQty = totalQty;
+                storeQty = 0;
+            }
+            shopInput.val(shopQty);
+            storeInput.val(storeQty);
+        } else if (changedField === 'shop' || changedField === 'store') {
+            totalQty = shopQty + storeQty;
+            totalInput.val(totalQty);
+        }
+
+        recalculateOrderTotal();
+    }
+
+    $(document).on('input change', '.qty-input', function() {
+        var row = $(this).closest('.order-item');
+        syncQuantities(row, 'total');
     });
 
     $(document).on('input change', '.shop-qty', function() {
         var row = $(this).closest('.order-item');
-        var totalQty = parseInt(row.find('.qty-input').val()) || 0;
-        var shopQty = parseInt($(this).val()) || 0;
-        if (shopQty > totalQty) {
-            $(this).val(totalQty);
-            shopQty = totalQty;
-        }
-        row.find('.store-qty').val(Math.max(0, totalQty - shopQty));
+        syncQuantities(row, 'shop');
     });
 
     $(document).on('input change', '.store-qty', function() {
         var row = $(this).closest('.order-item');
-        var totalQty = parseInt(row.find('.qty-input').val()) || 0;
-        var storeQty = parseInt($(this).val()) || 0;
-        if (storeQty > totalQty) {
-            $(this).val(totalQty);
-            storeQty = totalQty;
-        }
-        row.find('.shop-qty').val(Math.max(0, totalQty - storeQty));
+        syncQuantities(row, 'store');
     });
 
-    $(document).on('click', '.remove-item', function() {
-        $(this).closest('.order-item').remove();
-        updateItemCount();
+    $(document).on('input change', '.price-input', function() {
+        recalculateOrderTotal();
     });
 
     $('#paymentStatus').change(function() {
@@ -631,22 +1054,169 @@ $(document).ready(function() {
         } else {
             $('#amountPaidGroup').show();
             if (status === 'paid') {
-                $('#amountPaidInput').val('').prop('readonly', false);
+                var total = $('#totalOrderAmount').text();
+                $('#amountPaidInput').val(total).prop('readonly', true);
             } else {
                 $('#amountPaidInput').val('').prop('readonly', false).focus();
             }
         }
+        validateCreditLimit();
     });
 
+    $(document).on('input change', '#amountPaidInput', function() {
+        var total = parseFloat($('#totalOrderAmount').text()) || 0;
+        var paid = parseFloat($(this).val()) || 0;
+        if ($('#paymentStatus').val() === 'incomplete' && paid > total) {
+            $(this).val(total.toFixed(2));
+        }
+        validateCreditLimit();
+    });
+
+    // Save original options
+    var originalProductOptions = [];
+    $('#smartProductSelect option').each(function() {
+        var opt = $(this);
+        if (opt.val()) {
+            originalProductOptions.push({
+                val: opt.val(),
+                text: opt.text(),
+                sku: opt.data('sku') ? opt.data('sku').toString() : '',
+                name: opt.data('name'),
+                type: opt.data('type'),
+                category: opt.data('category'),
+                brand: opt.data('brand'),
+                price: opt.data('price')
+            });
+        }
+    });
+
+    var customerCreditLimit = 0;
+    var customerBalance = 0;
+    var isCheckingCredit = false;
+
+    function checkCustomerCredit() {
+        if (orderType !== 'BulkOrder') return;
+        var customerName = $('#customerSelect').val();
+        if (!customerName) {
+            $('#creditLimitAlert').hide();
+            $('#orderForm button[type="submit"]').prop('disabled', false).addClass('btn-success').removeClass('btn-danger');
+            return;
+        }
+
+        if (isCheckingCredit) return;
+        isCheckingCredit = true;
+
+        $.ajax({
+            url: '/api/contacts/credit-check',
+            method: 'GET',
+            data: { name: customerName },
+            success: function(res) {
+                if (res.exists) {
+                    customerCreditLimit = parseFloat(res.credit_limit) || 0;
+                    customerBalance = parseFloat(res.balance) || 0;
+                } else {
+                    customerCreditLimit = 0;
+                    customerBalance = 0;
+                }
+                validateCreditLimit();
+            },
+            error: function() {
+                console.error("Credit check connection error");
+            },
+            complete: function() {
+                isCheckingCredit = false;
+            }
+        });
+    }
+
+    function validateCreditLimit() {
+        if (orderType !== 'BulkOrder') return;
+        if (customerCreditLimit <= 0) {
+            $('#creditLimitAlert').hide();
+            $('#orderForm button[type="submit"]').prop('disabled', false).addClass('btn-success').removeClass('btn-danger');
+            return;
+        }
+
+        var orderTotal = parseFloat($('#totalOrderAmount').text()) || 0;
+        var amountPaidNow = parseFloat($('#amountPaidInput').val()) || 0;
+        var newRemaining = Math.max(0, orderTotal - amountPaidNow);
+        var projectBalance = customerBalance + newRemaining;
+
+        if (projectBalance > customerCreditLimit) {
+            var repaymentNeeded = projectBalance - customerCreditLimit;
+            $('#creditLimitAlertText').html(
+                'This customer will exceed their credit limit.<br>' +
+                '<strong>Limit:</strong> ' + currency + ' ' + customerCreditLimit.toFixed(2) + '<br>' +
+                '<strong>Current Debt:</strong> ' + currency + ' ' + customerBalance.toFixed(2) + '<br>' +
+                '<strong>New Order Unpaid Amount:</strong> ' + currency + ' ' + newRemaining.toFixed(2) + '<br>' +
+                '<strong>Projected Debt:</strong> ' + currency + ' ' + projectBalance.toFixed(2) + '<br>' +
+                '<span style="color:#d9534f;font-weight:700;">Repayment of at least ' + currency + ' ' + repaymentNeeded.toFixed(2) + ' is required to place this order.</span>'
+            );
+            $('#creditLimitAlert').slideDown();
+            $('#orderForm button[type="submit"]').prop('disabled', true).addClass('btn-danger').removeClass('btn-success');
+        } else {
+            $('#creditLimitAlert').slideUp();
+            $('#orderForm button[type="submit"]').prop('disabled', false).addClass('btn-success').removeClass('btn-danger');
+        }
+    }
+
+    // Exact SKU/barcode matching input scanner listener
+    $(document).on('input keyup', '.select2-search__field', function() {
+        var query = $(this).val().trim().toLowerCase();
+        if (!query) return;
+
+        var exactMatch = null;
+        originalProductOptions.forEach(function(opt) {
+            if (opt.sku.toLowerCase() === query) {
+                exactMatch = opt;
+            }
+        });
+
+        if (exactMatch) {
+            $('#smartProductSelect').val(exactMatch.val).trigger('change');
+            $('#smartProductSelect').select2('close');
+            toastr.success("Auto-added SKU matched: " + exactMatch.name);
+        }
+    });
+
+    $('#customerSelect').change(checkCustomerCredit);
+
     if ($.fn.select2) {
-        $('#smartProductSelect').select2({ width: '100%' });
+        $('#sellingPriceGroupSelect').select2({
+            width: '100%',
+            placeholder: "-- Default Location Price --",
+            allowClear: true,
+            minimumResultsForSearch: 0
+        });
+        
+        $('#smartProductSelect').select2({ 
+            width: '100%', 
+            placeholder: "-- Search by Name, Brand, Category, SKU... --",
+            allowClear: true,
+            minimumResultsForSearch: 0 
+        });
+
         $('#customerSelect').select2({
             width: '100%',
             tags: true,
             placeholder: "-- Select or Type New Customer --",
-            allowClear: true
+            allowClear: true,
+            minimumResultsForSearch: 0
         });
-        $('#fromLocationSelect, #toLocationSelect').select2({ width: '100%' });
+
+        $('#fromLocationSelect').select2({
+            width: '100%',
+            placeholder: "-- Select Source Store --",
+            allowClear: true,
+            minimumResultsForSearch: 0
+        });
+
+        $('#toLocationSelect').select2({
+            width: '100%',
+            placeholder: "-- Select Destination Shop --",
+            allowClear: true,
+            minimumResultsForSearch: 0
+        });
     }
 
     $('#quickAddCustomerForm').on('submit', function(e) {
@@ -678,7 +1248,7 @@ $(document).ready(function() {
         });
     });
 
-    updateItemCount();
+    recalculateOrderTotal();
 });
 </script>
 {{end}}

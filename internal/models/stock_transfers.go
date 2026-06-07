@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -84,6 +85,21 @@ func (m *Models) InsertStockTransfer(st *StockTransfer) (int64, error) {
 		_, err = tx.Exec(itemQuery, transferID, item.ProductID, item.Quantity)
 		if err != nil {
 			return 0, err
+		}
+
+		// Verify sufficient stock before deducting from FROM location
+		var qtyAvailable float64
+		var prodName string
+		err = tx.QueryRow(`
+			SELECT COALESCE(pl.qty_available, 0), p.name 
+			FROM products p
+			LEFT JOIN product_locations pl ON p.id = pl.product_id AND pl.location_id = ?
+			WHERE p.id = ?`, st.FromLocationID, item.ProductID).Scan(&qtyAvailable, &prodName)
+		if err != nil {
+			return 0, fmt.Errorf("verify stock for product %d: %v", item.ProductID, err)
+		}
+		if qtyAvailable < item.Quantity {
+			return 0, fmt.Errorf("You cannot transfer '%s' (ID: %d). Current available stock is %.0f, but requested is %.0f. Please add new stock or purchase in order to continue to transfer.", prodName, item.ProductID, qtyAvailable, item.Quantity)
 		}
 
 		// Deduct from FROM location
